@@ -252,7 +252,10 @@ if not 'control_region' in options.output:
  if 'VH' in options.output: purity = 'VH_'+purity
  else: purity = 'VV_'+purity
  if options.output.find('VBF')!=-1: purity = 'VBF_'+purity  
-if purity == '' and 'control_region' in options.output: purity = 'VH_NPHP_control_region'
+elif purity == '' and 'control_region' in options.output: 
+    purity = 'VH_NPHP_control_region'
+    if options.output.find('HPNP')!=-1: purity = 'VH_HPNP_control_region'
+elif purity == '' and options.output.find("NP")!=-1: purity= 'NP'
 else:
  print "SPECIFIED PURITY IS NOT ALLOWED!",options.output,purity
  sys.exit()  

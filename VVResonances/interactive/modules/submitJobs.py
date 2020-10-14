@@ -9,7 +9,7 @@ import subprocess, thread
 from array import array
 ROOT.gROOT.SetBatch(True)
 
-timeCheck = "30"
+timeCheck = "1000"
 userName=os.environ['USER']
 
 
@@ -1523,7 +1523,7 @@ def makePseudoData(input="JJ_nonRes_LPLP.root",kernel="JJ_nonRes_3D_LPLP.root",m
 
  pwd = os.getcwd()
  
- ROOT.gRandom.SetSeed(0)
+ ROOT.gRandom.SetSeed(123)
  
  finmc = ROOT.TFile.Open(pwd+'/'+input,'READ')
  hmcin = finmc.Get('nonRes')
@@ -1707,7 +1707,7 @@ def makePseudoDataVjets(input,kernel,mc,output,lumi,workspace,year,purity):
  
  pwd = os.getcwd()
  pwd = "/"
- ROOT.gRandom.SetSeed(0)
+ ROOT.gRandom.SetSeed(123)
  
  finmc = ROOT.TFile.Open(pwd+'/'+input,'READ')
  hmcin = finmc.Get('nonRes')
@@ -1817,7 +1817,7 @@ def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,pu
  
  pwd = os.getcwd()
  pwd = "/"
- ROOT.gRandom.SetSeed(0)
+ ROOT.gRandom.SetSeed(123)
  
  finmc = ROOT.TFile.Open(pwd+'/'+input,'READ')
  hmcin = finmc.Get('nonRes')
@@ -1923,4 +1923,127 @@ def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,pu
 
  finmc.Close()
  findata.Close()
+ fout.Close()    
+
+def makePseudoDataNoQCD(input_tt,output,lumi,workspace,year,purity):
+ 
+ pwd = os.getcwd()
+ pwd = "/"
+ ROOT.gRandom.SetSeed(123)
+ 
+ fout = ROOT.TFile.Open(output,'RECREATE')
+ #hmcin.Scale(10.)
+ ftt = ROOT.TFile.Open(input_tt,'READ')
+ hin_tt = ftt.Get('TTJets')
+ xbins = array("f",getListOfBinsLowEdge(hin_tt,"x"))
+ zbins = array("f",getListOfBinsLowEdge(hin_tt,"z"))
+
+ hout = ROOT.TH3F('data','data',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+ 
+ 
+ ws_file = ROOT.TFile.Open(workspace,'READ')
+ ws = ws_file.Get('w')
+ ws_file.Close()
+ ws.Print()
+
+ modelWjets = ws.pdf('shapeBkg_Wjets_JJ_%s_13TeV_%i'%(purity,year))
+ modelZjets = ws.pdf('shapeBkg_Zjets_JJ_%s_13TeV_%i'%(purity,year))
+ category = ws.obj("CMS_channel==CMS_channel::JJ_"+purity+"_13TeV_%i"%year)
+
+ MJ1= ws.var("MJ1");
+ MJ2= ws.var("MJ2");
+ MJJ= ws.var("MJJ");
+ args = ROOT.RooArgSet(MJ1,MJ2,MJJ)
+ ### Wjets
+ print "n_exp_binJJ_"+purity+"_13TeV_%i_proc_Wjets"%year
+ o_norm_wjets = ws.obj("n_exp_binJJ_"+purity+"_13TeV_%i_proc_Wjets"%year)
+ hout_wjets = ROOT.TH3F('wjets','wjets',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+ 
+ nEventsW = o_norm_wjets.getVal()
+ print "Expected W+jets events: ",nEventsW
+ wjets = modelWjets.generate(args,int(nEventsW))
+ if wjets!=None:
+  #print signal.sumEntries()
+  for i in range(0,int(wjets.sumEntries())):
+   a = wjets.get(i)
+   it = a.createIterator()
+   var = it.Next()
+   x=[]
+   while var:
+       x.append(var.getVal())
+       var = it.Next()
+   #print x
+   hout_wjets.Fill(x[0],x[1],x[2])
+      
+ hout.Add(hout_wjets)
+ ### Zjets
+ print "n_exp_binJJ_"+purity+"_13TeV_%i_proc_Zjets"%year
+ o_norm_zjets = ws.obj("n_exp_binJJ_"+purity+"_13TeV_%i_proc_Zjets"%year)
+ hout_zjets = ROOT.TH3F('zjets','zjets',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+ 
+ nEventsZ = o_norm_zjets.getVal()
+ print "Expected Z+jets events: ",nEventsZ
+ zjets = modelZjets.generate(args,int(nEventsZ))
+ if zjets!=None:
+  #print signal.sumEntries()
+  for i in range(0,int(zjets.sumEntries())):
+   a = zjets.get(i)
+   it = a.createIterator()
+   var = it.Next()
+   x=[]
+   while var:
+       x.append(var.getVal())
+       var = it.Next()
+   #print x
+   hout_zjets.Fill(x[0],x[1],x[2])
+      
+ hout.Add(hout_zjets)
+ 
+ hout_tt = ROOT.TH3F('data_tt','data_tt',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins) 
+ hout_tt.FillRandom(hin_tt,int(hin_tt.Integral()*lumi))
+ hout.Add(hout_tt)
+ 
+ fout.cd()
+ hout.Write('data')
+ 
+ print "output   ", output
+ print "lumi     ", lumi
+ print "workspace", workspace
+ print "year     ", year
+ print "purity   ", purity
+ print "Expected W+jets events: ",nEventsW
+ print "Expected Z+jets events: ",nEventsZ
+ print "Expected TTJets events:",int(hin_tt.Integral()*lumi)
+ print "Writing histograms nonRes and data to file ", output
+
+ fout.Close()    
+
+def makePseudoDataTT(input_tt,output,lumi,year,purity):
+ 
+ pwd = os.getcwd()
+ pwd = "/"
+ ROOT.gRandom.SetSeed(123)
+ fout = ROOT.TFile.Open(output,'RECREATE')
+ 
+ ftt = ROOT.TFile.Open(input_tt,'READ')
+ hin_tt = ftt.Get('TTJets')
+ xbins = array("f",getListOfBinsLowEdge(hin_tt,"x"))
+ zbins = array("f",getListOfBinsLowEdge(hin_tt,"z"))
+
+ hout_tt = ROOT.TH3F('data','data',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins) 
+ hout_tt.FillRandom(hin_tt,int(hin_tt.Integral()*lumi))
+ 
+ fout.cd()
+ hout_tt.Write('data')
+ 
+
+ print "output   ", output
+ print "lumi     ", lumi
+ print "year     ", year
+ print "purity   ", purity
+ print "Expected TTJets events:",int(hin_tt.Integral()*lumi)
+ print "Writing histograms nonRes and data to file ", output
+
+
+ ftt.Close()
  fout.Close()    

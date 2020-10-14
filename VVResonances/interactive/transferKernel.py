@@ -25,6 +25,7 @@ parser.add_option("--pdfz",dest="pdfz",help="name of pdfs lie PTZUp etc",default
 parser.add_option("--pdfx",dest="pdfx",help="name of pdfs lie PTXUp etc",default="")
 parser.add_option("--pdfy",dest="pdfy",help="name of pdfs lie PTYUp etc",default="")
 parser.add_option("--year",dest="year",help="year",default="2017")
+parser.add_option("--channel",dest="channel",default="VH_HPHP")
 (options,args) = parser.parse_args()
 ROOT.gStyle.SetOptStat(0)
 ROOT.RooMsgService.instance().setGlobalKillBelow(ROOT.RooFit.FATAL)
@@ -390,10 +391,10 @@ def makeNonResCard():
  doCorrelation = False
  if 'VBF' in purity: sig = 'VBF_BulkGWW'
  
- lumi = {'2016':35900,'2017':41367}
- lumi_unc = {'2016':1.025,'2017':1.023}
- scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086]}
- scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.]}
+ lumi = {'2016':35900,'2017':41367,'2018':59740.0}
+ lumi_unc = {'2016':1.025,'2017':1.023,'2018':1.025}
+ scales = {"2017" :[0.983,1.08], "2016":[1.014,1.086],"2018":[1,1]}
+ scalesHiggs = {"2017" :[1.,1.], "2016":[1.,1.],"2018":[1,1]}
 
  vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{},'VH_HPHP':{},'VH_HPLP':{},'VH_LPHP':{}, 'VV_etraLP':{}}
  vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763'}
@@ -456,24 +457,21 @@ def makeNonResCard():
  print "norm"
  card.addSystematic("CMS_VV_JJ_nonRes_norm","lnN",{'nonRes':1.5}) 
  print "OPTZ"
- card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.,2.])
- #card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[1.,2.]) 
- #card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.0,0.5])
+
+ card.addSystematic("CMS_VV_JJ_nonRes_OPTZ_"+category_pdf,"param",[0.,2.]) #1,2
  print "OPTXY"
- card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,2.]) 
- #card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[2.,2.]) 
-# card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.0,0.5])
+ card.addSystematic("CMS_VV_JJ_nonRes_OPTXY_"+category_pdf,"param",[0.,2.]) #0,2
  print "OPT3"
-# card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,0.333]) #orig
- card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.0,1.]) #good
- #card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.7,2.]) #test 
- #card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[10.,20.])
+ card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category_pdf,"param",[1.,2.]) #test for VH_HPHP  
  #print "PT"
- #card.addSystematic("CMS_VV_JJ_nonRes_PT_"+category_pdf,"param",[2.0,2.0]) #orig
-# card.addSystematic("CMS_VV_JJ_nonRes_PT_"+category_pdf,"param",[0.0,0.333]) #orig
+ #card.addSystematic("CMS_VV_JJ_nonRes_PT_"+category_pdf,"param",[0.0,0.333]) #orig
 # print "PTZ"
-# card.addSystematic("CMS_VV_JJ_nonRes_PTZ_"+category_pdf,"param",[0.0,2.]) 
+# card.addSystematic("CMS_VV_JJ_nonRes_PTZ_"+category_pdf,"param",[.0,2.]) #2,2
+# print "PTXY"
+# card.addSystematic("CMS_VV_JJ_nonRes_PTXY_"+category_pdf,"param",[0.,2.]) #0,2
+  
  
+
  print " and now make card"     
  card.makeCard()
 
@@ -496,22 +494,23 @@ if __name__=="__main__":
                               
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
-     if options.input.find("VH_HPHP")!=-1: purity = "VH_HPHP"
-     if options.input.find("VH_HPLP")!=-1: purity = "VH_HPLP"
-     if options.input.find("VH_LPHP")!=-1: purity = "VH_LPHP"
-     if options.input.find("VH_LPLP")!=-1: purity = "VH_LPLP"
-     if options.input.find("VV_HPHP")!=-1: purity = "VV_HPHP"
-     if options.input.find("VV_extraLP")!=-1: purity = "VV_extraLP"
-     if options.input.find("VV_LPLP")!=-1: purity = "VV_LPLP"
-     elif options.input.find("VV_HPLP")!=-1: purity= "VV_HPLP"
-
-#     if options.input.find("HPHP")!=-1: purity = "HPHP"
-#     elif options.input.find("HPLP")!=-1: purity = "HPLP"
-#     elif options.input.find("LPHP")!=-1: purity = "LPHP"
-#     else: purity = "LPLP" 
-#     if 'VH' in purity: purity = 'VH_'+purity
-#     else: purity = 'VV_'+purity
-     if options.input.find('VBF')!=-1: purity = 'VBF_'+purity    
+     purity = ''
+     if options.input.find("HPHP")!=-1: purity = "HPHP"
+     elif options.input.find("HPLP")!=-1: purity = "HPLP"
+     elif options.input.find("LPHP")!=-1: purity = "LPHP"
+     elif options.input.find("LPLP")!=-1: purity = "LPLP"
+     if not 'control_region' in options.input:
+      if 'VH' in options.input: purity = 'VH_'+purity
+      else: purity = 'VV_'+purity
+      if options.input.find('VBF')!=-1: purity = 'VBF_'+purity  
+     elif purity == '' and 'control_region' in options.input:
+         if 'VH_NPHP' in options.input:
+             purity = 'VH_NPHP_control_region'
+         else:
+             purity = 'VH_HPNP_control_region'
+     else:
+      print "SPECIFIED PURITY IS NOT ALLOWED!",options.input,purity
+      sys.exit()  
      print "Using purity: " ,purity    
      if options.merge:
       merge_all()

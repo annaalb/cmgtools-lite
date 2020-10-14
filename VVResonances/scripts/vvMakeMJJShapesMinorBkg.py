@@ -86,22 +86,40 @@ def doPlot(data,finalFit,sampleTypes,outlabel,mvv_nominal_w=None):
     data.GetYaxis().SetTitle("arbitrary scale")
     data.SetMarkerStyle(20)
     data.SetMaximum(1.2)
+    data.SetMinimum(0.000001)
     data.Draw("P")
-    finalFit.SetLineWidth(2)
-    tmp = finalFit.Clone()
-    tmp.SetParameter(4,1.2*finalFit.GetParameter(4))
+    orig = data.GetFunction("expo")
+    orig.SetLineWidth(2)
+    if outlabel.find("noreweight")!=-1 :
+        finalFit.SetLineColor(ROOT.kBlue)
+        tmpn = finalFit.Clone()
+        tmpn.SetParameter(4,1.2*finalFit.GetParameter(4))
+        tmpn.SetLineColor(ROOT.kGreen+2)
+        tmpn.SetLineStyle(2)
+        tmpn.Draw("fsame")
+
+        tmp2n = finalFit.Clone()
+        tmp2n.SetParameter(4,0.8*finalFit.GetParameter(4))
+        tmp2n.SetLineColor(ROOT.kGreen+2)
+        tmp2n.SetLineStyle(2)
+        tmp2n.Draw("fsame")
+
+    finalFit.Draw("fsame")
+
+    tmp = orig.Clone()
+    tmp.SetParameter(4,1.2*orig.GetParameter(4))
     tmp.SetLineColor(ROOT.kOrange)
     tmp.Draw("fsame")
     
-    tmp2 = finalFit.Clone()
-    tmp2.SetParameter(4,0.8*finalFit.GetParameter(4))
+    tmp2 = orig.Clone()
+    tmp2.SetParameter(4,0.8*orig.GetParameter(4))
     tmp2.SetLineColor(ROOT.kOrange)
     tmp2.Draw("fsame")
 
     l = ROOT.TLegend(0.3809045,0.6063636,0.7622613,0.8220979)
-    l.SetHeader(outlabel)
+    l.SetHeader(outlabel.split("_")[0])
     l.AddEntry(data,"simulation","lp")
-    l.AddEntry(finalFit,"Fit","l")
+    l.AddEntry(orig,"Fit","l")
     l.AddEntry(tmp,"Fit, c3 +/- 20%","l")
     if mvv_nominal_w!=None:
         if mvv_nominal_w.Integral()!=0: mvv_nominal_w.Scale(1/mvv_nominal_w.Integral())
@@ -109,11 +127,12 @@ def doPlot(data,finalFit,sampleTypes,outlabel,mvv_nominal_w=None):
         mvv_nominal_w.SetMarkerStyle(10)
         mvv_nominal_w.SetMarkerColor(ROOT.kBlue)
         mvv_nominal_w.SetLineColor(ROOT.kBlue)
-        if options.samples.find("TT")!=-1:
-            l.AddEntry(mvv_nominal_w,"t#bar{t} p_{T} w","lp")
-        else: l.AddEntry(mvv_nominal_w,"pT up variation", "lp")
+        #if options.samples.find("TT")!=-1:
+
+        #else: l.AddEntry(mvv_nominal_w,"pT up variation", "lp")
     l.Draw("same")
-    print "chisquare ",finalFit.GetChisquare()/data.GetNbinsX()
+
+    print "nominal chisquare ",orig.GetChisquare()/data.GetNbinsX()
     pt = ROOT.TPaveText(0.18,0.88,0.54,0.81,"NDC")
     pt.SetTextFont(42)
     pt.SetTextSize(0.03)
@@ -121,9 +140,29 @@ def doPlot(data,finalFit,sampleTypes,outlabel,mvv_nominal_w=None):
     pt.SetFillColor(0)
     pt.SetBorderSize(0)
     pt.SetFillStyle(0)
-    pt.AddText("Chi2/ndf = %.2f/%i = %.2f"%(finalFit.GetChisquare(),data.GetNbinsX(),finalFit.GetChisquare()/data.GetNbinsX()))
-    pt.AddText("Prob = %.3f"%ROOT.TMath.Prob(finalFit.GetChisquare(),data.GetNbinsX()))
+    pt.AddText("Chi2/ndf = %.2f/%i = %.2f"%(orig.GetChisquare(),data.GetNbinsX(),orig.GetChisquare()/data.GetNbinsX()))
+    pt.AddText("Prob = %.3f"%ROOT.TMath.Prob(orig.GetChisquare(),data.GetNbinsX()))
     pt.Draw("same")
+
+    if outlabel.find("noreweight")!=-1 :
+        l2 = ROOT.TLegend(0.15,0.3,0.35,0.5)
+        l2.AddEntry(mvv_nominal_w,"t#bar{t} without p_T","lp")
+        l2.AddEntry(finalFit,"Fit","l")
+        l2.AddEntry(tmpn,"Fit, c3 +/- 20%","l")
+        l2.Draw("same")
+
+        print "no pt reweight chisquare ",finalFit.GetChisquare()/data.GetNbinsX()
+        pt2 = ROOT.TPaveText(0.18,0.28,0.54,0.2,"NDC")
+        pt2.SetTextFont(42)
+        pt2.SetTextSize(0.03)
+        pt2.SetTextAlign(12)
+        pt2.SetFillColor(0)
+        pt2.SetBorderSize(0)
+        pt2.SetFillStyle(0)
+        pt2.AddText("Chi2/ndf = %.2f/%i = %.2f"%(finalFit.GetChisquare(),data.GetNbinsX(),finalFit.GetChisquare()/data.GetNbinsX()))
+        pt2.AddText("Prob = %.3f"%ROOT.TMath.Prob(finalFit.GetChisquare(),data.GetNbinsX()))
+        pt2.Draw("same")
+
     tmplabel = "nonRes"
     if sampleTypes[0].find("Jets")!=-1: tmplabel="Jets"
     if sampleTypes[0].find("TT")!=-1: tmplabel="TTbar"
@@ -131,13 +170,14 @@ def doPlot(data,finalFit,sampleTypes,outlabel,mvv_nominal_w=None):
     if options.output.find('VV_HPHP')!=-1: tmplabel+='VV_HPHP'
     if options.output.find('VH_HPLP')!=-1: tmplabel+='VH_HPLP'
     if options.output.find('VH_HPHP')!=-1: tmplabel+='VH_HPHP'
-    if options.output.find('VH_LPHP')!=-1: tmplabel+='VV_LPHP'
+    if options.output.find('VH_LPHP')!=-1: tmplabel+='VH_LPHP'
     if 'W' in sampleTypes: tmplabel="W"+tmplabel
     if 'Z' in sampleTypes: tmplabel="Z"+tmplabel
     text = ROOT.TLatex()
     text.DrawLatexNDC(0.13,0.92,"#font[62]{CMS} #font[52]{Simulation}")
-    c.SaveAs("debug_mVV_shapes_"+tmplabel+"_"+outlabel+".pdf")
-    print "for debugging save","debug_mVV_shapes_"+tmplabel+"_"+outlabel+".pdf"
+    outputname="debug_mVV_shapes_"+tmplabel+"_"+outlabel+".pdf"
+    c.SaveAs(outputname)
+    print "for debugging save",outputname
 
 def getParametrization(FinalFit):
     #string = str(FinalFit.GetParameter(0))+"*(1-x/13000.)^"+str(FinalFit.GetParameter(1))+"/(x/13000)^"+str(FinalFit.GetParameter(2))
@@ -182,6 +222,7 @@ def doFit(proj,label="",fixPars=None):
         expo=ROOT.TF1("expo","[0]*e^(-[1]*(x -1126.)/13000.-[2]/((x-1126.)/13000.))+ [3]*e^(-[4]*(x -1126.)/13000.)",1000,8000)
         expo.SetParLimits(4,65.,200.)
     expo=ROOT.TF1("expo","[0]*e^(-[1]*(x -1125.)/13000.-[2]/((x-1125.)/13000.))+ [3]*e^(-[4]*(x -1125.)/13000.)",1000,8000)
+
     if fixPars!=None:
         expo.SetParLimits(4,0.,1000.)
         for key in fixPars.keys():
@@ -208,7 +249,7 @@ def doFit(proj,label="",fixPars=None):
     #expo.SetParameters(0,16.,2.)
     proj.Fit(expo,"LLMR","",beginFitX,endX)
     proj.Fit(expo,"LLMR","",beginFitX,endX)
-    
+
     return expo
 
 weights_ = options.weights.split(',')
@@ -237,6 +278,9 @@ for filename in os.listdir(args[0]):
             if fname.find("QCD_Pt_") !=-1 or fname.find("QCD_HT") !=-1: 
                 print "going to apply spikekiller for ",fname
                 dataPlotters[fname].addCorrectionFactor('b_spikekiller','tree')
+            if filename.find("TT")!=-1:
+                #we consider ttbar with reweight applyied as nominal!
+                dataPlotters[fname].addCorrectionFactor('TopPTWeight','tree')
             if options.triggerW:
               dataPlotters[fname].addCorrectionFactor('triggerWeight','tree')
               print "Using trigger weights from tree"
@@ -263,13 +307,10 @@ for filename in os.listdir(args[0]):
             for w in weights_: 
              if w != '': dataPlottersNW[fname].addCorrectionFactor(w,'branch')
              if options.triggerW: dataPlottersNW[fname].addCorrectionFactor('triggerWeight','tree')
-            # add ttbar reweighting of pT spectrum (only if background is ttbar)
-            if filename.find("TT")!=-1:
-                dataPlottersNW[fname].addCorrectionFactor("sqrt(exp(0.0615-0.0005* jj_l1_gen_pt)*exp(0.0615-0.0005* jj_l2_gen_pt))","branch")
             # for different background -> add reweighting of pT spectrum
-            if filename.find("Jets")!=-1:
+            #if filename.find("Jets")!=-1:
                  #dataPlottersNW[fname].addCorrectionFactor("(1+ 0.00027272727*pow(jj_l1_gen_pt, 1) )*(1 + 0.00027272727 * pow(jj_l2_gen_pt, 1))","branch")
-                 dataPlottersNW[fname].addCorrectionFactor("sqrt((1.05*pow(jj_l1_gen_pt, 1) )*(1.05 * pow(jj_l2_gen_pt, 1)))","branch")
+                 #dataPlottersNW[fname].addCorrectionFactor("sqrt((1.05*pow(jj_l1_gen_pt, 1) )*(1.05 * pow(jj_l2_gen_pt, 1)))","branch")
                  #dataPlottersNW[fname].addCorrectionFactor("(1+ pow(5500*jj_l1_gen_pt, 2) )*(1 + pow(5500*jj_l2_gen_pt, 2))","branch")
             dataPlottersNW[fname].addCorrectionFactor(corrFactor,'flat')
             dataPlottersNW[fname].filename=fname
@@ -300,7 +341,7 @@ keys = dataPlotters.keys()
 for k in keys:
     if k.find("TT")!=-1 or k.find("WJets")!=-1 or k.find("ZJets")!=-1:
         list_dataPlotters.append(dataPlotters[k])
-        list_dataPlottersNW.append(dataPlottersNW[k])
+        if k.find("TT")!=-1: list_dataPlottersNW.append(dataPlottersNW[k])
 print list_dataPlotters
 if len(list_dataPlotters) > 0:
     for plotter in list_dataPlotters:
@@ -323,7 +364,7 @@ finalFit = doFit(mvv_nominal,((options.output).split("_")[-1]).split(".")[0])
 
 print "************************ do debugging plots *******************"
 
-doPlot(mvv_nominal,finalFit,sampleTypes,((options.output).split("_")[-1]).split(".")[0],mvv_nominal_w)
+doPlot(mvv_nominal,finalFit,sampleTypes,((options.output).split("_")[1]).split(".")[0],mvv_nominal_w)
 
 print " **************************** write fit to json ***************"
 print " open json file ",options.output
@@ -331,6 +372,23 @@ f=open(options.output,"w")
 parametrization = getParametrization(finalFit)
 json.dump(parametrization,f)
 #f.close()
+
+if options.samples.find("TT")!=-1: 
+    print " ********** Making fit without reweight  ******************"
+
+    noreweightFit = doFit(mvv_nominal_w,((options.output).split("_")[-1]).split(".")[0])
+
+
+    print "************************ do plots *******************"
+
+    doPlot(mvv_nominal,noreweightFit,sampleTypes,((options.output).split("_")[1]).split(".")[0]+"_noreweight",mvv_nominal_w)
+
+    print " **************************** write fit to json ***************"
+    jsonname="noreweight_"+options.output
+    print " open json file ",jsonname
+    f=open(jsonname,"w")
+    parametrization = getParametrization(noreweightFit)
+    json.dump(parametrization,f)
 
 
 #print " ********** Make PT reweighted histograms ********************"

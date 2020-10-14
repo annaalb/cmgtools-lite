@@ -4,7 +4,7 @@ import json
 import ROOT
 class DatacardTools():
 
- def __init__(self,scales,scalesHiggs,vtag_pt_dependence,lumi_unc,sfQCD,pseudodata,outlabel,doCorrelation=True):
+ def __init__(self,scales,scalesHiggs,vtag_pt_dependence,lumi_unc,sfQCD,pseudodata,outlabel,doCorrelation=True,fitvjetsmjj=False):
   
   self.scales=scales
   self.vtag_pt_dependence=vtag_pt_dependence
@@ -14,7 +14,7 @@ class DatacardTools():
   self.outlabel = outlabel
   self.scalesHiggs=scalesHiggs
   self.doCorrelation= doCorrelation
- 
+  self.fitvjetsmjj = fitvjetsmjj
  
 
  def AddSignal(self,card,dataset,category,sig,resultsDir,ncontrib):
@@ -161,33 +161,63 @@ class DatacardTools():
            
            
  
- #new implementation: split in 5 contributions W+W, T+T, nonRes+nonRes, nonRes+T, nonres+W
+ #new implementation: split in 6 contributions W+W, T+T, nonRes+nonRes, nonRes+T, nonres+W, resT+resW
  def AddTTBackground3(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib,uncertainty,normjson):
     print "add TT+jets background"  
     contrib =["resT","resW","nonresT","resTnonresT","resWnonresT","resTresW"]
+    mappdf = {"resT":"TTJetsTop","resW":"TTJetsW","nonresT":"TTJetsNonRes","resTnonresT":"TTJetsTNonResT","resWnonresT":"TTJetsWNonResT","resTresW":"TTJetsResWResT"}
+    #uncjsonfile=open(resultsDir+"/JJ_"+dataset+"_TTJets_MjjUnc_"+category+".json")
+    uncjsonfile=open(resultsDir+"/JJ_"+dataset+"_TTJets_MjjUnc_NP.json")
+    unc = json.load(uncjsonfile)
+    allunc = []
     for i in range(0,len(contrib)):
+     allunc.append(unc[contrib[i]])
+    print " allunc ",allunc
+    maxunc = max(allunc)
+    print " max unc is ",maxunc
+
+    for i in range(0,len(contrib)):
+     if self.pseudodata.find("ttbar")!=-1:
 
        #load mJJ - assume same for the three contributions (preliminary)
-       jsonfile = "JJ_"+contrib[i]+"2016_TTJets_MVV_NP_"+contrib[i]
-       if contrib[i]=="resT" or contrib[i]=="nonresT": jsonfile=jsonfile+"T"
-       jsonfile= jsonfile +  ".json"
+       #jsonfile = resultsDir+"/JJ_"+contrib[i]+dataset+"_TTJets_MVV_"+category+".json"
+       jsonfile = resultsDir+"/JJ_"+contrib[i]+dataset+"_TTJets_MVV_NP.json"
        print "load parametrisation for MVV ttbar contributions ",jsonfile,contrib[i]
-       card.addMVVMinorBkgParametricShape("TTJets"+contrib[i]+"_mjj",["MJJ"],jsonfile,uncertainty)
+       #card.addMVVMinorBkgParametricShape("TTJets"+contrib[i]+"_mjj",["MJJ"],jsonfile,[uncertainty[0].replace("TTJets",mappdf[contrib[i]])+"_"+category,unc[contrib[i]]])
+       card.addMVVMinorBkgParametricShape("TTJets"+contrib[i]+"_mjj",["MJJ"],jsonfile,[uncertainty[0].replace("TTJets",mappdf[contrib[i]]),unc[contrib[i]]])
 
        #print "load ", rootFileMVV[contrib[i]], " for ttbar contribution"
        #f = ROOT.TFile(rootFileMVV[contrib[i]],"READ")
        #card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",["PT:CMS_VV_JJ_TTJets_PTZ_"+category],False,0)       
+     else:
+      jsonfile = resultsDir+"/JJ_"+contrib[i]+dataset+"_TTJets_MVV_NP.json"
+      slopejson= normjson.replace("Norm","NormSlopes")
+      print "load parametrisation for MVV ttbar contributions ",jsonfile,contrib[i],slopejson
+      #card.addMVVMinorBkgParametricShape("TTJets"+contrib[i]+"_mjj",["MJJ"],jsonfile,[uncertainty[0].replace("TTJets",mappdf[contrib[i]])+"_"+category,unc[contrib[i]]])
+      #card.addMVVMinorBkgParametricShape("TTJets"+contrib[i]+"_mjj",["MJJ"],jsonfile,[uncertainty[0].replace("TTJets",mappdf[contrib[i]]),unc[contrib[i]]],slopejson)
+      # have only one slope variation for all 6 contributions, the largest
+      card.addMVVMinorBkgParametricShape("TTJets"+contrib[i]+"_mjj",["MJJ"],jsonfile,[uncertainty[0],maxunc],slopejson)
 
-    
+
     card.addMJJTTJetsParametricShapeResW("TTJetsW_mjetRes_l1","MJ1",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales[dataset])#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
     card.addMJJTTJetsParametricShapeResW("TTJetsW_mjetRes_l2","MJ2",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales[dataset])#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
     
-    card.addMJJTTJetsParametricShapeResT("TTJetsTop_mjetRes_l1","MJ1",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_top':1.},{'CMS_res_prunedj_top':1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
-    card.addMJJTTJetsParametricShapeResT("TTJetsTop_mjetRes_l2","MJ2",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_top':1.},{'CMS_res_prunedj_top':1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+    card.addMJJTTJetsParametricShapeResT("TTJetsTop_mjetRes_l1","MJ1",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+    card.addMJJTTJetsParametricShapeResT("TTJetsTop_mjetRes_l2","MJ2",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
     
     card.addMJJTTJetsParametricShapeNonRes("TTJetsNonRes_mjetRes_l1","MJ1",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
     card.addMJJTTJetsParametricShapeNonRes("TTJetsNonRes_mjetRes_l2","MJ2",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
-    
+    '''
+    print " testing uncorrelated mjet unc"
+    card.addMJJTTJetsParametricShapeResW("TTJetsW_mjetRes_l1","MJ1",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_W_'+category:1.},{'CMS_res_prunedj_W_'+category:1.},self.scales[dataset])#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+    card.addMJJTTJetsParametricShapeResW("TTJetsW_mjetRes_l2","MJ2",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_W_'+category:1.},{'CMS_res_prunedj_W_'+category:1.},self.scales[dataset])#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+
+    card.addMJJTTJetsParametricShapeResT("TTJetsTop_mjetRes_l1","MJ1",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_T_'+category:1.},{'CMS_res_prunedj_T_'+category:1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+    card.addMJJTTJetsParametricShapeResT("TTJetsTop_mjetRes_l2","MJ2",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_T_'+category:1.},{'CMS_res_prunedj_T_'+category:1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+
+    card.addMJJTTJetsParametricShapeNonRes("TTJetsNonRes_mjetRes_l1","MJ1",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_'+category:1.},{'CMS_res_prunedj_'+category:1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+    card.addMJJTTJetsParametricShapeNonRes("TTJetsNonRes_mjetRes_l2","MJ2",resultsDir+"/JJ_%s_TTJets_%s.json"%(dataset,category),{'CMS_scale_prunedj_'+category:1.},{'CMS_res_prunedj_'+category:1.})#,{'CMS_f_g1':1.},{'CMS_f_res':1.})
+    '''
     # built final PDFs:
     # W+W PDF
     card.conditionalProduct3('TTJetsW','TTJetsresW_mjj','TTJetsW_mjetRes_l1','TTJetsW_mjetRes_l2','MJJ')
@@ -242,26 +272,33 @@ class DatacardTools():
         for i in range(0,len(contrib)):
             card.addYield(mappdf[contrib[i]],ncontrib+i,norms[contrib[i]])
 	          
- def AddWResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib,uncertainty):
+ def AddWResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib,uncertainty=[]):
        print "add Wres background"  
        sys.path.append(resultsDir)
        module_name = 'JJ_WJets_%s'%category
        module = __import__(module_name)  
        print module_name
        # W+jets 
-       #card.addHistoShapeFromFile("Wjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+category,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+category],False,0)
-       #card.addMVVMinorBkgParametricShape("Wjets_mjj_c1",["MJJ"],rootFileMVV,uncertainty)
-       card.addMVVMinorBkgParametricShape("Wjets_mjj",["MJJ"],rootFileMVV,uncertainty)
+       if self.fitvjetsmjj == True:
+        card.addMVVMinorBkgParametricShape("Wjets_mjj",["MJJ"],rootFileMVV,uncertainty)
+       else:
+        card.addHistoShapeFromFile("Wjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+category,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+category],False,0)
        card.addMJJSignalShapeNOEXP("Wjets_mjetRes_l1","MJ1","",getattr(module,'Wjets_TTbar_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales[dataset])
        card.addGaussianShape("Wjets_mjetNonRes_l2","MJ2",getattr(module,'Wjets_TTbar_%s_nonRes'%category))
-       card.product3D("Wjets_c1","Wjets_mjetRes_l1","Wjets_mjetNonRes_l2","Wjets_mjj")
+       if self.fitvjetsmjj == True:
+        card.product3D("Wjets_c2","Wjets_mjetRes_l2","Wjets_mjetNonRes_l1","Wjets_mjj")
+       else:
+        card.product3D("Wjets_c1","Wjets_mjetRes_l1","Wjets_mjetNonRes_l2","Wjets_mjj_c1")
       
        # jets + W
-       #card.addHistoShapeFromFile("Wjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+category,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+category],False,0)
-       #card.addMVVMinorBkgParametricShape("Wjets_mjj_c2",["MJJ"],rootFileMVV,uncertainty)
+       if self.fitvjetsmjj == False:
+        card.addHistoShapeFromFile("Wjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+category,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+category],False,0)
        card.addMJJSignalShapeNOEXP("Wjets_mjetRes_l2","MJ2","",getattr(module,'Wjets_TTbar_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales[dataset])
        card.addGaussianShape("Wjets_mjetNonRes_l1","MJ1",getattr(module,'Wjets_TTbar_%s_nonRes'%category))
-       card.product3D("Wjets_c2","Wjets_mjetRes_l2","Wjets_mjetNonRes_l1","Wjets_mjj")
+       if self.fitvjetsmjj == True:
+        card.product3D("Wjets_c2","Wjets_mjetRes_l2","Wjets_mjetNonRes_l1","Wjets_mjj")
+       else:
+        card.product3D("Wjets_c2","Wjets_mjetRes_l2","Wjets_mjetNonRes_l1","Wjets_mjj_c2")
        card.sumPdf('Wjets',"Wjets_c1","Wjets_c2","CMS_ratio_Wjets_"+category)
      
        print "outlabel "+self.outlabel
@@ -273,26 +310,34 @@ class DatacardTools():
        else:
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets")
 
- def AddZResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib,uncertainty):  
+ def AddZResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib,uncertainty=[]):
        print "add Zres background"
        sys.path.append(resultsDir)
        module_name = 'JJ_WJets_%s'%category
        module = __import__(module_name)   
             
        # Z+jets 
-       #card.addHistoShapeFromFile("Zjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+category,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+category],False,0)
-       #card.addMVVMinorBkgParametricShape("Zjets_mjj_c1",["MJJ"],rootFileMVV,uncertainty)
-       card.addMVVMinorBkgParametricShape("Zjets_mjj",["MJJ"],rootFileMVV,uncertainty)
+       if self.fitvjetsmjj == True:
+        #card.addMVVMinorBkgParametricShape("Zjets_mjj_c1",["MJJ"],rootFileMVV,uncertainty)
+        card.addMVVMinorBkgParametricShape("Zjets_mjj",["MJJ"],rootFileMVV,uncertainty)
+       else:
+        card.addHistoShapeFromFile("Zjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+category,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+category],False,0)
        card.addMJJSignalShapeNOEXP("Zjets_mjetRes_l1","MJ1","",getattr(module,'Zjets_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales[dataset])
        card.addGaussianShape("Zjets_mjetNonRes_l2","MJ2",getattr(module,'Zjets_%s_nonRes'%category))
-       card.product3D("Zjets_c1","Zjets_mjetRes_l1","Zjets_mjetNonRes_l2","Zjets_mjj")
+       if self.fitvjetsmjj == True:
+        card.product3D("Zjets_c1","Zjets_mjetRes_l1","Zjets_mjetNonRes_l2","Zjets_mjj")
+       else:
+        card.product3D("Zjets_c1","Zjets_mjetRes_l1","Zjets_mjetNonRes_l2","Zjets_mjj_c1")
            
        # jets + Z
-       #card.addHistoShapeFromFile("Zjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+category,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+category],False,0)
-       #card.addMVVMinorBkgParametricShape("Zjets_mjj_c2",["MJJ"],rootFileMVV,uncertainty)
+       if self.fitvjetsmjj == False:
+        card.addHistoShapeFromFile("Zjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+category,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+category],False,0)
        card.addMJJSignalShapeNOEXP("Zjets_mjetRes_l2","MJ2","",getattr(module,'Zjets_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales[dataset])
        card.addGaussianShape("Zjets_mjetNonRes_l1","MJ1",getattr(module,'Zjets_%s_nonRes'%category))
-       card.product3D("Zjets_c2","Zjets_mjetRes_l2","Zjets_mjetNonRes_l1","Zjets_mjj")
+       if self.fitvjetsmjj == True:
+        card.product3D("Zjets_c2","Zjets_mjetRes_l2","Zjets_mjetNonRes_l1","Zjets_mjj")
+       else:
+        card.product3D("Zjets_c2","Zjets_mjetRes_l2","Zjets_mjetNonRes_l1","Zjets_mjj_c2")
        card.sumPdf('Zjets',"Zjets_c1","Zjets_c2","CMS_ratio_Zjets_"+category)
       
        if self.pseudodata=="" or self.pseudodata=="Vjets":
@@ -307,7 +352,7 @@ class DatacardTools():
       
       card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile3DPDF,"histo",['PT:CMS_VV_JJ_nonRes_PT_'+category,'OPT:CMS_VV_JJ_nonRes_OPT_'+category,'OPT3:CMS_VV_JJ_nonRes_OPT3_'+category,'altshape:CMS_VV_JJ_nonRes_altshape_'+category,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+category],False,0) ,    
           
-      if self.outlabel.find("sigonly")!=-1 or self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("ttbar")!=-1:
+      if self.outlabel.find("sigonly")!=-1 or self.outlabel.find("sigOnly")!=-1 or self.pseudodata.find("ttbar")!=-1:
           card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",0.0000000000001)
       else:
           card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",self.sfQCD)
@@ -343,8 +388,10 @@ class DatacardTools():
  def AddTTSystematics3(self,card,sig,dataset,category):
     card.addSystematic("CMS_f_g1","param",[0.0,0.02])
     card.addSystematic("CMS_f_res","param",[0.0,0.08])
-    card.addSystematic("CMS_scale_prunedj_top","param",[0.0,0.02])
-    card.addSystematic("CMS_res_prunedj_top","param",[0.0,0.08])
+    #   card.addSystematic("CMS_scale_prunedj_top","param",[0.0,0.02])
+    #    card.addSystematic("CMS_res_prunedj_top","param",[0.0,0.08])
+    card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
+    card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
     card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJetsW':1.2,'TTJetsTop':1.2,'TTJetsNonRes':1.2,'TTJetsWNonResT':1.2,'TTJetsResWResT':1.2,'TTJetsTNonResT':1.2})  
     #card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJets':1.2})  
     card.addSystematic("CMS_VV_JJ_TTJetsTop_PTZ_"+category,"param",[0,0.333]) #0.333
@@ -358,22 +405,43 @@ class DatacardTools():
     card.addSystematic("CMS_VV_JJ_TTJetsWnonresT_PTZ_"+category,"param",[0,0.333]) #0.333
     card.addSystematic("CMS_VV_JJ_TTJetsWnonresT_OPTZ_"+category,"param",[0,0.333]) #0.333
     
- def AddTTSystematics4(self,card,extra_uncertainty):
+ def AddTTSystematics4(self,card,extra_uncertainty,dataset,category):
     card.addSystematic("CMS_f_g1","param",[0.0,0.02])
     card.addSystematic("CMS_f_res","param",[0.0,0.08])
-    #card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJets':1.2})  
-    card.addSystematic(extra_uncertainty[0],"param",[0.0,extra_uncertainty[1]])
-    card.addSystematic("CMS_scale_prunedj_top","param",[0.0,0.02])
-    card.addSystematic("CMS_res_prunedj_top","param",[0.0,0.08])
+    #card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJets':1.2})
+    card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
+    card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
+    '''
+    print "decorrelateeeeeeeee "
+    card.addSystematic("CMS_scale_prunedj_"+category,"param",[0.0,0.3])
+    card.addSystematic("CMS_res_prunedj_"+category,"param",[0.0,0.3])
+    card.addSystematic("CMS_scale_prunedj_W_"+category,"param",[0.0,0.3])
+    card.addSystematic("CMS_res_prunedj_W_"+category,"param",[0.0,0.3])
+    card.addSystematic("CMS_scale_prunedj_T_"+category,"param",[0.0,0.3])
+    card.addSystematic("CMS_res_prunedj_T_"+category,"param",[0.0,0.3])
+    '''
+    contrib =["resT","resW","nonresT","resTnonresT","resWnonresT","resTresW"]
+    mappdf = {"resT":"TTJetsTop","resW":"TTJetsW","nonresT":"TTJetsNonRes","resTnonresT":"TTJetsTNonResT","resWnonresT":"TTJetsWNonResT","resTresW":"TTJetsResWResT"}
+    #uncjsonfile=open('results_'+dataset+"/JJ_"+dataset+"_TTJets_MjjUnc_"+category+".json")
+    uncjsonfile=open('results_'+dataset+"/JJ_"+dataset+"_TTJets_MjjUnc_NP.json")
+    unc = json.load(uncjsonfile)
+    allunc = []
+    for i in range(0,len(contrib)):
+       allunc.append(unc[contrib[i]])
+
+    #card.addSystematic("CMS_scale_prunedj_top","param",[0.0,0.02])
+    #card.addSystematic("CMS_res_prunedj_top","param",[0.0,0.08])
     if self.pseudodata.find("ttbar")==-1:
+        #card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJetsW':1.2,'TTJetsTop':1.2,'TTJetsNonRes':1.2,'TTJetsWNonResT':1.2,'TTJetsResWResT':1.2,'TTJetsTNonResT':1.2}) 
         card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{'TTJetsW':1.05,'TTJetsTop':1.05,'TTJetsNonRes':1.05,'TTJetsWNonResT':1.05,'TTJetsResWResT':1.05,'TTJetsTNonResT':1.05}) 
+        #card.addSystematic(extra_uncertainty[0],"param",[0.0,extra_uncertainty[1]])
+        #card.addSystematic(extra_uncertainty[0].replace("TTJets",mappdf[contrib[i]])+"_"+category,"param",[0.0,float("{:.3f}".format(unc[contrib[i]]))])
+        card.addSystematic(extra_uncertainty[0],"param",[0.0,float("{:.3f}".format(max(allunc)))])
     else:
-        card.addSystematic("CMS_VV_JJ_TTJetsW_norm","lnN",{'TTJetsW':3.2})
-        card.addSystematic("CMS_VV_JJ_TTJetsTop_norm","lnN",{'TTJetsTop':3.2})
-        card.addSystematic("CMS_VV_JJ_TTJetsNonRes_norm","lnN",{'TTJetsNonRes':3.2})
-        card.addSystematic("CMS_VV_JJ_TTJetsWNonResT_norm","lnN",{'TTJetsWNonResT':3.2})
-        card.addSystematic("CMS_VV_JJ_TTJetsResWResT_norm","lnN",{'TTJetsResWResT':3.2})
-        card.addSystematic("CMS_VV_JJ_TTJetsTNonResT_norm","lnN",{'TTJetsTNonResT':3.2})
+        for i in range(0,len(contrib)):
+         #card.addSystematic(extra_uncertainty[0].replace("TTJets",mappdf[contrib[i]])+"_"+category,"param",[0.0,float("{:.3f}".format(unc[contrib[i]]))])
+         card.addSystematic("CMS_VV_JJ_"+mappdf[contrib[i]]+"_norm","lnN",{mappdf[contrib[i]]:3.2})
+         card.addSystematic(extra_uncertainty[0].replace("TTJets",mappdf[contrib[i]]),"param",[0.0,float("{:.3f}".format(unc[contrib[i]]))])
     
        
  def AddSigSystematics(self,card,sig,dataset,category,correlate):
@@ -409,17 +477,18 @@ class DatacardTools():
      card.addSystematic("CMS_VV_JJ_DeepJet_Vtag_eff","lnN",{'%s'%signal: str(uncup)+"/"+ str(uncdown),'Wjets': str(uncup)+"/"+ str(uncdown),'Zjets': str(uncup)+"/"+ str(uncdown)})
      
      
- def AddResBackgroundSystematics(self,card,category,extra_uncertainty):
+ def AddResBackgroundSystematics(self,card,category,extra_uncertainty=[]):
  
        card.addSystematic("CMS_VV_JJ_Wjets_norm","lnN",{'Wjets':1.05})
        card.addSystematic("CMS_VV_JJ_Zjets_norm","lnN",{'Zjets':1.05}) 
-       card.addSystematic(extra_uncertainty[0],"param",[0.0,extra_uncertainty[1]])
-       card.addSystematic(extra_uncertainty[2],"param",[0.0,extra_uncertainty[3]])
-       
-       #card.addSystematic("CMS_VV_JJ_Wjets_PTZ_"+category,"param",[0,0.1]) #0.333
-       #card.addSystematic("CMS_VV_JJ_Wjets_OPTZ_"+category,"param",[0,0.1]) #0.333
-       #card.addSystematic("CMS_VV_JJ_Zjets_PTZ_"+category,"param",[0,0.1]) #0.333
-       #card.addSystematic("CMS_VV_JJ_Zjets_OPTZ_"+category,"param",[0,0.1]) #0.333
+       if self.fitvjetsmjj == True:
+        card.addSystematic(extra_uncertainty[0],"param",[0.0,extra_uncertainty[1]])
+        card.addSystematic(extra_uncertainty[2],"param",[0.0,extra_uncertainty[3]])
+       else:
+        card.addSystematic("CMS_VV_JJ_Wjets_PTZ_"+category,"param",[0,0.1]) #0.333
+        card.addSystematic("CMS_VV_JJ_Wjets_OPTZ_"+category,"param",[0,0.1]) #0.333
+        card.addSystematic("CMS_VV_JJ_Zjets_PTZ_"+category,"param",[0,0.1]) #0.333
+        card.addSystematic("CMS_VV_JJ_Zjets_OPTZ_"+category,"param",[0,0.1]) #0.333
        
 
  def AddNonResBackgroundSystematics(self,card,category):

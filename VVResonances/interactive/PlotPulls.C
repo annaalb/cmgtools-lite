@@ -2,9 +2,9 @@ void PlotPulls()
 {
 
   int nfiles = 1;
-  const int nlabels = 25;  
+  const int nlabels = 64;  // number of nuissance parameters
   std::string labels[nlabels] = {""};
-
+  // To get the fitDiagnostics.root file run ~ this command  'combine -M FitDiagnostics -m 2000 results_2016/workspace_JJ_BulkGWW_VH_NPHP_control_region_13TeV_2016_newdata.root -v 2 --noErrors --minos none' on the workspace
   TFile* tf = new TFile("fitDiagnostics.root","READ");
   tf->ls();
   
@@ -81,7 +81,7 @@ void PlotPulls()
   std::cout << "DONE" << std::endl;
   TText t;
   t.SetTextAngle(60);
-  t.SetTextSize(0.02);
+  t.SetTextSize(0.015);
   t.SetTextFont(42);
   t.SetTextAlign(33);
   const Int_t nx = 12;

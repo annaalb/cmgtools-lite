@@ -17,7 +17,7 @@ if (argc != 2):
 year = str(sys.argv[1])
 outdir = os.getcwd()
 loadHistos = False
-doVBF = False
+doVBF = True
 
 def get_pad(name,lumi):
 
@@ -226,8 +226,8 @@ if doVBF:
 	'jj_l1_MassDecorrelatedDeepBoosted_WvsQCD':{'minX':0,'maxX':1,'binsX':20,'titleX':'Jet 1 deepAK8 WvsQCD','scaleSig':0.05,'maxY':1500*100},
 	'jj_l2_MassDecorrelatedDeepBoosted_WvsQCD':{'minX':0,'maxX':1,'binsX':20,'titleX':'Jet 2 deepAK8 WvsQCD','scaleSig':0.05,'maxY':1500*100},
 	'abs(vbf_jj_l1_eta-vbf_jj_l2_eta)':{'minX':4.5,'maxX':10,'binsX':22,'titleX':'#Delta#eta_{jj}^{VBF}','scaleSig':10,'maxY':1.7},
-	'vbf_jj_l1_eta':{'minX':-5.0,'maxX':5.0,'binsX':100,'titleX':'VBF jet 1 #eta','scaleSig':3,'maxY':2},
-	'vbf_jj_l2_eta':{'minX':-5.0,'maxX':5.0,'binsX':100,'titleX':'VBF jet 2 #eta','scaleSig':3,'maxY':2},  
+	'vbf_jj_l1_eta':{'minX':-5.0,'maxX':5.0,'binsX':50,'titleX':'VBF jet 1 #eta','scaleSig':3,'maxY':2},
+	'vbf_jj_l2_eta':{'minX':-5.0,'maxX':5.0,'binsX':50,'titleX':'VBF jet 2 #eta','scaleSig':3,'maxY':2},  
 	'vbf_jj_l1_phi':{'minX':-3.2,'maxX':3.2,'binsX':32,'titleX':'VBF jet 1 #phi','scaleSig':3,'maxY':2},
 	'vbf_jj_l2_phi':{'minX':-3.2,'maxX':3.2,'binsX':32,'titleX':'VBF jet 2 #phi','scaleSig':3,'maxY':2},
 	'vbf_jj_LV_mass':{'minX':800,'maxX':10000,'binsX':92,'titleX':'VBF jets invariant mass [GeV]','scaleSig':0.01,'maxY':100},
@@ -392,9 +392,10 @@ for k,v in vars.iteritems():
   histos_data = []
 
   i = 0
-  for f in os.listdir('samples_%s'%year):
+  directory='deepAK8V2/%s/'%year
+  for f in os.listdir(directory):
    if 'JetHT' in f and '.root' in f:
-    tf = ROOT.TFile.Open('samples_'+year+"/"+f,'READ')
+    tf = ROOT.TFile.Open(directory+f,'READ')
     tree = tf.AnalysisTree
     ROOT.gROOT.cd()
     htemp = ROOT.gROOT.FindObject("htemp")
@@ -427,13 +428,13 @@ for k,v in vars.iteritems():
  
  if year == '2016':
   mc_samples = ['WJetsToQQ','ZJetsToQQ','TT','QCD_Pt_','QCD_HT','QCD_Pt-','ZprimeToZhToZhadhbb_narrow_2000','WprimeToWZToWhadZhad_narrow_2000','BulkGravToZZToZhadZhad_narrow_2000','BulkGravToWW_narrow_2000']
-  mc_folders = ['samples_2018','samples_2018','samples_2016','samples_2016','samples_2016','samples_2016','samples_2016','samples_2016','samples_2016','samples_2016']
+  mc_folders = ['2018','2018','2016','2016','2016','2016','2016','2016','2016','2016']
  elif year == '2017':
   mc_samples = ['WJetsToQQ','ZJetsToQQ','TT','QCD_Pt_','QCD_HT','QCD_Pt-','ZprimeToZhToZhadhbb_narrow_2000','WprimeToWZToWhadZhad_narrow_2000','BulkGravToZZToZhadZhad_narrow_2000','BulkGravToWW_narrow_2000']
-  mc_folders = ['samples_2018','samples_2018','samples_2017','samples_2017','samples_2017','samples_2017','samples_2016','samples_2016','samples_2016','samples_2016']
+  mc_folders = ['2018','2018','2017','2017','2017','2017','2016','2016','2016','2016']
  elif year == '2018':
   mc_samples = ['WJetsToQQ','ZJetsToQQ','TT','QCD_Pt_','QCD_HT','QCD_Pt-','ZprimeToZhToZhadhbb_narrow_2000','WprimeToWZToWhadZhad_narrow_2000','BulkGravToZZToZhadZhad_narrow_2000','BulkGravToWW_narrow_2000']
-  mc_folders = ['samples_2018','samples_2018','samples_2018','samples_2018','samples_2018','samples_2018','samples_2016','samples_2016','samples_2016','samples_2016']
+  mc_folders = ['2018','2018','2018','2018','2018','2018','2016','2016','2016','2016']
   
  if doVBF:
   mc_samples[6] = 'ZprimeToZhToZhadhbb_narrow_2000' #replace at some point with VBF version
@@ -463,8 +464,13 @@ for k,v in vars.iteritems():
    htemp = ROOT.gROOT.FindObject("htemp")
    if htemp: htemp.Delete()
    print "Draw histo for file",f
-   if not 'part' in f: tree.Draw("%s>>htemp_%s(%i,%f,%f)"%(k,f.replace('.root',''),v['binsX'],v['minX'],v['maxX']), '(genWeight*xsec*puWeight*%f)*'%(lumi*1./weightinv)+cut);
-   else: tree.Draw("%s>>htemp_%s(%i,%f,%f)"%(k,f.replace('.root',''),v['binsX'],v['minX'],v['maxX']), '(genWeight*xsec*puWeight*%f)*'%(lumi)+cut);
+   if f.find("QCD_Pt_") !=-1 or f.find("QCD_HT") !=-1:
+    print "spike killer "
+    if not 'part' in f: tree.Draw("%s>>htemp_%s(%i,%f,%f)"%(k,f.replace('.root',''),v['binsX'],v['minX'],v['maxX']), '(genWeight*xsec*puWeight*b_spikekiller*%f)*'%(lumi*1./weightinv)+cut);
+    else: tree.Draw("%s>>htemp_%s(%i,%f,%f)"%(k,f.replace('.root',''),v['binsX'],v['minX'],v['maxX']), '(genWeight*xsec*puWeight*b_spikekiller*%f)*'%(lumi)+cut);
+   else:
+    if not 'part' in f: tree.Draw("%s>>htemp_%s(%i,%f,%f)"%(k,f.replace('.root',''),v['binsX'],v['minX'],v['maxX']), '(genWeight*xsec*puWeight*%f)*'%(lumi*1./weightinv)+cut);
+    else: tree.Draw("%s>>htemp_%s(%i,%f,%f)"%(k,f.replace('.root',''),v['binsX'],v['minX'],v['maxX']), '(genWeight*xsec*puWeight*%f)*'%(lumi)+cut);
    htemp = ROOT.gROOT.FindObject("htemp_%s"%(f.replace('.root','')))
    histos_mc[s].append(htemp)
    tf.Close()

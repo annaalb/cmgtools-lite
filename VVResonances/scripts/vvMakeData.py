@@ -59,6 +59,9 @@ for filename in os.listdir(args[0]):
                 if options.triggerW:
                     print "Using triggerweights! Are you sure?"
                     dataPlotters[-1].addCorrectionFactor('triggerWeight','tree')	
+                if fname.find("TT") !=-1:
+                    print "applying top pt reweight"
+                    dataPlotters[-1].addCorrectionFactor('TopPTWeight','tree')
             corrFactors = options.factors.split(',')
 	    for c in corrFactors:
 	     if len(c.split(':')) < 2: continue

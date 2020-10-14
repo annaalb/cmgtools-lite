@@ -192,6 +192,8 @@ def getPlotters(samples_in):
     plotters_[-1].addCorrectionFactor('xsec','tree')
     plotters_[-1].addCorrectionFactor('genWeight','tree')
     plotters_[-1].addCorrectionFactor('puWeight','tree')
+    print "applying top pt reweight"
+    plotters_[-1].addCorrectionFactor('TopPTWeight','tree')
     if options.triggerW: 
       plotters_[-1].addCorrectionFactor('triggerWeight','tree')	
     plotters_[-1].addCorrectionFactor(options.corrFactor,'flat')

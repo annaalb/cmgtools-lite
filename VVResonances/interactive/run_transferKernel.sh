@@ -11,7 +11,7 @@ mkdir postfit_qcd
 #fit MC in catOut category with templates of catIn category
 for i in ${!samples[*]}
 do
-	python transferKernel.py -i results_2016/JJ_2016_nonRes_${catOut}${labels[$i]}.root --sample ${samples[$i]} --year 2016 -p xyz --pdfIn results_2016/JJ_2016_nonRes_3D_${catIn}.root
+	python transferKernel.py -i results_2016/JJ_2016_nonRes_${catOut}${labels[$i]}.root --sample ${samples[$i]} --year 2016 -p xyz --pdfIn results_2016/JJ_2016_nonRes_3D_${catIn}.root --channel ${catOut}
 done
 
 #merge post-fit 1Dx2Dx2D templates for catOut category

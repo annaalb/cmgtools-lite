@@ -47,7 +47,7 @@
     "minMX"  : 1200.0,
     "maxMX"  : 8000.0,
     
-    "minGenMJ" :20.0,
+    "minGenMJ" :0.0,
     "maxGenMJ" :300.0,
     "minGenMVV" : 800.0,
     "maxGenMVV": 6000.0,
@@ -64,9 +64,9 @@
     "W_tag_unc_LP" : {"2016": 0.11, "2017": 0.13 , "2018": 0.13 },
     "H_tag_unc_HP" : {"2016": 0.21 , "2017": 0.25 , "2018": 0.25 },
     "H_tag_unc_LP" : {"2016": 0.11, "2017": 0.13 , "2018": 0.13  },
-    "vtag_pt_dependence16" : {"VV_HPHP":"((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))","VV_HPLP":"((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))","VH_HPHP":"1","VH_HPLP":"1","VH_LPHP":"1","VH_NPHP_control_region" : "1"},
-    "vtag_pt_dependence17" : {"VV_HPHP":"((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))","VV_HPLP":"((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))","VH_HPHP":"1","VH_HPLP":"1","VH_LPHP":"1","VH_NPHP_control_region" : "1"},
-    "vtag_pt_dependence18" : {"VV_HPHP":"((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))","VV_HPLP":"((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))","VH_HPHP":"1","VH_HPLP":"1","VH_LPHP":"1","VH_NPHP_control_region" : "1"},
+    "vtag_pt_dependence16" : {"VV_HPHP":"((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))","VV_HPLP":"((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))","VH_HPHP":"1","VH_HPLP":"1","VH_LPHP":"1","VH_NPHP_control_region" : "1","VH_HPNP_control_region" : "1"},
+    "vtag_pt_dependence17" : {"VV_HPHP":"((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))","VV_HPLP":"((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))","VH_HPHP":"1","VH_HPLP":"1","VH_LPHP":"1","VH_NPHP_control_region" : "1","VH_HPNP_control_region" : "1"},
+    "vtag_pt_dependence18" : {"VV_HPHP":"((1+0.06*log(MH/2/300))*(1+0.06*log(MH/2/300)))","VV_HPLP":"((1+0.06*log(MH/2/300))*(1+0.07*log(MH/2/300)))","VH_HPHP":"1","VH_HPLP":"1","VH_LPHP":"1","VH_NPHP_control_region" : "1","VH_HPNP_control_region" : "1"},
 
 
     "tagging_variables_and_wp" : {
@@ -98,9 +98,12 @@
     "WP_LP_Wtag16" : "0p10",
     "WP_LP_Wtag17" : "0p10",
     "WP_LP_Wtag18" : "0p10",
-    "WP_NP_Wtag16" : "0p20",
-    "WP_NP_Wtag17" : "0p20",
-    "WP_NP_Wtag18" : "0p20",
+    "WP_NP_Wtag16" : "0p10",
+    "WP_NP_Wtag17" : "0p10",
+    "WP_NP_Wtag18" : "0p10",
+    "WP_NPLP_Wtag16" : "0p20",
+    "WP_NPLP_Wtag17" : "0p20",
+    "WP_NPLP_Wtag18" : "0p20",
     
     
     "WP_HP_Htag16" : "0p02",
@@ -108,7 +111,13 @@
     "WP_HP_Htag18" : "0p02",
     "WP_LP_Htag16" : "0p10",
     "WP_LP_Htag17" : "0p10",
-    "WP_LP_Htag18" : "0p10"
+    "WP_LP_Htag18" : "0p10",
+    "WP_NP_Htag16" : "0p10",
+    "WP_NP_Htag17" : "0p10",
+    "WP_NP_Htag18" : "0p10",
+    "WP_NPLP_Htag16" : "0p20",
+    "WP_NPLP_Htag17" : "0p20",
+    "WP_NPLP_Htag18" : "0p20"
 
     },
     "selection_cuts" : {

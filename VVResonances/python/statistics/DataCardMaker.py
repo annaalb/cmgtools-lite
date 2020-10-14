@@ -526,7 +526,7 @@ class DataCardMaker:
         
     
     
-    def addMVVMinorBkgParametricShape(self,name,variable,jsonFile,uncertainty,ToReplace="MJJ"):
+    def addMVVMinorBkgParametricShape(self,name,variable,jsonFile,uncertainty,slopejson=None,ToReplace="MJJ"):
                  
         MJJ=variable[0]  
         if self.w.var(MJJ) == None: self.w.factory(MJJ+"[0,10000]")
@@ -534,7 +534,7 @@ class DataCardMaker:
         f=open(jsonFile)
         info=json.load(f)
         pdfName="_".join([name,self.tag])
-        
+
         #SLOPEVar=name+"_slope1"
         self.w.factory("EXPR::{name}('TMath::Exp(-{c1}*(MJJ -1125.)/13000.-{c2}/((MJJ-1125.)/13000.))',MJJ)".format(name=pdfName+"_c1",c1=info['c1'],c2=info['c2']))
         
@@ -543,7 +543,14 @@ class DataCardMaker:
         if self.w.var(uncertainty[0]) == None: 
             self.w.factory(uncertainty[0]+"[0,-"+str(uncertainty[1])+","+str(uncertainty[1])+"]")
             self.w.var(uncertainty[0]).setConstant(1)
-        self.w.factory("EXPR::{name}('TMath::Exp(-{c3}*(1+{unc_slope})*(MJJ -1125.)/13000.)',MJJ,{unc_slope})".format(name=pdfName+"_c2",c3=info['c3'],unc_slope=uncertainty[0]))
+        C3=info['c3']
+        if slopejson != None:
+            fs=open(slopejson)
+            slopes=json.load(fs)
+            contrib=name.split("_")[0].replace("TTJets","")
+            print " modified c3 for ",contrib
+            C3=info['c3']*(1+slopes[contrib])
+        self.w.factory("EXPR::{name}('TMath::Exp(-{c3}*(1+{unc_slope})*(MJJ -1125.)/13000.)',MJJ,{unc_slope})".format(name=pdfName+"_c2",c3=C3,unc_slope=uncertainty[0]))
         
         #self.w.factory("RooExponential::{name}({var},{SLOPE})".format(name=pdfName+"_c2",var=MJJ,SLOPE=SLOPEVar.replace("slope1","slope2")).replace("MH",ToReplace))
         
@@ -1711,7 +1718,7 @@ class DataCardMaker:
         print pdfName2
         print pdfName3
         self.w.factory("PROD::{name}({name1},{name2},{name3})".format(name=pdfName,name1=pdfName1,name2=pdfName2,name3=pdfName3))
-    
+
     
     def envelope(self,name,pdfs):
         catName = "envelope_"+name+"_"+self.tag
