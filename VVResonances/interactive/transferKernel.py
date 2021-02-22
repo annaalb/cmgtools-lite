@@ -711,7 +711,7 @@ def makeNonResCard():
       
 # DTools.AddSignal(card,dataset,purity,sig,'results_2016',0)
  print "Adding Signal"
- DTools.AddSignal(card,dataset,purity,sig,'results_%s'%dataset,0)
+ DTools.AddOneSignal(card,dataset,purity,sig,'results_%s'%dataset,0)
  print "Signal Added !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
  hname = 'histo'
  if options.sample!='pythia': hname+=('_'+options.sample)
