@@ -117,11 +117,11 @@ def smoothTail1D(proj,smooth=3000):
         return 0
     scale = proj.Integral()
     proj.Scale(1.0/scale)
-    
+
     
     beginFitX = 2100#1500
     if smooth < 2600 :
-        beginFitX = options.minx
+        beginFitX = 1200
     endX = smooth #2800
 
 
@@ -129,7 +129,7 @@ def smoothTail1D(proj,smooth=3000):
         #beginFitX=1100
         #endX = 1500
     #expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",2000,8000) #orig
-    expo=ROOT.TF1("expo","[0]*(1-x/13000.)^(min([1],[2]))/(x/13000)^[2]",2000,8000) #Andreas suggestion 1
+    expo=ROOT.TF1("expo","[0]*(1-x/13000.)^(min([1],[2]))/(x/13000)^[2]",1000,8000) #Andreas suggestion 1
     #expo=ROOT.TF1("expo","[0]*(1-x/30000.)^[1]/(x/30000)^[2]",2000,8000) #Andreas suggestion 2
     expo.SetParameters(0,16.,2.)
     expo.SetParLimits(2,1.,20.)
@@ -182,17 +182,16 @@ print "smooth start",smoothstart
 for folder in folders:
     print " folder "
     for filename in os.listdir(folder):
-        print "split ",folder.split("/")
-        year=folder.split("/")[-2]
-        print "year ",year
-        print "now working with cuts "
-        ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
-        print "lumi for year "+year+" = ",ctx.lumi[year]
-        luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
-        if options.output.find("Run2") ==-1: luminosity = 1
-
         for sampleType in sampleTypes:
             if filename.find(sampleType)!=-1:
+                print "split ",folder.split("/")
+                year=folder.split("/")[-2]
+                print "year ",year
+                print "now working with cuts "
+                ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
+                print "lumi for year "+year+" = ",ctx.lumi[year]
+                luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
+                if options.output.find("Run2") ==-1: luminosity = 1
                 fnameParts=filename.split('.')
                 fname=fnameParts[0]
                 ext=fnameParts[1]
@@ -200,7 +199,9 @@ for folder in folders:
                 dataPlotters.append(TreePlotter(folder+'/'+fname+'.root','AnalysisTree'))
                 dataPlotters[-1].setupFromFile(folder+'/'+fname+'.pck')
                 dataPlotters[-1].addCorrectionFactor('xsec','tree')
-                dataPlotters[-1].addCorrectionFactor('genWeight','tree')
+                genweight='genWeight'
+                if (year == "2017" or year == "2018") and fname.find("TT") !=-1:  genweight='genWeight_LO'
+                dataPlotters[-1].addCorrectionFactor(genweight,'tree')
                 dataPlotters[-1].addCorrectionFactor('puWeight','tree')
                 dataPlotters[-1].addCorrectionFactor(luminosity,'flat')
                 #print "applying tagging SF"
@@ -462,7 +463,8 @@ for hist in finalHistograms.itervalues():
  if (options.output).find("Jets")!=-1 and hist.GetName().find("hist")!=-1:
      if hist.Integral() > 0:
         #print  " NO SMOOTHENING!"
-        smoothTail1D(hist,startsmooth)
+
+        smoothTail1D(hist,float(startsmooth))
         print "smooth tails of 1D histogram for tt background of histo "+hist.GetName()
         if hist.GetName().find("hist_nominal")!=-1:
             hist.Scale(scale)
