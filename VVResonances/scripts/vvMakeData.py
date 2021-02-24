@@ -68,7 +68,9 @@ for filename in os.listdir(args[0]):
             if options.data==0 or options.data==2:
                 dataPlotters[-1].setupFromFile(args[0]+'/'+fname+'.pck')
                 dataPlotters[-1].addCorrectionFactor('xsec','tree')
-                dataPlotters[-1].addCorrectionFactor('genWeight','tree')
+                genweight='genWeight'
+                if (year == "2017" or year == "2018") and fname.find("TT") !=-1:  genweight='genWeight_LO'
+                dataPlotters[-1].addCorrectionFactor(genweight,'tree')
                 dataPlotters[-1].addCorrectionFactor('puWeight','tree')
                 dataPlotters[-1].addCorrectionFactor(luminosity,'flat')
                 if fname.find("QCD_Pt_") !=-1 or fname.find("QCD_HT") !=-1:
