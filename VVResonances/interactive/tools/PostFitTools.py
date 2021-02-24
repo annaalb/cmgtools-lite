@@ -466,6 +466,7 @@ class Postfitplotter():
 
         pad1.Draw()
         pad1.cd()	 
+        outfile = ROOT.TFile.Open(self.options.output+"Histos"+self.options.label+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root","RECREATE");
     
         histos[0].SetMinimum(ymin)
         histos[0].SetMaximum(ymax) 
@@ -538,7 +539,7 @@ class Postfitplotter():
             #hsig.SetTitle("category  "+self.options.channel)
             hsig.Draw("HISTsame")
             #leg.AddEntry(hsig,"Signal pdf","F")
-            
+            hsig.Write(self.signalName)
         #errors[0].Draw("E5same")
         if errors!=None:
             if axis=="z":
@@ -560,24 +561,38 @@ class Postfitplotter():
         nevents["data"]=hdata.Integral()
         if pseudo == False:
             leg.AddEntry(hdata,"Data","ep")
-        else: leg.AddEntry(hdata,"Simulation","ep")
-        leg.AddEntry(histos[0],"Signal+background fit","l")
+            hdata.Write("Data")
+        else:
+            leg.AddEntry(hdata,"Simulation","ep")
+            hdata.Write("Simulation")
+        #leg.AddEntry(histos[0],"Signal+background fit","l")
+        leg.AddEntry(histos[0],"Background fit","l")
+        histos[0].Write("BackgroundFit")
         if errors!=None:
             leg.AddEntry(errors[0],"#pm 1#sigma unc.","f")
         if len(histos)>1:    
             leg.AddEntry(histos[1],"W+jets","l")  ; print "Wjets ", histos[1].Integral(); nevents["Wjets"] = histos[1].Integral()
+            histos[1].Write("Wjets")
             leg.AddEntry(histos[2],"Z+jets","l")  ; print "Zjets ", histos[2].Integral(); nevents["Zjets"] = histos[2].Integral()
+            histos[2].Write("Zjets")
         if len(histos)>2:
             if self.options.addTop: leg.AddEntry(histos[3],"t#bar{t}","l"); print "all ttbar ", histos[3].Integral() ; nevents["TTbarall"] = histos[3].Integral()
+            histos[3].Write("TTbarall")
             if len(histos)>4:
                 if self.options.addTop: leg.AddEntry(histos[4],"res Top","l") ; print "res top ", histos[4].Integral(); nevents["resT"] = histos[4].Integral()
+                histos[4].Write("TTbar_2resT")
                 if self.options.addTop: leg.AddEntry(histos[5],"res W","l") ; print "res W  ", histos[5].Integral() ; nevents["resW"] = histos[5].Integral()
+                histos[5].Write("TTbar_2resW")
                 if self.options.addTop: leg.AddEntry(histos[6],"nonres Top","l") ; print "nonres top ", histos[6].Integral() ; nevents["nonresT"] = histos[6].Integral()
+                histos[6].Write("TTbar_nonresonant")
                 if self.options.addTop: leg.AddEntry(histos[7],"nonres Top + res Top","l") ; print "resT nonres T ", histos[7].Integral() ; nevents["resTnonresT"] = histos[7].Integral()
+                histos[7].Write("TTbar_resTnonresT")
                 if self.options.addTop: leg.AddEntry(histos[8],"nonres Top + res W","l"); print "res W nonresT ", histos[8].Integral(); nevents["resWnonresT"] = histos[8].Integral()
+                histos[8].Write("TTbar_resWnonresT")
                 if self.options.addTop: leg.AddEntry(histos[9],"res T + res W","l") ; print "resW resT ", histos[9].Integral(); nevents["resTresW"] = histos[9].Integral()
-                #if self.options.addTop: leg.AddEntry(histos[10],"res W, res T","l")
+                histos[9].Write("TTbar_resTresW")
         
+        outfile.Close()
         text = "G_{bulk} (%.1f TeV) #rightarrow WW (#times %i)"%(self.options.signalMass/1000.,scaling)
         if (self.options.signalMass%1000.)==0:
             text = "G_{bulk} (%i TeV) #rightarrow WW (#times %i)"%(self.options.signalMass/1000.,scaling) 
