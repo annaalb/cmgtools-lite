@@ -164,15 +164,17 @@ def selectSignalTree(cs,sample):
     return tmpname
 
 
-def calculateSFUnc(self,event,ctx,year,jet,SF,eff_vtag=[1,1],eff_htag=[1,1],mistag_top=[1,1],TTruth1=0,TTruth2=0,tag1="",tag2=""):
+def calculateSFUnc(self,event,ctx,year,jet,SF,eff_vtag=[1,1],eff_htag=[1,1],mistag_top=[1,1],TTruth1=0,TTruth2=0,HTruth1=0,HTruth2=0,tag1="",tag2=""):
+
     VTruth = event.jj_l1_mergedVTruth
-    HTruth = event.jj_l1_mergedHTruth
+    HTruth = HTruth1
     ZbbTruth = event.jj_l1_mergedZbbTruth
     TTruth = TTruth1
     jetTag = tag1
+
     if jet == 2:
         VTruth = event.jj_l2_mergedVTruth
-        HTruth = event.jj_l2_mergedHTruth
+        HTruth = HTruth2
         ZbbTruth = event.jj_l2_mergedZbbTruth
         TTruth = TTruth2
         jetTag = tag2
@@ -229,20 +231,20 @@ def calculateSFUnc(self,event,ctx,year,jet,SF,eff_vtag=[1,1],eff_htag=[1,1],mist
      
     return eff_vtag,eff_htag,mistag_top
 
-def calculateSF(self,event,ctx,year,jet,TTruth1=0,TTruth2=0,tag1="",tag2=""):
+def calculateSF(self,event,ctx,year,jet,TTruth1=0,TTruth2=0,HTruth1=0,HTruth2=0,tag1="",tag2=""):
 
     SF = 1.0
     SFW = 1.0
     SFH =1.0
     VTruth = event.jj_l1_mergedVTruth
-    HTruth = event.jj_l1_mergedHTruth
+    HTruth = HTruth1
     ZbbTruth = event.jj_l1_mergedZbbTruth
     TTruth = TTruth1
     jetTag = tag1
     pt = event.jj_l1_pt
     if jet == 2:
         VTruth = event.jj_l2_mergedVTruth
-        HTruth = event.jj_l2_mergedHTruth
+        HTruth = HTruth2
         ZbbTruth = event.jj_l2_mergedZbbTruth
         TTruth = TTruth2
         jetTag = tag2
@@ -307,9 +309,21 @@ class myTree:
     jj_l1_mergedVTruth           = rootint()
     jj_l2_mergedVTruth           = rootint()
     
-    jj_l1_mergedHTruth           = rootint()
-    jj_l2_mergedHTruth           = rootint()
+    jj_l1_mergedHbbTruth           = rootint()
+    jj_l2_mergedHbbTruth           = rootint()
     
+    jj_l1_mergedHccTruth           = rootint()
+    jj_l2_mergedHccTruth           = rootint()
+
+    jj_l1_mergedHggTruth           = rootint()
+    jj_l2_mergedHggTruth           = rootint()
+
+    jj_l1_mergedHVV4qTruth           = rootint()
+    jj_l2_mergedHVV4qTruth           = rootint()
+
+    jj_l1_mergedHVVlepTruth           = rootint()
+    jj_l2_mergedHVVlepTruth           = rootint()
+
     jj_l1_mergedTopTruth           = rootint()
     jj_l2_mergedTopTruth           = rootint()
 
@@ -353,8 +367,16 @@ class myTree:
    
         self.newTree.Branch("jj_l1_mergedVTruth",self.jj_l1_mergedVTruth,"jj_l1_mergedVTruth/i")
         self.newTree.Branch("jj_l2_mergedVTruth",self.jj_l2_mergedVTruth,"jj_l2_mergedVTruth/i")
-        self.newTree.Branch("jj_l1_mergedHTruth",self.jj_l1_mergedHTruth,"jj_l1_mergedHTruth/i")
-        self.newTree.Branch("jj_l2_mergedHTruth",self.jj_l2_mergedHTruth,"jj_l2_mergedHTruth/i")
+        self.newTree.Branch("jj_l1_mergedHbbTruth",self.jj_l1_mergedHbbTruth,"jj_l1_mergedHbbTruth/i")
+        self.newTree.Branch("jj_l2_mergedHbbTruth",self.jj_l2_mergedHbbTruth,"jj_l2_mergedHbbTruth/i")
+        self.newTree.Branch("jj_l1_mergedHccTruth",self.jj_l1_mergedHccTruth,"jj_l1_mergedHccTruth/i")
+        self.newTree.Branch("jj_l2_mergedHccTruth",self.jj_l2_mergedHccTruth,"jj_l2_mergedHccTruth/i")
+        self.newTree.Branch("jj_l1_mergedHggTruth",self.jj_l1_mergedHggTruth,"jj_l1_mergedHggTruth/i")
+        self.newTree.Branch("jj_l2_mergedHggTruth",self.jj_l2_mergedHggTruth,"jj_l2_mergedHggTruth/i")
+        self.newTree.Branch("jj_l1_mergedHVV4qTruth",self.jj_l1_mergedHVV4qTruth,"jj_l1_mergedHVV4qTruth/i")
+        self.newTree.Branch("jj_l2_mergedHVV4qTruth",self.jj_l2_mergedHVV4qTruth,"jj_l2_mergedHVV4qTruth/i")
+        self.newTree.Branch("jj_l1_mergedHVVlepTruth",self.jj_l1_mergedHVVlepTruth,"jj_l1_mergedHVVlepTruth/i")
+        self.newTree.Branch("jj_l2_mergedHVVlepTruth",self.jj_l2_mergedHVVlepTruth,"jj_l2_mergedHVVlepTruth/i")
         self.newTree.Branch("jj_l1_mergedTopTruth",self.jj_l1_mergedTopTruth,"jj_l1_mergedTopTruth/i")
         self.newTree.Branch("jj_l2_mergedTopTruth",self.jj_l2_mergedTopTruth,"jj_l2_mergedTopTruth/i")
         self.newTree.Branch("jj_l1_mergedZbbTruth",self.jj_l1_mergedZbbTruth,"jj_l1_mergedZbbTruth/i")
@@ -372,7 +394,7 @@ class myTree:
         self.newTree.Branch("jj_l2_pt",self.jj_l2_pt,"jj_l2_pt/F")
 
 
-    def setOutputTreeBranchValues(self,cat,ctx,tmpname,year):
+    def setOutputTreeBranchValues(self,cat,ctx,tmpname,year,LO):
         print " setOutputTreeBranchValues ",cat
         rf = ROOT.TFile(tmpname+'.root','READ')
         cattree = rf.Get(cat)
@@ -433,6 +455,7 @@ class myTree:
 	    
             self.puWeight.rf       = event.puWeight 
             self.genWeight.rf      = event.genWeight
+            if LO == True: self.genWeight.rf      = event.genWeight_LO
             self.xsec.rf           = event.xsec     
             self.evt.rl            = event.evt                  
             self.lumi.ri           = event.lumi
@@ -440,8 +463,67 @@ class myTree:
             
             self.jj_l1_mergedVTruth.ri = event.jj_l1_mergedVTruth
             self.jj_l2_mergedVTruth.ri = event.jj_l2_mergedVTruth
-            self.jj_l1_mergedHTruth.ri = event.jj_l1_mergedHTruth
-            self.jj_l2_mergedHTruth.ri = event.jj_l2_mergedHTruth
+            try:
+                self.jj_l1_mergedHbbTruth.ri = event.jj_l1_mergedHTruth
+                self.jj_l2_mergedHbbTruth.ri = event.jj_l2_mergedHTruth
+                Hbb1=event.jj_l1_mergedHTruth
+                Hbb2=event.jj_l2_mergedHTruth
+            except:
+                self.jj_l1_mergedHbbTruth.ri = 0
+                self.jj_l2_mergedHbbTruth.ri = 0
+                Hbb1=0
+                Hbb2=0
+            try:
+                self.jj_l1_mergedHbbTruth.ri = event.jj_l1_mergedHbbTruth
+                self.jj_l2_mergedHbbTruth.ri = event.jj_l2_mergedHbbTruth
+                Hbb1=event.jj_l1_mergedHbbTruth
+                Hbb2=event.jj_l2_mergedHbbTruth
+            except:
+                self.jj_l1_mergedHbbTruth.ri = 0
+                self.jj_l2_mergedHbbTruth.ri = 0
+                Hbb1=0
+                Hbb2=0
+            try:
+                self.jj_l1_mergedHccTruth.ri = event.jj_l1_mergedHccTruth
+                self.jj_l2_mergedHccTruth.ri = event.jj_l2_mergedHccTruth
+                Hcc1=event.jj_l1_mergedHccTruth
+                Hcc2=event.jj_l2_mergedHccTruth
+            except:
+                self.jj_l1_mergedHccTruth.ri = 0
+                self.jj_l2_mergedHccTruth.ri = 0
+                Hcc1=0
+                Hcc2=0
+            try:
+                self.jj_l1_mergedHggTruth.ri = event.jj_l1_mergedHggTruth
+                self.jj_l2_mergedHggTruth.ri = event.jj_l2_mergedHggTruth
+                Hgg1=event.jj_l1_mergedHggTruth
+                Hgg2=event.jj_l2_mergedHggTruth
+            except:
+                self.jj_l1_mergedHggTruth.ri = 0
+                self.jj_l2_mergedHggTruth.ri = 0
+                Hgg1=0
+                Hgg2=0
+            try:
+                self.jj_l1_mergedHVV4qTruth.ri = event.jj_l1_mergedHVVTruth_4q
+                self.jj_l2_mergedHVV4qTruth.ri = event.jj_l2_mergedHVVTruth_4q
+                HVV4q1=event.jj_l1_mergedHVVTruth_4q
+                HVV4q2=event.jj_l2_mergedHVVTruth_4q
+            except:
+                self.jj_l1_mergedHVV4qTruth.ri = 0
+                self.jj_l2_mergedHVV4qTruth.ri = 0
+                HVV4q1=0
+                HVV4q2=0
+            try:
+                self.jj_l1_mergedHVVlepTruth.ri = event.jj_l1_mergedHVVTruth_lept
+                self.jj_l2_mergedHVVlepTruth.ri = event.jj_l2_mergedHVVTruth_lept
+                HVVlep1=event.jj_l1_mergedHVVTruth_lept
+                HVVlep2=event.jj_l2_mergedHVVTruth_lept
+            except:
+                self.jj_l1_mergedHVVlepTruth.ri = 0
+                self.jj_l2_mergedHVVlepTruth.ri = 0
+                HVVlep1=0
+                HVVlep2=0
+
             try:
                 self.jj_l1_mergedTopTruth.ri = event.jj_l1_mergedTopTruth
                 self.jj_l2_mergedTopTruth.ri = event.jj_l2_mergedTopTruth
@@ -454,6 +536,13 @@ class myTree:
                 top2=0
             #print " event top ",event.jj_l1_mergedTopTruth,event.jj_l2_mergedTopTruth
             #print " self top ",self.jj_l1_mergedTopTruth.ri,self.jj_l2_mergedTopTruth.ri
+            HTruth1 = 0
+            HTruth2 = 0
+            if self.jj_l1_mergedHbbTruth.ri == 1 or self.jj_l1_mergedHccTruth.ri == 1  or self.jj_l1_mergedHggTruth.ri == 1 or self.jj_l1_mergedHVV4qTruth.ri == 1 or self.jj_l1_mergedHVVlepTruth.ri ==1:
+                HTruth1 = 1
+            if self.jj_l2_mergedHbbTruth.ri == 1 or self.jj_l2_mergedHccTruth.ri == 1  or self.jj_l2_mergedHggTruth.ri == 1 or self.jj_l2_mergedHVV4qTruth.ri == 1 or self.jj_l2_mergedHVVlepTruth.ri ==1:
+                HTruth2 = 1
+
 
             self.jj_l1_mergedZbbTruth.ri = event.jj_l1_mergedZbbTruth
             self.jj_l2_mergedZbbTruth.ri = event.jj_l2_mergedZbbTruth
@@ -494,9 +583,9 @@ class myTree:
             CMS_eff_htag_sf = [1.0,1.0]
             CMS_mistag_top_sf = [1.0,1.0]
             jet = 1
-            SF1,SFW1,SFH1 = calculateSF(self,event,ctx,year,jet,top1,top2,tag1,tag2)
+            SF1,SFW1,SFH1 = calculateSF(self,event,ctx,year,jet,top1,top2,HTruth1,HTruth2,tag1,tag2)
             jet = 2
-            SF2,SFW2,SFH2 = calculateSF(self,event,ctx,year,jet,top1,top2,tag1,tag2)
+            SF2,SFW2,SFH2 = calculateSF(self,event,ctx,year,jet,top1,top2,HTruth1,HTruth2,tag1,tag2)
             SF = SF1*SF2
             #pt dependent part
             # I calculate 2 additional SF to take into account the impact the tagger pt dependence separately for each tagger
@@ -505,14 +594,14 @@ class myTree:
             Wsfpt= SFW1*SFW2
 	    if (tag1.find('Htag') != tag2.find('Htag')) or (tag1.find('Vtag') != tag2.find('Vtag')):
 	     jet = 1
-             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,SF2,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,tag1,tag2)
+             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,SF2,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
 	     jet = 2
-             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,SF1,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,tag1,tag2)
+             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,SF1,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
 	    else:
 	     jet = 1
-             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,1.0,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,tag1,tag2)
+             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,1.0,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
 	     jet = 2
-             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,1.0,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,tag1,tag2)
+             CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,1.0,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
             if CMS_eff_htag_sf[0] == 1 and CMS_eff_htag_sf[1] == 1: CMS_eff_htag_sf = [SF,SF]
 	    if CMS_eff_vtag_sf[0] == 1 and CMS_eff_vtag_sf[1] == 1: CMS_eff_vtag_sf = [SF,SF]
 	    if CMS_mistag_top_sf[0] == 1 and CMS_mistag_top_sf[1] == 1: CMS_mistag_top_sf = [SF,SF]
@@ -587,20 +676,22 @@ if __name__=='__main__':
         outtreeAll = myTree(sample,outfile)
         tmpfilename = selectSignalTree(ctx.cuts,samplelist[sample])
         print " tmpfilename ",tmpfilename
-        outtree.setOutputTreeBranchValues('VBF_VH_HPHP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VBF_VV_HPHP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VBF_VH_LPHP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VBF_VH_HPLP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VBF_VV_HPLP',ctx,tmpfilename,filePeriod)
+        LO = False
+        if (filePeriod == "2017" or filePeriod == "2018") and (sample.find("QCD")==-1 or sample.find("Jets")==-1):  LO = True
+        outtree.setOutputTreeBranchValues('VBF_VH_HPHP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VBF_VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VBF_VH_LPHP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VBF_VH_HPLP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VBF_VV_HPLP',ctx,tmpfilename,filePeriod,LO)
 
-        outtree.setOutputTreeBranchValues('VH_HPHP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VV_HPHP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VH_LPHP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VH_HPLP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VV_HPLP',ctx,tmpfilename,filePeriod)
-        outtree.setOutputTreeBranchValues('VV_NPHP',ctx,tmpfilename,filePeriod)
+        outtree.setOutputTreeBranchValues('VH_HPHP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VH_LPHP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VH_HPLP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VV_HPLP',ctx,tmpfilename,filePeriod,LO)
+        outtree.setOutputTreeBranchValues('VV_NPHP',ctx,tmpfilename,filePeriod,LO)
         outtree.write('signalregion')
-        outtreeAll.setOutputTreeBranchValues('all',ctx,tmpfilename,filePeriod)
+        outtreeAll.setOutputTreeBranchValues('all',ctx,tmpfilename,filePeriod,LO)
         outfile.cd()
         outtreeAll.write('all')
         
