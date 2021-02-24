@@ -258,7 +258,9 @@ def getPlotters(samples_in):
       plotters_.append(TreePlotter(name+'.root','AnalysisTree'))
       plotters_[-1].setupFromFile(name+'.pck')
       plotters_[-1].addCorrectionFactor('xsec','tree')
-      plotters_[-1].addCorrectionFactor('genWeight','tree')
+      genweight='genWeight'
+      if (year == "2017" or year == "2018") and name.find("TT") !=-1:  genweight='genWeight_LO'
+      plotters_[-1].addCorrectionFactor(genweight,'tree')
       plotters_[-1].addCorrectionFactor('puWeight','tree')
       plotters_[-1].addCorrectionFactor(lumi,'flat')
       print "applying top pt reweight"
