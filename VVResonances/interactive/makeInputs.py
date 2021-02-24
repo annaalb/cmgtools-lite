@@ -45,7 +45,8 @@ jsonfile="init_VV_VH.json"
 ctx  = cuts.cuts(jsonfile,options.period,options.sorting+"dijetbins",widerMVV)
 if options.binning==False: ctx  = cuts.cuts(jsonfile,int(options.period),options.sorting,widerMVV)
 
-basedir="deepAK8V2/"
+basedir="./"
+#basedir="deepAK8V2/"
 print "options.period  ",options.period  
 period = options.period
 samples=""
@@ -94,10 +95,14 @@ ZprimeWWTemplate= "ZprimeToWW_"
 VBFZprimeWWTemplate= "VBF_ZprimeToWW_"
 ZprimeZHTemplate="ZprimeToZhToZhadhbb_"
 VBFZprimeZHTemplate="VBF_ZprimeToZhToZhadhbb_"
+ZprimeZHincTemplate="ZprimeToZhToZhadhinc_"
+VBFZprimeZHincTemplate="VBF_ZprimeToZhToZhadhinc_"
 WprimeWZTemplate= "WprimeToWZToWhadZhad_"
 VBFWprimeWZTemplate= "VBF_WprimeToWZ_"
 WprimeWHTemplate="WprimeToWhToWhadhbb_" #"WprimeToWhToWhadhbb_"
 VBFWprimeWHTemplate="VBF_WprimeToWhToWhadhbb_" #"WprimeToWhToWhadhbb_"
+WprimeWHincTemplate="WprimeToWhToWhadhinc_" #"WprimeToWhToWhadhbb_"
+VBFWprimeWHincTemplate="VBF_WprimeToWhToWhadhinc_" #"WprimeToWhToWhadhbb_"
 RadionWWTemplate="RadionToWW_"
 VBFRadionWWTemplate="VBF_RadionToWW_"
 RadionZZTemplate="RadionToZZ_"
@@ -108,9 +113,11 @@ BRZZ=1.*0.001*0.6991*0.6991
 BRZZincl=1.*0.001
 BRWW=1.*0.001 #ZprimeWW and GBulkWW are inclusive
 BRZH=1.*0.001*0.6991*0.584
+BRZHinc=1.*0.001*0.6991
 BRWZ=1.*0.001*0.6991*0.676
 BRWZincl=1.*0.001
 BRWH=1.*0.001*0.676*0.584
+BRWHinc=1.*0.001*0.676
 
 #data samples
 dataTemplate="JetHT"
@@ -136,14 +143,22 @@ f = AllFunctions(parameters)
 
 #parser.add_option("--signal",dest="signal",default="BGWW",help="which signal do you want to run? options are BGWW, BGZZ, WprimeWZ, ZprimeWW, ZprimeZH")
 if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
-    if options.signal.find("ZprimeZH")!=-1 and not 'VBF' in options.signal:
+    if options.signal.find("ZprimeZH")!=-1 and not 'VBF' in options.signal and not 'inc' in options.signal:
         signal_inuse="ZprimeZH"
         signaltemplate_inuse=ZprimeZHTemplate
         xsec_inuse=BRZH
-    elif options.signal.find("VBFZprimeZH")!=-1:
+    elif options.signal.find("VBFZprimeZH")!=-1 and not 'inc' in options.signal:
         signal_inuse="VBF_ZprimeZH"
         signaltemplate_inuse=VBFZprimeZHTemplate
         xsec_inuse=BRZH
+    elif options.signal.find("ZprimeZHinc")!=-1 and not 'VBF' in options.signal:
+        signal_inuse="ZprimeZHinc"
+        signaltemplate_inuse=ZprimeZHincTemplate
+        xsec_inuse=BRZHinc
+    elif options.signal.find("VBFZprimeZHinc")!=-1:
+        signal_inuse="VBF_ZprimeZHinc"
+        signaltemplate_inuse=VBFZprimeZHincTemplate
+        xsec_inuse=BRZHinc
     elif options.signal.find("BGWW")!=-1 and not 'VBF' in options.signal:
         signal_inuse="BulkGWW"
         signaltemplate_inuse=BulkGravWWTemplate
@@ -176,14 +191,22 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
         signal_inuse="VBF_WprimeWZ"
         signaltemplate_inuse=VBFWprimeWZTemplate
         xsec_inuse=BRWZincl
-    elif options.signal.find("WprimeWH")!=-1 and not 'VBF' in options.signal:
+    elif options.signal.find("WprimeWH")!=-1 and not 'VBF' in options.signal and not 'inc' in options.signal:
         signal_inuse="WprimeWH"
         signaltemplate_inuse=WprimeWHTemplate
         xsec_inuse=BRWH
-    elif options.signal.find("VBFWprimeWH")!=-1:
+    elif options.signal.find("VBFWprimeWH")!=-1 and not 'inc' in options.signal:
         signal_inuse="VBF_WprimeWH"
         signaltemplate_inuse=VBFWprimeWHTemplate
         xsec_inuse=BRWH
+    elif options.signal.find("WprimeWHinc")!=-1 and not 'VBF' in options.signal:
+        signal_inuse="WprimeWHinc"
+        signaltemplate_inuse=WprimeWHincTemplate
+        xsec_inuse=BRWHinc
+    elif options.signal.find("VBFWprimeWHinc")!=-1:
+        signal_inuse="VBF_WprimeWHinc"
+        signaltemplate_inuse=VBFWprimeWHincTemplate
+        xsec_inuse=BRWHinc
     elif options.signal.find("RWW")!=-1 and not 'VBF' in options.signal:
         signal_inuse="RadionWW"
         signaltemplate_inuse=RadionWWTemplate
@@ -217,7 +240,11 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
         if sorting == "random":
             if signal_inuse.find("H")!=-1: 
                 f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random', fixParsSig[signal_inuse.replace('VBF_','')],"jj_random_mergedVTruth==1")
-                f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')],"jj_random_mergedHTruth==1")
+                if signal_inuse.find("inc")==-1:
+                    f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')],"jj_random_mergedHbbTruth==1")
+                else:
+                    f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')],"jj_random_mergedHbbTruth==1||jj_random_mergedHccTruth==1||jj_random_mergedHggTruth==1||jj_random_mergedHVVTruth_4q==1||jj_random_mergedHVVTruth_lept==1")
+
             else:
                 f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')]) 
         else:
