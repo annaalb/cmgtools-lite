@@ -245,187 +245,139 @@ def doTagging(signal,legend,year,colorindex,inputdir,decay):
     c1.SaveAs(name+".pdf" )
     c1.SaveAs(name+".C"   )
     c1.SaveAs(name+".root")
-    
-    
 
 
+def doDecay(signal,legend,year,colorindex,inputdir):
+    marker=[20,22,24,21,25,22,26,23,32]
+    color=[1,425,12,2,4,7]
+    decays = ["mergedHbbTruth","mergedHccTruth","mergedHggTruth","mergedHVV4qTruth","mergedHVVlepTruth"]
+    n = len(massPoints)
+    gr = {}
+    j=0
+    data = [] 
+    c1,leg,pt = getCanvasPaper("c1")
+    c1.Draw()
 
-
-def doMVV(signal,titles,years):
-
-    vars = ["MEAN","SIGMA","ALPHA1","ALPHA2","N1","N2"]
-    ROOT.gStyle.SetOptFit(0)
-
-    files=[]
-    for year in years :
-      print " getting year ",year
-      files.append(ROOT.TFile("results_"+year+"/debug_JJ_"+signal+"_"+year+"_MVV.json.root","READ"))
-
-    for var in vars:
-      fits=[]
-      datas=[]
-
-      c,l,pt = getCanvasPaper("c")
-      l2 = getLegend(0.7788945,0.1783217,0.9974874,0.2482517)
-      ROOT.gStyle.SetOptStat(0)
-      ROOT.gStyle.SetOptTitle(0)
-
-      for i,f in enumerate(files):
-        g = f.Get(var)
-        fun = f.Get(var+"_func")
-        beautify(fun ,rt.TColor.GetColor(colorsyears[years[i]]),2,markeryears[years[i]])
-        beautify(g ,rt.TColor.GetColor(colorsyears[years[i]]),2,markeryears[years[i]])
-        #fun.SetLineColor(0)
-        #fun.SetLineWidth(0)
-
-        datas.append(g)
-        fits.append(fun)
-        l.AddEntry(fun,years[i],"LP")
+    for decayleaf in decays:
+        print " working on ",decayleaf
         
-        datas[0].GetXaxis().SetTitle("M_{X} [GeV]")
-        datas[0].GetYaxis().SetTitle(var+" [GeV]")
-        datas[0].GetYaxis().SetNdivisions(4,5,0)
-        datas[0].GetXaxis().SetNdivisions(9,2,0)
-        datas[0].GetYaxis().SetTitleOffset(0.97)
-        datas[0].GetYaxis().SetMaxDigits(2)
-        datas[0].GetXaxis().SetTitleOffset(0.94)
-        datas[0].GetXaxis().SetLimits(1126, 8500.)
-        datas[0].GetYaxis().SetRangeUser(-2., 3.)
-        if var.find("ALPHA1")!=-1: datas[0].GetYaxis().SetRangeUser(0., 4.)
-        if var.find("ALPHA2")!=-1: datas[0].GetYaxis().SetRangeUser(0., 20.)
-        if var.find("SIGMA")!=-1:  datas[0].GetYaxis().SetRangeUser(0., 400.)
-        if var.find("MEAN")!=-1:   datas[0].GetYaxis().SetRangeUser(700., 8000)
-        if var.find("N1")!=-1:     datas[0].GetYaxis().SetRangeUser(0., 150.)
-        if var.find("N2")!=-1:     datas[0].GetYaxis().SetRangeUser(-10., 150.)
-        datas[0].Draw("CA")
-        print datas[0].Eval(1200.)
-        c.Update()
-      for i,gg in enumerate(fits):
-        gg.Draw("Lsame")
-        datas[i].Draw("Psame")
-      l.SetNColumns(len(years)/2)
-      l.Draw("same")
+        #gr[decayleaf]
+        markerd={}
+        colord={}
+        mass, perc = array( 'd' ), array( 'd' )
+        for m in massPoints : 
+            mass.append(m)
+            filename= inputdir+"/"+signal+"_narrow_"+str(m)+"_"+year+".root"
+            print " filename ",filename
+            r_file = ROOT.TFile(filename,"READ")
+            tree = r_file.Get("signalregion")
+            t1 = ROOT.gROOT.FindObject('t1')
+            if t1: t1.Delete()
+            t2 = ROOT.gROOT.FindObject('t2')
+            if t2: t2.Delete()
+            h1 = ROOT.gROOT.FindObject('h1')
+            if h1: h1.Delete()
+            h2 = ROOT.gROOT.FindObject('h2')
+            if h2: h2.Delete()
+            print " * ",decayleaf
+            tot = ROOT.TH1F("tot","tot",1,0,1)
+            tree.Draw("evt>>t1(1,0,1)","jj_l1_mergedHbbTruth==1||jj_l1_mergedHccTruth==1||jj_l1_mergedHggTruth==1||jj_l1_mergedHVV4qTruth==1||jj_l1_mergedHVVlepTruth==1","goff")
+            t1 = ROOT.gROOT.FindObject('t1')
+            tree.Draw("evt>>t2(1,0,1)","jj_l2_mergedHbbTruth==1||jj_l2_mergedHccTruth==1||jj_l2_mergedHggTruth==1||jj_l2_mergedHVV4qTruth==1||jj_l2_mergedHVVlepTruth==1","goff")  
+            t2 = ROOT.gROOT.FindObject('t2')
+            if t1:
+                tot.Add(t1)
+            if t2:
+                tot.Add(t2)
+            print " tot ",tot.GetEntries()
+            total = tot.GetEntries()
+            if tot.GetEntries() == 0: 
+                total = -1
+            h = ROOT.TH1F("h","h",1,0,1)
+            tree.Draw("evt>>h1(1,0,1)","jj_l1_"+decayleaf+"==1","goff")
+            h1 = ROOT.gROOT.FindObject('h1')
+            tree.Draw("evt>>h2(1,0,1)","jj_l2_"+decayleaf+"==1","goff")
+            h2 = ROOT.gROOT.FindObject('h2')
+            print h1.GetEntries()
+            if h1:
+                h.Add(h1)
+            if h2:
+                h.Add(h2)
+            print float(h.GetEntries())/float(total)*100
+            perc.append(float(h.GetEntries())/float(total)*100)
+        graph = ROOT.TGraph( n, mass, perc )
+        gr[decayleaf]= graph
 
-      pt2 = ROOT.TPaveText(0.7,0.87,0.8,0.9,"NDC")
-      pt2.SetTextFont(42)
-      pt2.SetTextSize(0.04)
-      pt2.SetTextAlign(12)
-      pt2.SetFillColor(0)
-      pt2.SetBorderSize(0)
-      pt2.SetFillStyle(0)
-      pt2.AddText(titles)
-      pt2.Draw()
+        gr[decayleaf].SetLineColor(color[j])
+        gr[decayleaf].SetLineStyle(2)
+        gr[decayleaf].SetLineWidth(2)
+        gr[decayleaf].SetMarkerColor(color[j])
+        gr[decayleaf].SetMarkerStyle(marker[j])
+        
+
+        gr[decayleaf].GetYaxis().SetTitle("[%]")
+        gr[decayleaf].GetXaxis().SetTitle("m_{X} [GeV]")
+        gr[decayleaf].GetYaxis().SetTitleOffset(1.3)
+        gr[decayleaf].GetYaxis().SetNdivisions(4,5,0)
+        gr[decayleaf].GetXaxis().SetNdivisions(3,5,0)
+        gr[decayleaf].SetMinimum(0.)
+        gr[decayleaf].SetMaximum(100.)
+        gr[decayleaf].GetXaxis().SetLimits(1000.,8500.)
+        gr[decayleaf].GetXaxis().SetTitleSize(0.055)
+        gr[decayleaf].GetYaxis().SetTitleSize(0.055)
+        gr[decayleaf].GetYaxis().SetLabelSize(0.04)
+        gr[decayleaf].GetXaxis().SetLabelSize(0.04)
+        data.append(gr[decayleaf])        
+        leg.AddEntry(gr[decayleaf],decayleaf, "LP")
+        j=j+1
 
 
+    data[0].Draw("AC")
+    for i,(g) in enumerate(data):
+        print " print ",i,g
+        #g.GetXaxis().SetRangeUser(1000.,8500.)
+        g.Draw("PLsame")
 
-      #cmslabel_sim_prelim(c,'sim',11)
-      c.Update()
-      name = path+"Signal_mVV_allyears_"+var+"_"+signal+"_"+options.name
-      c.SaveAs(name+".png")
-      c.SaveAs(name+".pdf")
-      c.SaveAs(name+".C")
+        #gr[decayleaf][year].Draw("APL")
+        #gr[decayleaf][year].Draw("PL")
+          
+        
+    leg.Draw("same")
+
+    
+    pt2 = ROOT.TPaveText(0.7,0.87,0.8,0.9,"NDC")
+    pt2.SetTextFont(42)
+    pt2.SetTextSize(0.04)
+    pt2.SetTextAlign(12)
+    pt2.SetFillColor(0)
+    pt2.SetBorderSize(0)
+    pt2.SetFillStyle(0)
+    pt2.AddText(legend)
+    pt2.Draw()
+    
+
+    pt3 = ROOT.TPaveText(0.7,0.75,0.8,0.87,"NDC")
+    pt3.SetTextFont(42)
+    pt3.SetTextSize(0.04)
+    pt3.SetTextAlign(12)
+    pt3.SetFillColor(0)
+    pt3.SetBorderSize(0)
+    pt3.SetFillStyle(0)
+    pt3.AddText("jet1 == H or jet 2 == H")
+    pt3.Draw()
+    
       
-
-
-def doJetMass(leg,signal,titles,years):
-    print signal
-    ROOT.gStyle.SetOptFit(0)
-
-    files=[]
-    filesHjet=[]
-
-    for i,year in enumerate(years):
-        files.append(ROOT.TFile("results_"+year+"/debug_JJ_"+signal+"_"+year+"_MJ"+leg+"_NP.json.root","READ"))
-        filesHjet.append(None)
-        if files[-1].IsZombie()==1:
-            files[-1] =(ROOT.TFile("results_"+year+"/debug_JJ_Vjet_"+signal+"_"+year+"_MJ"+leg+"_NP.json.root","READ"))
-            filesHjet[-1] =(ROOT.TFile("results_"+year+"/debug_JJ_Hjet_"+signal+"_"+year+"_MJ"+leg+"_NP.json.root","READ"))
-            
-
-    vars = ["mean","sigma","alpha","n","alpha2","n2"]
-    for var in vars:
-
-       fits =[]
-       fitsHjet=[]
-       datas=[]
-       datasHjet=[]
-
-       c,l,pt = getCanvasPaper("c")
-
-       ROOT.gStyle.SetOptStat(0)
-       ROOT.gStyle.SetOptTitle(0)
-       #title = "Jet mass width "
-       #if var == "mean": title="Jet mass mean"
-       for i,(f,fH) in enumerate(zip(files,filesHjet)):
-           print fH
-           print f
-
-           if fH ==None:
-                gH = f.Get(var)
-                funH = f.Get(var+"_func")
-           else:
-                print fH.GetName()
-                gH = fH.Get(var+"H")
-                funH = fH.Get(var+"H_func")
-           g = f.Get(var)
-           fun = f.Get(var+"_func")
-
-           beautify(fun  ,rt.TColor.GetColor(colorsyears[years[i]]),2,markeryears[years[i]])
-           beautify(funH ,rt.TColor.GetColor(colorsyears[years[i]]),1,markeryears[years[i]])
-           beautify(g ,rt.TColor.GetColor(colorsyears[years[i]]),2,markeryears[years[i]])
-           beautify(gH ,rt.TColor.GetColor(colorsyears[years[i]]),1,markeryears[years[i]])
-           datas.append(g)
-           datasHjet.append(gH)
-           fits.append(fun)
-           fitsHjet.append(funH)
-           l.AddEntry(funH,years[i],"LP")
-       print datasHjet
-
-       datas[0].GetXaxis().SetTitle("m_{X} [GeV]")
-       datas[0].GetYaxis().SetTitle(var)
-       datas[0].GetYaxis().SetNdivisions(4,5,0)
-       datas[0].GetXaxis().SetNdivisions(5,5,0)
-       datas[0].GetYaxis().SetTitleOffset(1.05)
-       datas[0].GetXaxis().SetTitleOffset(0.9)
-       datas[0].GetXaxis().SetRangeUser(1126, 5500.)
-       datas[0].GetXaxis().SetLabelSize(0.04)
-       datas[0].GetXaxis().SetTitleSize(0.06)
-       datas[0].GetYaxis().SetLabelSize(0.04)
-       datas[0].GetYaxis().SetTitleSize(0.06)
-       if var == "mean": datas[0].GetYaxis().SetRangeUser(75,150);
-       if var == "sigma": datas[0].GetYaxis().SetRangeUser(5,20.);
-       if var == "alpha": datas[0].GetYaxis().SetRangeUser(0,5); datas[0].GetYaxis().SetTitle("alpha")
-       if var == "n": datas[0].GetYaxis().SetRangeUser(0,250); datas[0].GetYaxis().SetTitle("n")
-       if var == "alpha2": datas[0].GetYaxis().SetRangeUser(0,5); datas[0].GetYaxis().SetTitle("alpha2")
-       if var == "n2": datas[0].GetYaxis().SetRangeUser(0,20); datas[0].GetYaxis().SetTitle("n2")
-       datas[0].Draw("AP")
-       for i,(g,gH) in enumerate(zip(datas,datasHjet)):
-           g.Draw("Psame")
-           gH.Draw("Psame")
-           fits[i].Draw("Csame")
-           fitsHjet[i].Draw("Csame")
-       datas[0].GetXaxis().SetLimits(1126, 8500.)
-       l.Draw("same")
-       pt2 = ROOT.TPaveText(0.7,0.87,0.8,0.9,"NDC")
-       pt2.SetTextFont(42)
-       pt2.SetTextSize(0.04)
-       pt2.SetTextAlign(12)
-       pt2.SetFillColor(0)
-       pt2.SetBorderSize(0)
-       pt2.SetFillStyle(0)
-       pt2.AddText(titles)
-       pt2.Draw()
+    name = path+"PercHinc_%s_%s_%s"  %(year,options.name,signal)
+    c1.SaveAs(name+".png")
+    c1.SaveAs(name+".pdf" )
+    c1.SaveAs(name+".C"   )
+    c1.SaveAs(name+".root")
+    
+    
 
 
 
 
-       #cmslabel_sim_prelim(c,'sim',11)
-
-       c.Update()
-       name = path+"Signal_mjet_Allyears_"+signal+"_"+var+"_"+options.name
-       c.SaveAs(name+".png")
-       c.SaveAs(name+".pdf")
-       c.SaveAs(name+".C")
 
                 
 if __name__ == '__main__':
@@ -442,5 +394,5 @@ if __name__ == '__main__':
       for j in range(len(decays)):
           for year in years:
               doTagging(signals[i],legs[i],year,i,inputdir,decays[j])
-
+              doDecay(signals[i],legs[i],year,i,inputdir)
   
