@@ -12,11 +12,11 @@ gROOT.SetBatch(True)
 
 path = sys.argv[1]
 cols = [46,30]
-colors = ["#4292c6","#41ab5d","#ef3b2c","#ffd300","#D02090","#fdae61","#abd9e9","#2c7bb6"]
+colors = ["#4292c6","#41ab5d","#ef3b2c","#ffd300","#D02090","#fdae61","#abd9e9","#492a60","#780000"]
 #mstyle = [8,24,22,26,32]
 #linestyle=[1,2,1,2,3]
-markerstyle = [1,4,8,10,20,25]
-linestyle = [1,2,3,4,5,6,7,8,9]
+markerstyle = [3,4,8,21,20,25,22,26]
+linestyle = [1,2,3,4,5,6,7,8,9,1,2]
 mstyle = [8,4]
 
 def beautify(h1,color,linestyle=1,markerstyle=8):
@@ -104,8 +104,8 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     filesHP=[]
   
     for i,s in enumerate(signals):
-        filesHP.append(TFile(directory+"JJ_"+s+"_"+category+"_yield.root","READ"))
-        print 'open file '+directory+"JJ_"+s+"_"+category+"_yield.root"
+        filesHP.append(TFile(directory+"JJ_"+s+"_Run2_"+category+"_yield.root","READ"))
+        print 'open file '+directory+"JJ_"+s+"_Run2_"+category+"_yield.root"
     
     for i,fHP in enumerate(filesHP):
         gHPHP = fHP.Get("yield")
@@ -143,8 +143,10 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     fitsHP[0].GetXaxis().SetNdivisions(5,5,0)
     fitsHP[0].GetYaxis().SetTitleOffset(1.15)
     fitsHP[0].GetXaxis().SetTitleOffset(0.9)
-    fitsHP[0].GetXaxis().SetRangeUser(1126, 6050.)
-    fitsHP[0].GetYaxis().SetRangeUser(0.0, ymaxrange[ky])
+    fitsHP[0].GetXaxis().SetRangeUser(1246, 6050.)
+    fitsHP[0].GetYaxis().SetRangeUser(0.0,0.3)
+    if "VBF" in category: fitsHP[0].GetYaxis().SetRangeUser(0.0,0.1)
+    #fitsHP[0].GetYaxis().SetRangeUser(0.0, ymaxrange[ky])
     #fitsHP[0].Draw("AC")
     c.Update()
     for i,(gHP) in enumerate(datasHP): 
@@ -160,9 +162,12 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     
     
     c.Update()
-    c.SaveAs(path+"signalEff"+prelim+"_"+category+".png")
-    c.SaveAs(path+"signalEff"+prelim+"_"+category+".pdf")
-    c.SaveAs(path+"signalEff"+prelim+"_"+category+".C")
+    vbfsig=""
+    if "VBF" in signals[0]: vbfsig="VBFsig"
+    outname=path+"signalEff"+vbfsig+prelim+"_"+category
+    c.SaveAs(outname+".png")
+    c.SaveAs(outname+".pdf")
+    c.SaveAs(outname+".C")
     print ky
     print ymaxrange[ky]
 
@@ -196,7 +201,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
 
     print tot[s]
 
-    gr_tot = TGraph(gr['Run2_VV_HPHP'][s].GetN(),Mass[s],tot[s])
+    gr_tot = TGraph(gr['VH_HPHP'][s].GetN(),Mass[s],tot[s])
     gr_tot.SetLineColor(signalcolor[s])
     gr_tot.SetLineStyle(1)
     gr_tot.SetLineWidth(2)
@@ -222,7 +227,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
 
   legt.Draw("same")
  
-  name = path+"signalEff_TotalVVVH_%s"  %(prelim)
+  name = path+"signalEff%s_TotalVVVH_%s"  %(vbfsig,prelim)
   ct.SaveAs(name+".png")
   ct.SaveAs(name+".pdf" )
   ct.SaveAs(name+".C"   )
@@ -896,13 +901,19 @@ def compSignalMVV():
         
 if __name__ == '__main__':
   prelim = ""
-  signals = ["ZprimeWW","BulkGWW","WprimeWZ","BulkGZZ","ZprimeZH","WprimeWH"]
-  titles =  ["Z' #rightarrow WW","G_{B}#rightarrow WW","W' #rightarrow WZ","G_{B}#rightarrow ZZ","Z' #rightarrow ZH","W' #rightarrow WH"]
+  signals = ["ZprimeWW","BulkGWW","WprimeWZ","BulkGZZ","ZprimeZHinc","WprimeWHinc","RadionWW","RadionZZ"]
+  titles =  ["Z' #rightarrow WW","G_{B}#rightarrow WW","W' #rightarrow WZ","G_{B}#rightarrow ZZ","Z' #rightarrow ZH","W' #rightarrow WH","R #rightarrow WW","R #rightarrow ZZ"]
 
-  categories = ["Run2_NP"]
-  doJetMass("random",signals,titles,categories)
-  doMVV(signals,titles,"Run2")
+#  categories = ["Run2_NP"]
+#  doJetMass("random",signals,titles,categories)
+#  doMVV(signals,titles,"Run2")
 
-  categories = ["Run2_VV_HPHP","Run2_VV_HPLP","Run2_VH_HPHP","Run2_VH_HPLP","Run2_VH_LPHP"]
-  doSignalEff(sys.argv[1],signals,titles,categories,[0.3,0.03,0.06,0.2,0.05])
+  categories = ["VH_HPHP","VV_HPHP","VH_LPHP","VH_HPLP","VV_HPLP","VBF_VH_HPHP","VBF_VV_HPHP","VBF_VH_LPHP","VBF_VH_HPLP","VBF_VV_HPLP"]
+  doSignalEff(sys.argv[1],signals,titles,categories,[0.3,0.06,0.2,0.05,0.03,0.03,0.03,0.03,0.03,0.03])
+  vbfsignals=[]
+  vbftitles= []
+  for sig,t in zip(signals,titles):
+      vbfsignals.append("VBF_"+sig)
+      vbftitles.append("VBF "+t)
 
+  doSignalEff(sys.argv[1],vbfsignals,vbftitles,categories,[0.3,0.06,0.2,0.05,0.03,0.03,0.03,0.03,0.03,0.03])
