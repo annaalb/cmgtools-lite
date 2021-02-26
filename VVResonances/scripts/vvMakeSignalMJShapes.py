@@ -66,7 +66,7 @@ for folder in folders:
         samples[folder].update({mass : folder+fname})
 
         print 'found',filename,'mass',str(mass) 
-        if filename.find('hbb')!=-1: isVH=True;
+        if filename.find('hbb')!=-1 or filename.find('hinc')!=-1: isVH=True;
         if filename.find("HH")!=-1: isHH=True; 
 
 
@@ -155,8 +155,8 @@ for mass in sorted(complete_mass.keys()):
     
     fitter=Fitter(['x'])
     if isVH and options.cut.find('Truth')==-1: fitter.jetDoublePeakVH('model','x'); print "INFO: fit jet double peak";
-    if (not isVH and not isHH) or options.cut.find('VTruth')!=-1: fitter.jetResonanceNOEXP('model','x'); print "INFO: fit jetmass no exp ";
-    if (isVH and options.cut.find('HTruth')) or isHH: fitter.jetResonanceHiggs('model','x'); print "INFO: fit jetResonanceHiggs";
+    if (not isVH and not isHH) or (options.cut.find('VTruth')!=-1 and options.cut.find('VVTruth') ==-1): fitter.jetResonanceNOEXP('model','x'); print "INFO: fit jetmass no exp ";
+    if (isVH and options.cut.find('HbbTruth')) or isHH: fitter.jetResonanceHiggs('model','x'); print "INFO: fit jetResonanceHiggs";
     
     if options.fixPars!="1":
         fixedPars =options.fixPars.split(',')
