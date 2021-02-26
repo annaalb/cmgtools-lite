@@ -29,7 +29,7 @@ class DatacardTools():
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq1"%sig,"MJ1" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig,"MJ2" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.product3D("%s"%sig,"%s_Wqq1"%sig,"%s_Wqq2"%sig,"%s_MVV"%sig)
-        if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         else: card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
 	
        elif 'WprimeWZ' in sig:
@@ -57,10 +57,10 @@ class DatacardTools():
         card.sumSimple("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")
        
         if not "sigOnly" in self.outlabel:
-         if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+         if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
          else: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         else:
-         if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
+         if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
          else: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
                 
        elif 'BulkG' in sig or 'Radion' in sig:
@@ -74,10 +74,10 @@ class DatacardTools():
         elif sig=='BulkGZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/BulkG.json","sigma","BRZZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         elif sig=='RadionWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/Radion.json","sigma","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         elif sig=='RadionZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/Radion.json","sigma","BRZZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='VBF_BulkGWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_BulkG.json","sigma","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='VBF_BulkGZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_BulkG.json","sigma","BRZZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='VBF_RadionWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_Radion.json","sigma","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='VBF_RadionZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_Radion.json","sigma","BRZZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='VBF_BulkGWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_BulkG.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='VBF_BulkGZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_BulkG.json","sigma","BRZZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='VBF_RadionWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_Radion.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='VBF_RadionZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_Radion.json","sigma","BRZZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
        
        elif 'H' in sig:
      
