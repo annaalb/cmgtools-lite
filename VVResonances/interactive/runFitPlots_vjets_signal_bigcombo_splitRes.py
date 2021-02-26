@@ -64,7 +64,7 @@ if options.name.find("BulkGWW")!=-1:
     signalName="BulkGWW"
 if options.name.find("BulkGZZ")!=-1:
     signalName="BulkGZZ"
-if options.name.find("VBF")!=-1:
+if options.name.find("VBF_"+signalName)!=-1:
     signalName="VBF_"+signalName
 
 def addGraph(graphs):
