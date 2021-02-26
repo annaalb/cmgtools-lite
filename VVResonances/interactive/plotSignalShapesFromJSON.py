@@ -10,7 +10,7 @@ from  CMGTools.VVResonances.plotting.CMS_lumi import *
 
 # ROOT.gROOT.SetBatch(True)
 
-def getLegend(textsize=0.20,x1=0.5809045,y1=0.6363636,x2=0.9522613,y2=0.9020979):
+def getLegend(textsize=0.20,x1=0.345809045,y1=0.6363636,x2=0.9522613,y2=0.9020979):
   legend = ROOT.TLegend(x1,y1,x2,y2)
   legend.SetTextSize(textsize)
   legend.SetLineColor(0)
@@ -123,10 +123,10 @@ def getPdf(w,j,MH,postfix="",jH=None,isMVV=False):
 parser = optparse.OptionParser()
 parser.add_option("-f","--file",dest="file",default='JJ_BulkGWW_2016_MVV.json',help="input file (JJ_{sig}_2016_MVV.json,JJ_{sig}_2016_MJrandom_VV_HPLP.json)")
 parser.add_option("-v","--var",dest="var",help="mVV or mJ",default='mVV')
-parser.add_option("-y","--year",dest="year",help="2016 or 2017 or 2018",default='2016')
+parser.add_option("-y","--year",dest="year",help="2016 or 2017 or 2018",default='Run2')
 parser.add_option("-c","--category",dest="category",help="VV_HPHP or VV_HPLP or VH_HPHP etc",default='VV_HPLP')
 parser.add_option("-o","--outdir",dest="outdir",help="output directory",default='../plots/')
-parser.add_option("-i","--indir",dest="indir",help="input directory",default='results_2016/')
+parser.add_option("-i","--indir",dest="indir",help="input directory",default='results_Run2/')
 parser.add_option("-n","--name",dest="name",help="you may specify an additional label for the output file",default='test')
 parser.add_option("-l","--leg",dest="leg",help="mVV or mJ",default='l1')
 parser.add_option("-p","--prelim",dest="prelim",help="with label preliminary or not",default=0)
@@ -153,6 +153,8 @@ colors.append(["#CD8500","#CD950C","#EE9A00","#EEAD0E","#FFA500","#FFB90F","#FFC
 colors.append(["#8B2500","#CD3700","#EE4000","#FF4500","#CD4F39","#EE5C42","#EE6A50","#FF7256","#FA8072","#FFA07A","#EEB4B4"]*4)
 colors.append(["#EE82EE","#FF00FF","#D02090","#C71585","#B03060 ","#DB7093","#FFB6C1","#FFC0CB"]*4)
 colors.append(["#D2B48C","#FFA54F","#EE9A49","#CD853F"]*4)
+colors.append(["#241b1b","#3c2929","#450000","#630000","#780000"]*4) #darkest days Color Palette from https://www.color-hex.com/color-palette/105294
+colors.append(["#bec1f6","#cfd3ff","#e3e6ff","#f0f3ff"]*4) #periwinkle snowflakes Color Palette from https://www.color-hex.com/color-palette/105538
 #colors.append(["#000080","#0000CD","#0000FF","#3D59AB","#4169E1","#4876FF","#6495ED","#1E90FF","#63B8FF","#87CEFA","#C6E2FF"]*3)   
 
 
@@ -229,7 +231,7 @@ def doAll(category,jsons,legs):
 
     c1.Draw()
     if options.var == 'mVV':
-        c1.Divide(1,6,0.0,0.0)
+        c1.Divide(1,len(jsons),0.0,0.0)
     leg = []
     frame = []  
     #frame.SetTitle("")
@@ -249,7 +251,10 @@ def doAll(category,jsons,legs):
             frame[-1].SetAxisRange(55,150)
         frame[-1].SetTitle("")
         name = f.split("_")[1]
-        if f.find("H")!=-1 : name = f.split("_")[2]
+        if "VBF" in f :  name = name+ f.split("_")[2]
+        if f.find("H")!=-1 :
+          name = f.split("_")[2]
+          if "VBF" in f :  name = name+ f.split("_")[3]
         with open(options.indir+f) as jsonFile:
           j = json.load(jsonFile)
           for i, MH in enumerate(massPoints):  # mind that MH is evaluated below
@@ -266,8 +271,6 @@ def doAll(category,jsons,legs):
                     with open(options.indir+f.replace("Hjet","Vjet")) as jsonFileV:
                         jV = json.load(jsonFileV)
                     getMJPdf(w,jV,MH,name,j)
-            print "signal  "+jsons[ii]
-            print " color ii "+str(ii)+" i "+str(i)+" "+colors[ii][i]
             w.pdf('signal_%d%s'%(MH,name)).plotOn(frame[-1], ROOT.RooFit.LineColor(ROOT.TColor.GetColor(colors[ii][i])),ROOT.RooFit.Name(str(MH)+name))#,ROOT.RooFit.Range(MH*0.8,1.2*MH))#ROOT.RooFit.Normalization(1, ROOT.RooAbsReal.RelativeExpected),
       
    
@@ -276,13 +279,22 @@ def doAll(category,jsons,legs):
             print len(jsons)
             print ii
             print "json "+str(jsons[len(jsons)-ii-1])
-            name = jsons[ii].split("_")[1]
-            if jsons[len(jsons)-ii-1].find("jet")!=-1 : name = jsons[len(jsons)-ii-1].split("_")[2]
-            leg[ii].AddEntry(frame[ii].findObject(str(2000)+name), legs[ii], "L")
+            name = jsons[len(jsons)-ii-1].split("_")[1]
+            if "VBF" in jsons[len(jsons)-ii-1]: name=jsons[len(jsons)-ii-1].split("_")[1]+jsons[len(jsons)-ii-1].split("_")[2]
+            if jsons[len(jsons)-len(jsons)-ii-1].find("H")!=-1 :
+              name = jsons[len(jsons)-len(jsons)-ii-1].split("_")[2]
+              if "VBF" in jsons[len(jsons)-ii-1]: name=jsons[len(jsons)-ii-1].split("_")[2]+jsons[len(jsons)-ii-1].split("_")[3]
+            leg[len(jsons)-ii-1].AddEntry(frame[len(jsons)-ii-1].findObject(str(2000)+name), legs[len(jsons)-ii-1], "L")
     else:
         for ii,f in enumerate(jsons):
             name = jsons[len(jsons)-ii-1].split("_")[1]
-            if jsons[len(jsons)-ii-1].find("jet")!=-1 : name = jsons[len(jsons)-ii-1].split("_")[2]
+            print name
+            print jsons[len(jsons)-ii-1].split("_")[1]+jsons[len(jsons)-ii-1].split("_")[2]
+            if "VBF" in jsons[len(jsons)-ii-1]:
+              name= jsons[len(jsons)-ii-1].split("_")[1]+jsons[len(jsons)-ii-1].split("_")[2]
+            if "H" in jsons[len(jsons)-ii-1]:
+              name = jsons[len(jsons)-ii-1].split("_")[2]
+              if "VBF" in jsons[len(jsons)-ii-1]: name= jsons[len(jsons)-ii-1].split("_")[2]+jsons[len(jsons)-ii-1].split("_")[3]
             print name
             print jsons[len(jsons)-ii-1]
             leg[-1].AddEntry(frame[0].findObject(str(2000)+name),legs[len(jsons)-ii-1],"L")
@@ -335,6 +347,9 @@ def doAll(category,jsons,legs):
     pt2.SetFillColor(0)
     pt2.SetBorderSize(0)
     pt2.SetFillStyle(0)
+    vbfsig=""
+    if "VBF" in jsons[0]: vbfsig="VBFsig"
+    outname=path+"signalShapes"+vbfsig+"_%s_%s_%s_All_%s_prelim" %(options.var,category,options.year,options.name)
 
     if options.var == 'mJ': pt2.AddText(category)
     pt2.Draw()
@@ -342,35 +357,26 @@ def doAll(category,jsons,legs):
     if options.prelim=="1":
         cmslabel_sim_prelim(c1,'sim',11)
         c1.Update()
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.png"  %(options.var,category,options.year,options.name))
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.pdf"  %(options.var,category,options.year,options.name))
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.C"    %(options.var,category,options.year,options.name))
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s_prelim.root" %(options.var,category,options.year,options.name))
+        c1.SaveAs(outname+".png")
+        c1.SaveAs(outname+".pdf")
+        c1.SaveAs(outname+".C")
+        c1.SaveAs(outname+".root")
     else:
         cmslabel_sim(c1,'sim',11)
         c1.Update()
-        
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.png"  %(options.var,category,options.year,options.name))
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.pdf"  %(options.var,category,options.year,options.name))
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.C"    %(options.var,category,options.year,options.name))
-        c1.SaveAs(path+"signalShapes_%s_%s_%s_All_%s.root" %(options.var,category,options.year,options.name))
+        outname=path+"signalShapes"+vbfsig+"_%s_%s_%s_All_%s" %(options.var,category,options.year,options.name)
+        c1.SaveAs(outname+".png")
+        c1.SaveAs(outname+".pdf")
+        c1.SaveAs(outname+".C")
+        c1.SaveAs(outname+".root")
     
       
 if __name__ == '__main__':
-    #doSingle()
-#    legs = ["G_{bulk} #rightarrow WW"]
-    legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH","W' #rightarrow WH"]
-#    legs = ["Z' #rightarrow ZH"]
-#    signals = ["BulkGWW"]
-    signals = ["BulkGZZ","WprimeWZ","BulkGWW","ZprimeWW","ZprimeZH","WprimeWH"]
-#    signals = ["ZprimeZH"]
-#    categories = ["VV_HPLP","VV_HPHP"]
-#    categories = ["VV_HPHP","VV_HPLP","VH_HPLP","VH_HPHP","VH_LPHP"]
-#    categories = ["VV_HPHP","VV_HPLP","VH_HPHP","VH_LPHP"]
+
+    legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH","W' #rightarrow WH","R #rightarrow WW","R #rightarrow ZZ"]
+    signals = ["BulkGZZ","WprimeWZ","BulkGWW","ZprimeWW","ZprimeZHinc","WprimeWHinc","RadionWW","RadionZZ"]
     categories = ["NP"]
-#    legs = ["G_{bulk} #rightarrow ZZ","W' #rightarrow WZ","G_{bulk} #rightarrow WW","Z'#rightarrow WW","Z' #rightarrow ZH","W' #rightarrow WH"]
-#    signals = ["BulkGZZ","WprimeWZ","BulkGWW","ZprimeWW","ZprimeZH","WprimeWH"]
-#    categories = options.category.split(',')
+
     for category in categories:
       jsons=[]
       for s in signals:
@@ -383,3 +389,24 @@ if __name__ == '__main__':
           jsons.append("JJ_"+s+"_Run2_MVV.json")
 
       doAll(category,jsons,legs)
+
+
+    vbfsignals=[]
+    vbftitles= []
+    for sig,t in zip(signals,legs):
+      vbfsignals.append("VBF_"+sig)
+      vbftitles.append("VBF "+t)
+
+
+    for category in categories:
+      jsons=[]
+      for s in vbfsignals:
+        print "################################     signal      "+s+"       #######################"
+        if options.var =="mJ":
+          if s.find("H")==-1 :
+            jsons.append("JJ_"+s+"_Run2_MJrandom_"+category+".json")
+          else : jsons.append("JJ_Hjet_"+s+"_Run2_MJrandom_"+category+".json")
+        if options.var =="mVV":
+          jsons.append("JJ_"+s+"_Run2_MVV.json")
+
+      doAll(category,jsons,vbftitles)
