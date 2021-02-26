@@ -335,9 +335,12 @@ def doJetMass(leg,signals,titles,categories):
            cmslabel_sim(c,'sim',11)
        pt = getPavetext()
        c.Update()
-       c.SaveAs(path+"Signal_mjet%s_"%categories[0].replace("HPHP","")+var+prelim+".png")
-       c.SaveAs(path+"Signal_mjet%s_"%categories[0].replace("HPHP","")+var+prelim+".pdf")
-       c.SaveAs(path+"Signal_mjet%s_"%categories[0].replace("HPHP","")+var+prelim+".C")
+       vbfsig = ""
+       if "VBF" in signals[0]: vbfsig = "VBFsig"
+       outname=path+"Signal"+vbfsig+"_mjet%s_"%categories[0].replace("HPHP","")+var+prelim
+       c.SaveAs(outname+".png")
+       c.SaveAs(outname+".pdf")
+       c.SaveAs(outname+".C")
     
     
     
@@ -476,9 +479,12 @@ def doMVV(signals,titles,year):
         cmslabel_sim_prelim(c,'sim',11)
         pt = getPavetext()
         c.Update()
-        c.SaveAs(path+"Signal_mVV_"+var+"_"+year+".png")
-        c.SaveAs(path+"Signal_mVV_"+var+"_"+year+".pdf")
-        c.SaveAs(path+"Signal_mVV_"+var+"_"+year+".C")
+        vbfsig = ""
+        if "VBF" in signals[0]: vbfsig = "VBFsig"
+        outname=path+"Signal"+vbfsig+"_mVV_"+var+"_"+year
+        c.SaveAs(outname+".png")
+        c.SaveAs(outname+".pdf")
+        c.SaveAs(outname+".C")
         
 
 def doMJFit():
@@ -903,10 +909,17 @@ if __name__ == '__main__':
   prelim = ""
   signals = ["ZprimeWW","BulkGWW","WprimeWZ","BulkGZZ","ZprimeZHinc","WprimeWHinc","RadionWW","RadionZZ"]
   titles =  ["Z' #rightarrow WW","G_{B}#rightarrow WW","W' #rightarrow WZ","G_{B}#rightarrow ZZ","Z' #rightarrow ZH","W' #rightarrow WH","R #rightarrow WW","R #rightarrow ZZ"]
+  categories = ["Run2_NP"]
+  doJetMass("random",signals,titles,categories)
+  doMVV(signals,titles,"Run2")
+  vbfsignals=[]
+  vbftitles= []
+  for sig,t in zip(signals,titles):
+      vbfsignals.append("VBF_"+sig)
+      vbftitles.append("VBF "+t)
+  doJetMass("random",vbfsignals,vbftitles,categories)
+  doMVV(vbfsignals,vbftitles,"Run2")
 
-#  categories = ["Run2_NP"]
-#  doJetMass("random",signals,titles,categories)
-#  doMVV(signals,titles,"Run2")
 
   categories = ["VH_HPHP","VV_HPHP","VH_LPHP","VH_HPLP","VV_HPLP","VBF_VH_HPHP","VBF_VV_HPHP","VBF_VH_LPHP","VBF_VH_HPLP","VBF_VV_HPLP"]
   doSignalEff(sys.argv[1],signals,titles,categories,[0.3,0.06,0.2,0.05,0.03,0.03,0.03,0.03,0.03,0.03])
