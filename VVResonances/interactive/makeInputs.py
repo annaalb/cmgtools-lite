@@ -218,11 +218,11 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
     elif options.signal.find("RZZ")!=-1 and not 'VBF' in options.signal:
         signal_inuse="RadionZZ"
         signaltemplate_inuse=RadionZZTemplate
-        xsec_inuse=BRZZ
+        xsec_inuse=BRZZincl
     elif options.signal.find("VBFRZZ")!=-1:
         signal_inuse="VBF_RadionZZ"
         signaltemplate_inuse=VBFRadionZZTemplate
-        xsec_inuse=BRZZ
+        xsec_inuse=BRZZincl
     else:
         print "signal "+str(options.signal)+" not found!"
         sys.exit()
