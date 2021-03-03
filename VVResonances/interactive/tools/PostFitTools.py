@@ -407,7 +407,7 @@ class Postfitplotter():
         zrange = self.options.zrange
         if self.options.xrange == '0,-1': xrange = '55,215'
         if self.options.yrange == '0,-1': yrange = '55,215'
-        if self.options.zrange == '0,-1': zrange = '1126,7600' #5500'
+        if self.options.zrange == '0,-1': zrange = '1246,7600' #5500'
         xlow = xrange.split(',')[0]
         xhigh = xrange.split(',')[1]
         ylow = yrange.split(',')[0]
