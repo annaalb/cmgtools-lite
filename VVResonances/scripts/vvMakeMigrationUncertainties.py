@@ -475,19 +475,22 @@ if __name__=="__main__":
             json.dump(data[year], outfile)
 
 
-    if len(years) == 3:
-        print "#######################################      Making Run2 combination by average weighted by lumi      ##############################"
+    if len(years) == 3 or options.year == "2016,2017" :
+        period="Run2"
+        if options.year == "2016,2017": period = "1617"
+        print "#######################################      Making "+period+" combination by average weighted by lumi      ##############################"
         print " All years uncertainties "
         print " TOTAL ",total
         print " NOM ",totalnom
         print " PT ",totalpt
         splitstr = options.output
-        file2write=open("SFpt_dependence_"+splitstr+"_Run2.txt",'w')
+        file2write=open("SFpt_dependence_"+splitstr+"_"+period+".txt",'w')
         unc_Run2 = {}
         for tag in tags:
             print "tag ",tag
             func="[0]*TMath::Log(x)"
             if tag == "V_tag": func= "pol1"
+
 
             unc_Run2[tag]={}
             for cat in categories:
@@ -513,7 +516,7 @@ if __name__=="__main__":
                   if dofit ==True:
                     Hratio = GetHistsRatio(Hpt,Hnom)
                     print " Hratio ",Hratio.GetEntries()
-                    fitfunc = DrawSFPT(Hnom,Hpt,Hratio,tag,cat,splitstr,"Run2",func)
+                    fitfunc = DrawSFPT(Hnom,Hpt,Hratio,tag,cat,splitstr,period,func)
                     print " cat "+cat+" tag "+tag+" func "+func
                     file2write.write(" cat "+cat+" tag "+tag+" func "+func+" \n")
                     print "N  parameters ",fitfunc.GetNpar()
@@ -538,7 +541,7 @@ if __name__=="__main__":
                         print " Hnom ",Hnom.GetEntries()
                         print " Hpt ",Hpt.GetEntries()
                         Hratio = GetHistsRatio(Hpt,Hnom)
-                        fitfunc = DrawSFPT(Hnom,Hpt,Hratio,tag,cat,mappdf[con],"Run2",func)
+                        fitfunc = DrawSFPT(Hnom,Hpt,Hratio,tag,cat,mappdf[con],period,func)
                         file2write.write(" cat "+cat+" tag "+tag+" func "+func+" \n")
                         print "N  parameters ",fitfunc.GetNpar()
                         file2write.write("N  parameters "+str(fitfunc.GetNpar())+" \n")
@@ -559,19 +562,19 @@ if __name__=="__main__":
                         for con in contrib:
                             unc_Run2[tag].update( {mappdf[con]+'.'+cat : [n,u,d] })
 
-        print " run 2 unc "
+        print " unc ",period
         print unc_Run2
         file2write.close()
         print 'CMS_VV_JJ_DeepJet_Htag_eff'
-        data["Run2"] = {splitstr+'_'+'CMS_VV_JJ_DeepJet_Htag_eff' : calcfinalUnc(unc_Run2,'H_tag',categories)}
+        data[period] = {splitstr+'_'+'CMS_VV_JJ_DeepJet_Htag_eff' : calcfinalUnc(unc_Run2,'H_tag',categories)}
         print 'CMS_VV_JJ_DeepJet_Vtag_eff'
-        data["Run2"].update( {splitstr+'_'+'CMS_VV_JJ_DeepJet_Vtag_eff' : calcfinalUnc(unc_Run2,'V_tag',categories)})
+        data[period].update( {splitstr+'_'+'CMS_VV_JJ_DeepJet_Vtag_eff' : calcfinalUnc(unc_Run2,'V_tag',categories)})
         print 'CMS_VV_JJ_DeepJet_TOPtag_mistag'
-        data["Run2"].update({splitstr+'_'+'CMS_VV_JJ_DeepJet_TOPtag_mistag' : calcfinalUnc(unc_Run2,'top_tag',categories)})
+        data[period].update({splitstr+'_'+'CMS_VV_JJ_DeepJet_TOPtag_mistag' : calcfinalUnc(unc_Run2,'top_tag',categories)})
 
-        jsonfilename["Run2"] = 'migrationunc_'+splitstr+'_Run2.json'
-        with open(jsonfilename["Run2"], 'w') as outfile:
-            json.dump(data["Run2"], outfile)
+        jsonfilename[period] = 'migrationunc_'+splitstr+'_'+period+'.json'
+        with open(jsonfilename[period], 'w') as outfile:
+            json.dump(data[period], outfile)
 
 
  

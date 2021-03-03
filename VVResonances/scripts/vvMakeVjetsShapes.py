@@ -186,7 +186,7 @@ for files in samples.keys():
         ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
         lumi = ctx.lumi[year]
 
-        if options.output.find("Run2")!=-1 and year=="2017":
+        if options.output.find("Run2")!=-1 or options.output.find("1617")!=-1 and year=="2017":
             ctx2016 = cuts.cuts("init_VV_VH.json","2016","dijetbins_random")
             lumi+= ctx2016.lumi["2016"]
         print "luminosity is "+str(lumi)

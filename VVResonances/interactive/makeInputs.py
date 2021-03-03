@@ -55,6 +55,7 @@ rescale=False #for pseudodata: set to True if files comes from splitting Run2
 if options.period.find(",")!=-1: 
     period = options.period.split(',') 
     filePeriod="Run2"
+    if "2018" not in options.period: filePeriod = "1617"
     for year in period:
         print year
         if year==period[-1]: samples+=basedir+year+"/"

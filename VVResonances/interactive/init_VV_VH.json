@@ -3,10 +3,12 @@
     "lumi16" : 35920.0,
     "lumi17" : 41530.0,
     "lumi18" : 59740.0,
+    "lumi1617": 77450.0,
     "lumi161718": 137190.0,
     "unc_lumi16": 1.025,
     "unc_lumi17": 1.023,
     "unc_lumi18": 1.025,
+    "unc_lumi1617": 1.013,
     "unc_lumi161718": 1.018,
 
     "_commentOnSF":"from Loukas for map-decorrelated MD pt 400-800 for WvsQCD, pt >600 for ZHbbvsQCD",

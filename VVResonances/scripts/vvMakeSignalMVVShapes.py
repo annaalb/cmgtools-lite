@@ -295,7 +295,8 @@ for mass in sorted(complete_mass.keys()):
         print "year ",year
         ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
         luminosity=   ctx.lumi[year]/ctx.lumi["Run2"]
-        if options.output.find("Run2") ==-1: luminosity = 1
+        if options.output.find("1617") !=-1: luminosity= ctx.lumi[year]/ctx.lumi["1617"]
+        if options.output.find("Run2") ==-1 or options.output.find("1617") ==-1: luminosity = 1
         print " fraction of lumi ",luminosity
         plotter.append(TreePlotter(complete_mass[mass][folder]+'.root','AnalysisTree'))
         if year == "2016": plotter[-1].addCorrectionFactor('genWeight','tree')

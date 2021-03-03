@@ -49,8 +49,9 @@ print "year ",year
 print "now working with cuts "
 ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
 print "lumi for year "+year+" = ",ctx.lumi[year]
-luminosity = ctx.lumi[year]/ctx.lumi["Run2"]  #int(ctx.lumi[year]/ctx.lumi["Run2"])
-if options.output.find("Run2") ==-1 or options.name.find("data")!=-1 : luminosity = 1
+luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
+if options.output.find("1617") !=-1 :luminosity = ctx.lumi[year]/ctx.lumi["1617"]
+if options.output.find("Run2") ==-1 or options.output.find("1617") ==-1 or options.name.find("data")!=-1 : luminosity = 1
 print " lumi rewight ",luminosity
 
 for filename in os.listdir(args[0]):

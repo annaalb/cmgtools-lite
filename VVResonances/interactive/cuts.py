@@ -150,7 +150,9 @@ class cuts():
                 self.H_LPmassscale = data["H_LPmassscale"+self.yeartag]
 
             self.lumi["Run2"] =  data["lumi"+self.yeartag]
+            self.lumi["1617"] =  data["lumi1617"]
             self.lumi_unc["Run2"] = data["unc_lumi"+self.yeartag]
+            self.lumi_unc["1617"] = data["unc_lumi1617"]
             self.Wtag_slope = data["wtag_slope"]
             self.Wtag_intercept = data["wtag_intercept"]
             self.Htag_slope = data["htag_slope"]
