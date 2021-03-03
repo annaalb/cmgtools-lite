@@ -610,7 +610,6 @@ class DatacardTools():
       if case=="1":
        print "case 1: fully correlated JER and JES"
        jesunc=str(round(jes[sig.replace("VBF_","")],3))
-       if signaltype == "nonVBFsig" and production == "VBFcat": jesunc=str(round(1+jes[sig.replace("VBF_","")]/100.,3)) #FIXME this is temporary!! to be removed after Jen fixes the JSON
        print "jesunc ",jesunc
        card.addSystematic("CMS_jes_norm","lnN",{'%s'%sig:jesunc,'Wjets':jesunc,'Zjets':jesunc,"TTJetsW":jesunc,"TTJetsWNonResT":jesunc,"TTJetsResWResT":jesunc,"TTJetsTop":jesunc,"TTJetsNonRes":jesunc,"TTJetsTNonResT":jesunc})
        jerunc=str(round(jer[sig.replace("VBF_","")],3))
