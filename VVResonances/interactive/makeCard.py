@@ -35,6 +35,9 @@ parser.add_option("-m","--merge",dest="merge",help="set to False if you do not w
 
 cmd='combineCards.py '
 
+#specify how to correlate jes & jer uncertainties
+# 1 = fully correlated among years, 2 = fully uncerrelated among years, 3 = partial correlation among years (do as in CASE 1 but take half effect as fully correlated and half effect as fully uncorrelated) (but NB json case2 = 2016 unc, case3 = 2017, case4 = 2018)
+case=1
 
 
 #### to create the preparatory WS for pseudodata with Vjets: pseudodata = "" & doVjets=True 
@@ -83,6 +86,10 @@ if len(datasets) == 3 and options.combo == True:
   datasets = []
   datasets.append("Run2")
   resultsDir.update({"Run2" : "results_Run2"})
+if len(datasets) == 2 and options.combo == True:
+  datasets = []
+  datasets.append("1617")
+  resultsDir.update({"1617" : "results_1617"})
 print "datasets ",datasets
 print "result dir ",resultsDir
 
@@ -208,7 +215,7 @@ for sig in signals:
 
       print "##########################       data/pseudodata added in datacard      ######################"  
       correlateyields=1
-      Tools.AddSigSystematics(card,sig,dataset,p,correlateyields)
+      Tools.AddSigSystematics(card,sig,dataset,p,correlateyields,str(case))
       if options.fitvjetsmjj == True:
         Tools.AddResBackgroundSystematics(card,p,options.vbf,["CMS_VV_JJ_WJets_slope",0.2,"CMS_VV_JJ_ZJets_slope",0.2])
       else:

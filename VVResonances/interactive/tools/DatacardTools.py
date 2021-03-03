@@ -25,7 +25,7 @@ class DatacardTools():
 
        if 'ZprimeWW' in sig:
 
-        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0})
+        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_jes_scale_j':1},{'CMS_jer_res_j':1.0})
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq1"%sig,"MJ1" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig,"MJ2" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.product3D("%s"%sig,"%s_Wqq1"%sig,"%s_Wqq2"%sig,"%s_MVV"%sig)
@@ -34,7 +34,7 @@ class DatacardTools():
 	
        elif 'WprimeWZ' in sig:
 
-        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0},self.doCorrelation)
+        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_jes_scale_j':1},{'CMS_jer_res_j':1.0},self.doCorrelation)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq1_c1"%sig,"MJ1" ,resultsDir+"/JJ_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq2_c1"%sig,"MJ2" ,resultsDir+"/JJ_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         if self.doCorrelation:
@@ -65,7 +65,7 @@ class DatacardTools():
                 
        elif 'BulkG' in sig or 'Radion' in sig:
        
-        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0})
+        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_jes_scale_j':1},{'CMS_jer_res_j':1.0})
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq1"%sig,"MJ1" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig,"MJ2" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.product3D("%s"%sig,"%s_Wqq1"%sig,"%s_Wqq2"%sig,"%s_MVV"%sig)
@@ -81,9 +81,9 @@ class DatacardTools():
        
        elif 'H' in sig:
      
-        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_scale_j':1},{'CMS_res_j':1.0},self.doCorrelation)
+        card.addMVVSignalParametricShape("%s_MVV"%sig,"MJJ",resultsDir+"/JJ_%s_%s_MVV.json"%(sig,dataset),{'CMS_jes_scale_j':1},{'CMS_jer_res_j':1.0},self.doCorrelation)
 
-        card.addMJJSignalParametricShapeHiggs("%s_Wqq1_c1"%sig,"MJ1" ,resultsDir+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_scale_j':1},{'CMS_res_j':1.0},self.scalesHiggs)
+        card.addMJJSignalParametricShapeHiggs("%s_Wqq1_c1"%sig,"MJ1" ,resultsDir+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_jes_scale_j':1},{'CMS_jer_res_j':1.0},self.scalesHiggs)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq2_c1"%sig,"MJ2" ,resultsDir+"/JJ_Vjet_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         if self.doCorrelation:
          print "doing correlation"
@@ -93,7 +93,7 @@ class DatacardTools():
          print "no MVV correlation"
          card.product3D("%s_c1"%sig,"%s_Wqq1_c1"%sig,"%s_Wqq2_c1"%sig,"%s_MVV"%sig)
 
-        card.addMJJSignalParametricShapeHiggs("%s_Wqq2_c2"%sig,"MJ2" ,resultsDir+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_scale_j':1},{'CMS_res_j':1.0},self.scalesHiggs)
+        card.addMJJSignalParametricShapeHiggs("%s_Wqq2_c2"%sig,"MJ2" ,resultsDir+"/JJ_Hjet_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_jes_scale_j':1},{'CMS_jer_res_j':1.0},self.scalesHiggs)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq1_c2"%sig,"MJ1" ,resultsDir+"/JJ_Vjet_%s_%s_MJrandom_%s.json"%(sig,dataset,"NP"),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         if self.doCorrelation:
          print "doing correlation"
@@ -581,12 +581,55 @@ class DatacardTools():
          card.addSystematic("CMS_VV_JJ_"+mappdf[contrib[i]]+"_TOPPTZ_"+category,"param",[0,1.])
 
        
- def AddSigSystematics(self,card,sig,dataset,category,correlate):
+ def AddSigSystematics(self,card,sig,dataset,category,correlate,case):
       print " signal ",sig
+      production = "nonVBFcat"
+      signaltype = "nonVBFsig"
+      if category.find("VBF") !=-1:
+       production = "VBFcat"
+      if sig.find("VBF") !=-1:
+       signaltype = "VBFsig"
+
+      # JES & JER uncertainties: migration uncertainties betwenn VBF and non VBF categories do to the mjj cut on the VBF jets + shape uncertainties
+      #migration
+      jesfilename="results_"+dataset+"/JES_case"+case+"_"+signaltype+"_"+production+".json"
+      jerfilename="results_"+dataset+"/JER_case"+case+"_"+signaltype+"_"+production+".json"
+      try:
+       jesjsonfile=open(jesfilename)
+       jes = json.load(jesjsonfile)
+      except:
+       print "no jes file ",jesfilename
+       sys.exit()
+      try:
+       jerjsonfile=open(jerfilename)
+       jer = json.load(jerjsonfile)
+      except:
+       print "no jer file ",jerfilename
+       sys.exit()
+
+      if case=="1":
+       print "case 1: fully correlated JER and JES"
+       jesunc=str(round(jes[sig.replace("VBF_","")],3))
+       if signaltype == "nonVBFsig" and production == "VBFcat": jesunc=str(round(1+jes[sig.replace("VBF_","")]/100.,3)) #FIXME this is temporary!! to be removed after Jen fixes the JSON
+       print "jesunc ",jesunc
+       card.addSystematic("CMS_jes_norm","lnN",{'%s'%sig:jesunc,'Wjets':jesunc,'Zjets':jesunc,"TTJetsW":jesunc,"TTJetsWNonResT":jesunc,"TTJetsResWResT":jesunc,"TTJetsTop":jesunc,"TTJetsNonRes":jesunc,"TTJetsTNonResT":jesunc})
+       jerunc=str(round(jer[sig.replace("VBF_","")],3))
+       print "jerunc ",jerunc
+       card.addSystematic("CMS_jer_norm","lnN",{'%s'%sig:jerunc,'Wjets':jerunc,'Zjets':jerunc,"TTJetsW":jerunc,"TTJetsWNonResT":jerunc,"TTJetsResWResT":jerunc,"TTJetsTop":jerunc,"TTJetsNonRes":jerunc,"TTJetsTNonResT":jerunc})
+      else:
+       print "case ",case,"not found!"
+
+      #shape
+      if case=="1":
+       card.addSystematic("CMS_jes_scale_j","param",[0.0,0.012])
+       #card.addSystematic("CMS_jes_res_j","param",[0.0,0.04])
+       #card.addSystematic("CMS_jer_scale_j","param",[0.0,0.002])
+       card.addSystematic("CMS_jer_res_j","param",[0.0,0.06])
+      else:
+       print "case ",case,"not found!"
+
       card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
       card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
-      card.addSystematic("CMS_scale_j","param",[0.0,0.012])
-      card.addSystematic("CMS_res_j","param",[0.0,0.08])
       card.addSystematic("CMS_pdf","lnN",{'%s'%sig:1.01})
       production = "ggDY"
       signaltype = "signal"
