@@ -590,42 +590,43 @@ class DatacardTools():
       if sig.find("VBF") !=-1:
        signaltype = "VBFsig"
 
-      # JES & JER uncertainties: migration uncertainties betwenn VBF and non VBF categories do to the mjj cut on the VBF jets + shape uncertainties
-      #migration
-      jesfilename="results_"+dataset+"/JES_case"+case+"_"+signaltype+"_"+production+".json"
-      jerfilename="results_"+dataset+"/JER_case"+case+"_"+signaltype+"_"+production+".json"
-      try:
-       jesjsonfile=open(jesfilename)
-       jes = json.load(jesjsonfile)
-      except:
-       print "no jes file ",jesfilename
-       sys.exit()
-      try:
-       jerjsonfile=open(jerfilename)
-       jer = json.load(jerjsonfile)
-      except:
-       print "no jer file ",jerfilename
-       sys.exit()
+      if case != "0":
+       # JES & JER uncertainties: migration uncertainties betwenn VBF and non VBF categories do to the mjj cut on the VBF jets + shape uncertainties
+       #migration
+       jesfilename="results_"+dataset+"/JES_case"+case+"_"+signaltype+"_"+production+".json"
+       jerfilename="results_"+dataset+"/JER_case"+case+"_"+signaltype+"_"+production+".json"
+       try:
+        jesjsonfile=open(jesfilename)
+        jes = json.load(jesjsonfile)
+       except:
+        print "no jes file ",jesfilename
+        sys.exit()
+       try:
+        jerjsonfile=open(jerfilename)
+        jer = json.load(jerjsonfile)
+       except:
+        print "no jer file ",jerfilename
+        sys.exit()
 
-      if case=="1":
-       print "case 1: fully correlated JER and JES"
-       jesunc=str(round(jes[sig.replace("VBF_","")],3))
-       print "jesunc ",jesunc
-       card.addSystematic("CMS_jes_norm","lnN",{'%s'%sig:jesunc,'Wjets':jesunc,'Zjets':jesunc,"TTJetsW":jesunc,"TTJetsWNonResT":jesunc,"TTJetsResWResT":jesunc,"TTJetsTop":jesunc,"TTJetsNonRes":jesunc,"TTJetsTNonResT":jesunc})
-       jerunc=str(round(jer[sig.replace("VBF_","")],3))
-       print "jerunc ",jerunc
-       card.addSystematic("CMS_jer_norm","lnN",{'%s'%sig:jerunc,'Wjets':jerunc,'Zjets':jerunc,"TTJetsW":jerunc,"TTJetsWNonResT":jerunc,"TTJetsResWResT":jerunc,"TTJetsTop":jerunc,"TTJetsNonRes":jerunc,"TTJetsTNonResT":jerunc})
-      else:
-       print "case ",case,"not found!"
+       if case=="1":
+        print "case 1: fully correlated JER and JES"
+        jesunc=str(round(jes[sig.replace("VBF_","")],3))
+        print "jesunc ",jesunc
+        card.addSystematic("CMS_jes_norm","lnN",{'%s'%sig:jesunc,'Wjets':jesunc,'Zjets':jesunc,"TTJetsW":jesunc,"TTJetsWNonResT":jesunc,"TTJetsResWResT":jesunc,"TTJetsTop":jesunc,"TTJetsNonRes":jesunc,"TTJetsTNonResT":jesunc})
+        jerunc=str(round(jer[sig.replace("VBF_","")],3))
+        print "jerunc ",jerunc
+        card.addSystematic("CMS_jer_norm","lnN",{'%s'%sig:jerunc,'Wjets':jerunc,'Zjets':jerunc,"TTJetsW":jerunc,"TTJetsWNonResT":jerunc,"TTJetsResWResT":jerunc,"TTJetsTop":jerunc,"TTJetsNonRes":jerunc,"TTJetsTNonResT":jerunc})
+       else:
+        print "case ",case,"not found!"
 
-      #shape
-      if case=="1":
-       card.addSystematic("CMS_jes_scale_j","param",[0.0,0.012])
-       #card.addSystematic("CMS_jes_res_j","param",[0.0,0.04])
-       #card.addSystematic("CMS_jer_scale_j","param",[0.0,0.002])
-       card.addSystematic("CMS_jer_res_j","param",[0.0,0.06])
-      else:
-       print "case ",case,"not found!"
+       #shape
+       if case=="1":
+        card.addSystematic("CMS_jes_scale_j","param",[0.0,0.012])
+        #card.addSystematic("CMS_jes_res_j","param",[0.0,0.04])
+        #card.addSystematic("CMS_jer_scale_j","param",[0.0,0.002])
+        card.addSystematic("CMS_jer_res_j","param",[0.0,0.06])
+       else:
+        print "case ",case,"not found!"
 
       card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
       card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
