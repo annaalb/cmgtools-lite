@@ -51,6 +51,7 @@ period = "2016"
 if options.name.find("2017")!=-1: period = "2017"
 if options.name.find("2018")!=-1: period = "2018"
 if options.name.find("Run2")!=-1: period = "Run2"
+if options.name.find("1617")!=-1: period = "1617"
 
 showallTT=False
 signalName = "ZprimeZH"

@@ -356,12 +356,12 @@ class Postfitplotter():
         period = "2016"
         if self.options.name.find("2017")!=-1: period = "2017"
         if self.options.name.find("2018")!=-1: period = "2018"
-        if self.options.name.find("16+17")!=-1: period = "16+17"
+        if self.options.name.find("1617")!=-1: period = "1617"
         if self.options.name.find("Run2")!=-1: period = "Run2"
         if period =="2016":  CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
         if period =="2017":  CMS_lumi.lumi_13TeV = "41.5 fb^{-1}"
         if period =="2018":  CMS_lumi.lumi_13TeV = "59.7 fb^{-1}"
-        if period =="16+17":  CMS_lumi.lumi_13TeV = "113.2 fb^{-1}"
+        if period =="1617":  CMS_lumi.lumi_13TeV = "77.4 fb^{-1}"
         if period =="Run2":  CMS_lumi.lumi_13TeV = "137.2 fb^{-1}"
         CMS_lumi.writeExtraText = 1
         CMS_lumi.lumi_sqrtS = "13 TeV (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
