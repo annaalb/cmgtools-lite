@@ -85,11 +85,11 @@ def smoothTail1D(proj):
     proj.Scale(1.0/scale)
     
     
-    beginFitX = 2100#1500
-    endX = 2800
-    if options.output.find("HPHP")!=-1: #irene removed if on 2016 period as Vjets are from 2017 or 2018
-        beginFitX=1100
-        endX = 1500
+    beginFitX = 1246 #2100#1500
+    endX = 2000 #2800
+    #if options.output.find("LP")!=-1: #irene removed if on 2016 period as Vjets are from 2017 or 2018
+    #    beginFitX=1246
+    #    endX = 1800
     expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",2000,8000)
     expo.SetParameters(0,16.,2.)
     expo.SetParLimits(2,1.,20.)
