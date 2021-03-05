@@ -1303,10 +1303,10 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
             l.AddEntry(mvv_nominal,"simulation","lp")
             l.AddEntry(histo_nominal,"template","l")
             l.AddEntry(histo_noreweight,"no pt reweigh","l")
-            try:
-                l.AddEntry(histo_doublereweight,"double pt reweigh","l")
-            except:
-                print " no double"
+            #try:
+            #    l.AddEntry(histo_doublereweight,"double pt reweigh","l")
+            #except:
+            #    print " no double"
 
             l.Draw("same")
 
