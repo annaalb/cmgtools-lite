@@ -686,7 +686,10 @@ def makeNonResCard():
 
  dataset = str(options.year)
  ctx = cuts.cuts("init_VV_VH.json",dataset,"dijetbins_random")
- if options.year.find(",")!=-1: dataset ="Run2"
+ if options.year.find(",")!=-1:
+     dataset ="Run2"
+     if options.year.find("2018")==-1:
+         dataset ="1617"
  print dataset
 
  lumi = ctx.lumi
@@ -728,7 +731,7 @@ def makeNonResCard():
  print "adding data"
  DTools.AddData(card,options.input,"nonRes",lumi[dataset] )
  print "adding sig sys for purity", purity
- DTools.AddSigSystematics(card,sig,dataset,purity,0)
+ DTools.AddSigSystematics(card,sig,dataset,purity,0,"0")
 
  print "Adding systematics to card"
  print "norm"
@@ -763,7 +766,10 @@ if __name__=="__main__":
      #  os.mkdir(options.output)     
 
      #################################################
-     if options.year.find(",")!=-1: dataset ="Run2"
+     if options.year.find(",")!=-1:
+         dataset ="Run2"
+         if options.year.find("2018")==-1:
+             dataset ="1617"
      else: dataset =options.year
      print dataset
 
