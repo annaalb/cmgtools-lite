@@ -5,11 +5,13 @@ import ROOT
   
 class DatacardTools():
 
- def __init__(self,scales,scalesHiggs,tagger_pt_dependence,PU_unc,lumi_unc,sfQCD,pseudodata,outlabel,doCorrelation=True,fitvjetsmjj=False):
+ def __init__(self,scales,scalesHiggs,tagger_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,sfQCD,pseudodata,outlabel,doCorrelation=True,fitvjetsmjj=False):
   
   self.scales=scales
   self.tagger_pt_dependence=tagger_pt_dependence
   self.PU_unc = PU_unc
+  self.JES_unc = JES_unc
+  self.JER_unc = JER_unc
   self.lumi_unc = lumi_unc
   self.sfQCD = sfQCD
   self.pseudodata = pseudodata
@@ -581,20 +583,22 @@ class DatacardTools():
          card.addSystematic("CMS_VV_JJ_"+mappdf[contrib[i]]+"_TOPPTZ_"+category,"param",[0,1.])
 
        
- def AddSigSystematics(self,card,sig,dataset,category,correlate,case):
+ def AddSigSystematics(self,card,sig,dataset,category,correlate,case,resultsDir="results_Run2/"):
       print " signal ",sig
       production = "nonVBFcat"
+      productionBKG = "ggDY"
       signaltype = "nonVBFsig"
       if category.find("VBF") !=-1:
        production = "VBFcat"
+       productionBKG = "VBF"
       if sig.find("VBF") !=-1:
        signaltype = "VBFsig"
 
       if case != "0":
        # JES & JER uncertainties: migration uncertainties betwenn VBF and non VBF categories do to the mjj cut on the VBF jets + shape uncertainties
        #migration
-       jesfilename="results_"+dataset+"/JES_case"+case+"_"+signaltype+"_"+production+".json"
-       jerfilename="results_"+dataset+"/JER_case"+case+"_"+signaltype+"_"+production+".json"
+       jesfilename=resultsDir+"/JES_case"+case+"_"+signaltype+"_"+production+".json"
+       jerfilename=resultsDir+"/JER_case"+case+"_"+signaltype+"_"+production+".json"
        try:
         jesjsonfile=open(jesfilename)
         jes = json.load(jesjsonfile)
@@ -612,10 +616,10 @@ class DatacardTools():
         print "case 1: fully correlated JER and JES"
         jesunc=str(round(jes[sig.replace("VBF_","")],3))
         print "jesunc ",jesunc
-        card.addSystematic("CMS_jes_norm","lnN",{'%s'%sig:jesunc,'Wjets':jesunc,'Zjets':jesunc,"TTJetsW":jesunc,"TTJetsWNonResT":jesunc,"TTJetsResWResT":jesunc,"TTJetsTop":jesunc,"TTJetsNonRes":jesunc,"TTJetsTNonResT":jesunc})
+        card.addSystematic("CMS_jes_norm","lnN",{'%s'%sig:jesunc,'Wjets':self.JES_unc[productionBKG]['Wjets'],'Zjets':self.JES_unc[productionBKG]['Zjets'],"TTJetsW":self.JES_unc[productionBKG]['TTjets'],"TTJetsWNonResT":self.JES_unc[productionBKG]['TTjets'],"TTJetsResWResT":self.JES_unc[productionBKG]['TTjets'],"TTJetsTop":self.JES_unc[productionBKG]['TTjets'],"TTJetsNonRes":self.JES_unc[productionBKG]['TTjets'],"TTJetsTNonResT":self.JES_unc[productionBKG]['TTjets']})
         jerunc=str(round(jer[sig.replace("VBF_","")],3))
         print "jerunc ",jerunc
-        card.addSystematic("CMS_jer_norm","lnN",{'%s'%sig:jerunc,'Wjets':jerunc,'Zjets':jerunc,"TTJetsW":jerunc,"TTJetsWNonResT":jerunc,"TTJetsResWResT":jerunc,"TTJetsTop":jerunc,"TTJetsNonRes":jerunc,"TTJetsTNonResT":jerunc})
+        card.addSystematic("CMS_jer_norm","lnN",{'%s'%sig:jerunc,'Wjets':self.JER_unc[productionBKG]['Wjets'],'Zjets':self.JER_unc[productionBKG]['Zjets'],"TTJetsW":self.JER_unc[productionBKG]['TTjets'],"TTJetsWNonResT":self.JER_unc[productionBKG]['TTjets'],"TTJetsResWResT":self.JER_unc[productionBKG]['TTjets'],"TTJetsTop":self.JER_unc[productionBKG]['TTjets'],"TTJetsNonRes":self.JER_unc[productionBKG]['TTjets'],"TTJetsTNonResT":self.JER_unc[productionBKG]['TTjets']})
        else:
         print "case ",case,"not found!"
 

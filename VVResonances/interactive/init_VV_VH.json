@@ -83,6 +83,10 @@
     "_commentOnPU":"estimated by Jen varying the PU xsec 4.6% up/down in the UHH framework, for VBF and non-VBF signals and bkg in gg/DY and VBF categories separately",
     "PU_unc" :{"ggDY":{"signal":"1.01","signalVBF":"1.01","PRbackground":"1.001"},
 	       "VBF":{"signal":"1.04","signalVBF":"1.01","PRbackground":"1.02"}},
+    "JES_unc":{"ggDY":{"Wjets":0.97,"Zjets":0.97,"TTjets":0.96},
+	       "VBF":{"Wjets":1.27,"Zjets":1.25,"TTjets":1.20}},
+    "JER_unc":{"ggDY":{"Wjets":0.9997,"Zjets":0.9999,"TTjets":0.999},
+	       "VBF":{"Wjets":1.11,"Zjets":1.10,"TTjets":1.06}},
 
     "tagging_variables_and_wp" : {
    "varl1Wtag": "jj_l1_MassDecorrelatedDeepBoosted_WvsQCD",

@@ -42,7 +42,7 @@ case=1
 
 #### to create the preparatory WS for pseudodata with Vjets: pseudodata = "" & doVjets=True 
 pseudodata = options.pseudodata
-
+if pseudodata == "ttbar": case=0
 outlabel = options.outlabel
 
 
@@ -77,6 +77,8 @@ if pseudodata == "False":
 
 vtag_pt_dependence = ctx.tagger_pt_dependence
 PU_unc = ctx.PU_uncertainties
+JES_unc = ctx.JES_uncertainties
+JER_unc = ctx.JER_uncertainties
 
 
 datasets= options.period.split(",")
@@ -94,7 +96,7 @@ print "datasets ",datasets
 print "result dir ",resultsDir
 
 doCorrelation = True 
-Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,PU_unc,lumi_unc,sf_qcd,pseudodata,outlabel,doCorrelation,options.fitvjetsmjj)
+Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,sf_qcd,pseudodata,outlabel,doCorrelation,options.fitvjetsmjj)
 
 
 for sig in signals:
@@ -206,7 +208,7 @@ for sig in signals:
        scaleData=1.0
       elif pseudodata=="False":
         rootFileData = resultsDir[dataset]+"/JJ_"+dataset+"_data_"+p+".root"
-        if dataset == "Run2": rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
+        if dataset == "Run2" or dataset == "1617" : rootFileData = resultsDir[dataset]+"/JJ_"+p+".root"
         histName="data"
         scaleData=1.0
 
@@ -215,7 +217,7 @@ for sig in signals:
 
       print "##########################       data/pseudodata added in datacard      ######################"  
       correlateyields=1
-      Tools.AddSigSystematics(card,sig,dataset,p,correlateyields,str(case))
+      Tools.AddSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
       if options.fitvjetsmjj == True:
         Tools.AddResBackgroundSystematics(card,p,options.vbf,["CMS_VV_JJ_WJets_slope",0.2,"CMS_VV_JJ_ZJets_slope",0.2])
       else:
