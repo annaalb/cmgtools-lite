@@ -682,7 +682,6 @@ def makeNonResCard():
  dataset = options.year
  sig = 'BulkGWW' 
  doCorrelation = False
- if 'VBF' in purity: sig = 'VBF_BulkGWW'
 
  dataset = str(options.year)
  ctx = cuts.cuts("init_VV_VH.json",dataset,"dijetbins_random")
@@ -777,22 +776,21 @@ if __name__=="__main__":
      finMC = ROOT.TFile(options.input,"READ");
      hinMC = finMC.Get("nonRes");
      purity = ''
-     if options.input.find("HPHP")!=-1: purity = "HPHP"
-     elif options.input.find("HPLP")!=-1: purity = "HPLP"
-     elif options.input.find("LPHP")!=-1: purity = "LPHP"
+     if options.input.find("VV_HPHP")!=-1: purity = "VV_HPHP"
+     elif options.input.find("VH_HPHP")!=-1: purity = "VH_HPHP"
+     elif options.input.find("VV_HPLP")!=-1: purity = "VV_HPLP"
+     elif options.input.find("VH_HPLP")!=-1: purity = "VH_HPLP"
+     elif options.input.find("VH_LPHP")!=-1: purity = "VH_LPHP"
      elif options.input.find("LPLP")!=-1: purity = "LPLP"
-     if not 'control_region' in options.input:
-      if 'VH' in options.input: purity = 'VH_'+purity
-      else: purity = 'VV_'+purity
-      if options.input.find('VBF')!=-1: purity = 'VBF_'+purity  
-     elif purity == '' and 'control_region' in options.input:
+     if options.input.find('VBF')!=-1: purity = 'VBF_'+purity  
+     if purity == '' and 'control_region' in options.input:
          if 'VH_NPHP' in options.input:
              purity = 'VH_NPHP_control_region'
          if 'VV_NPHP' in options.input:
              purity = 'VV_NPHP_control_region'
          else:
              purity = 'VH_HPNP_control_region'
-     else:
+     if purity == '':
       print "SPECIFIED PURITY IS NOT ALLOWED!",options.input,purity
       sys.exit()  
      print "Using purity: " ,purity    
