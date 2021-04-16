@@ -94,7 +94,7 @@ class cuts():
     
     
     def __init__(self,jsonfile,period,options,widerMVV=False):
-        
+        print " options ",options
         with open(jsonfile) as json_file:
                      
             
@@ -232,7 +232,15 @@ class cuts():
                 self.catVtag['LP2'] = '(('+ self.varl2Wtag +'<'+ self.WPHPl2Wtag +')&&('+ self.varl2Wtag +'>'+ self.WPLPl2Wtag +'))'
                 self.catVtag['NP1'] =  '('+ self.varl1Wtag +'<'+ self.WPNPl1Wtag +')'
                 self.catVtag['NP2'] =  '('+ self.varl2Wtag +'<'+ self.WPNPl2Wtag +')'
-                
+                if options.find('tau')!=-1:
+                    print " --------     Tagging WPs for tau21 -----------"
+                    self.catVtag['HP1'] =  '('+ self.varl1Wtag +'<'+ self.WPHPl1Wtag +')'
+                    self.catVtag['HP2'] =  '('+ self.varl2Wtag +'<'+ self.WPHPl2Wtag +')'
+                    self.catVtag['LP1'] = '(('+ self.varl1Wtag +'>'+ self.WPHPl1Wtag +')&&('+ self.varl1Wtag +'<'+ self.WPLPl1Wtag +'))' 
+                    self.catVtag['LP2'] = '(('+ self.varl2Wtag +'>'+ self.WPHPl2Wtag +')&&('+ self.varl2Wtag +'<'+ self.WPLPl2Wtag +'))'
+                    self.catVtag['NP1'] =  '('+ self.varl1Wtag +'>'+ self.WPNPl1Wtag +')'
+                    self.catVtag['NP2'] =  '('+ self.varl2Wtag +'>'+ self.WPNPl2Wtag +')'
+
             
                 self.catHtag['HP1'] =  '('+ self.varl1Htag +'>'+ self.WPHPl1Htag +')' 
                 self.catHtag['HP2'] =  '('+ self.varl2Htag +'>'+ self.WPHPl2Htag +')' 
@@ -286,52 +294,97 @@ class cuts():
                 #print "Use random sorting!"
                 #print "ortoghonal VV + VH"
                 catsAll = {}
-                #scheme 2: improves VV HPHP (VH_HPHP -> VV_HPHP -> VH_LPHP,VH_HPLP -> VV_HPLP) 
-                #at least one H tag HP (+ one V/H tag HP)                                                                                                                                                                                                                                     
-                catsAll['VH_HPHP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['HP2']])+')'
-                catsAll['HV_HPHP'] = '('+'&&'.join([self.catHtag['HP1'],self.catVtag['HP2']])+')'
-                catsAll['HH_HPHP'] = '('+'&&'.join([self.catHtag['HP1'],self.catHtag['HP2']])+')'
-                self.cuts['VH_HPHP'] = '('+'||'.join([catsAll['VH_HPHP'],catsAll['HV_HPHP'],catsAll['HH_HPHP']])+')'
+                if options.find('VV')==-1 and options.find('4')==-1:
+                    print " ---------- using default VV+VH 5 categories definition "
+                    #scheme 2: improves VV HPHP (VH_HPHP -> VV_HPHP -> VH_LPHP,VH_HPLP -> VV_HPLP)
+                    #at least one H tag HP (+ one V/H tag HP)
+                    catsAll['VH_HPHP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['HP2']])+')'
+                    catsAll['HV_HPHP'] = '('+'&&'.join([self.catHtag['HP1'],self.catVtag['HP2']])+')'
+                    catsAll['HH_HPHP'] = '('+'&&'.join([self.catHtag['HP1'],self.catHtag['HP2']])+')'
+                    self.cuts['VH_HPHP'] = '('+'||'.join([catsAll['VH_HPHP'],catsAll['HV_HPHP'],catsAll['HH_HPHP']])+')'
 
-                # two V tag HP                                                                                                                                                                                                                                                                
-                self.cuts['VV_HPHP'] = '('+'!'+self.cuts['VH_HPHP']+'&&'+'(' +  '&&'.join([self.catVtag['HP1'],self.catVtag['HP2']]) + ')' + ')'
+                    # two V tag HP
+                    self.cuts['VV_HPHP'] = '('+'!'+self.cuts['VH_HPHP']+'&&'+'(' +  '&&'.join([self.catVtag['HP1'],self.catVtag['HP2']]) + ')' + ')'
 
-                #at least one H-tag HP (+one V OR H-tag LP)                                                                                                                                                                                                                                   
-                catsAll['VH_LPHP'] = '('+'&&'.join([self.catVtag['LP1'],self.catHtag['HP2']])+')'
-                catsAll['HV_HPLP'] = '('+'&&'.join([self.catHtag['HP1'],self.catVtag['LP2']])+')'
-                catsAll['HH_HPLP'] = '('+'&&'.join([self.catHtag['HP1'],self.catHtag['LP2']])+')'
-                catsAll['HH_LPHP'] = '('+'&&'.join([self.catHtag['LP1'],self.catHtag['HP2']])+')'
-                self.cuts['VH_LPHP'] = '('+'('+'!'+self.cuts['VH_HPHP']+'&&!'+self.cuts['VV_HPHP']+')&&('+'||'.join([catsAll['VH_LPHP'],catsAll['HV_HPLP'],catsAll['HH_HPLP'],catsAll['HH_LPHP']])+')'+')'
+                    #at least one H-tag HP (+one V OR H-tag LP)
+                    catsAll['VH_LPHP'] = '('+'&&'.join([self.catVtag['LP1'],self.catHtag['HP2']])+')'
+                    catsAll['HV_HPLP'] = '('+'&&'.join([self.catHtag['HP1'],self.catVtag['LP2']])+')'
+                    catsAll['HH_HPLP'] = '('+'&&'.join([self.catHtag['HP1'],self.catHtag['LP2']])+')'
+                    catsAll['HH_LPHP'] = '('+'&&'.join([self.catHtag['LP1'],self.catHtag['HP2']])+')'
+                    self.cuts['VH_LPHP'] = '('+'('+'!'+self.cuts['VH_HPHP']+'&&!'+self.cuts['VV_HPHP']+')&&('+'||'.join([catsAll['VH_LPHP'],catsAll['HV_HPLP'],catsAll['HH_HPLP'],catsAll['HH_LPHP']])+')'+')'
 
-                #at least one V-tag HP (+ one H-tag LP)                                  
-                catsAll['VH_HPLP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['LP2']])+')'
-                catsAll['HV_LPHP'] = '('+'&&'.join([self.catHtag['LP1'],self.catVtag['HP2']])+')'
-                self.cuts['VH_HPLP'] = '('+'('+'!'+self.cuts['VH_LPHP']+'&&!'+self.cuts['VH_HPHP']+'&&!'+self.cuts['VV_HPHP']+')&&('+'||'.join([catsAll['VH_HPLP'],catsAll['HV_LPHP']])+')'+')'
+                    #at least one V-tag HP (+ one H-tag LP)
+                    catsAll['VH_HPLP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['LP2']])+')'
+                    catsAll['HV_LPHP'] = '('+'&&'.join([self.catHtag['LP1'],self.catVtag['HP2']])+')'
+                    self.cuts['VH_HPLP'] = '('+'('+'!'+self.cuts['VH_LPHP']+'&&!'+self.cuts['VH_HPHP']+'&&!'+self.cuts['VV_HPHP']+')&&('+'||'.join([catsAll['VH_HPLP'],catsAll['HV_LPHP']])+')'+')'
+                    self.cuts['VH_all'] =  '('+  '||'.join([self.cuts['VH_HPHP'],self.cuts['VH_LPHP'],self.cuts['VH_HPLP']]) + ')'
+                    self.cuts['VV_HPLP'] = '(' +'('+'!'+self.cuts['VH_all']+') &&' + '(' + '('+  '&&'.join([self.catVtag['HP1'],self.catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([self.catVtag['HP2'],self.catVtag['LP1']]) + ')' + ')' + ')'
 
-                self.cuts['VH_all'] =  '('+  '||'.join([self.cuts['VH_HPHP'],self.cuts['VH_LPHP'],self.cuts['VH_HPLP']]) + ')'                
-
-                self.cuts['VV_HPLP'] = '(' +'('+'!'+self.cuts['VH_all']+') &&' + '(' + '('+  '&&'.join([self.catVtag['HP1'],self.catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([self.catVtag['HP2'],self.catVtag['LP1']]) + ')' + ')' + ')'
-
-                self.cuts['VV_all'] = '('+  '||'.join([self.cuts['VV_HPHP'],self.cuts['VV_HPLP']]) + ')'
-                self.cuts['VV_VH']= '('+  '||'.join([self.cuts['VH_all'],self.cuts['VV_all']]) + ')'
+                    self.cuts['VV_all'] = '('+  '||'.join([self.cuts['VV_HPHP'],self.cuts['VV_HPLP']]) + ')'
+                    self.cuts['VV_VH']= '('+  '||'.join([self.cuts['VH_all'],self.cuts['VV_all']]) + ')'
 
 
-                #control region (invert w-tag)
-                catsAll['VV_NPHP'] = '('+'&&'.join([self.catVtag['NP1'],self.catVtag['HP2']])+')'
-                catsAll['VV_HPNP'] = '('+'&&'.join([self.catVtag['HP1'],self.catVtag['NP2']])+')'
-                # I am excluding only the VH categories because it is already othogonal to VV and TTree.Draw doesn't like "overlapping" conditions
-                self.cuts['VV_NPHP_control_region'] = '('+'('+'||'.join([catsAll['VV_NPHP'],catsAll['VV_HPNP']])+')'+'&&'+'('+'!'+self.cuts['VH_all']+')'+'&&'+'('+'!'+self.cuts['VV_all']+')'+')'
+                    #control region (invert w-tag)
+                    catsAll['VV_NPHP'] = '('+'&&'.join([self.catVtag['NP1'],self.catVtag['HP2']])+')'
+                    catsAll['VV_HPNP'] = '('+'&&'.join([self.catVtag['HP1'],self.catVtag['NP2']])+')'
+                    # I am excluding only the VH categories because it is already othogonal to VV and TTree.Draw doesn't like "overlapping" conditions
+                    self.cuts['VV_NPHP_control_region'] = '('+'('+'||'.join([catsAll['VV_NPHP'],catsAll['VV_HPNP']])+')'+'&&'+'('+'!'+self.cuts['VH_all']+')'+'&&'+'('+'!'+self.cuts['VV_all']+')'+')'
 
+                    '''
+                    #control region (invert h-tag)
+                    catsAll['VH_HPNP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['NP2']])+')'
+                    catsAll['HV_NPHP'] = '('+'&&'.join([self.catHtag['NP1'],self.catVtag['HP2']])+')'
+                    self.cuts['VH_HPNP_control_region'] = '('+'('+'||'.join([catsAll['VH_HPNP'],catsAll['HV_NPHP']])+')'+'&&'+'('+'!'+'('+ '||'.join([self.cuts['VV_all'],self.cuts['VH_NPHP_control_region']]) +')'+')'+')'
                 '''
-                #control region (invert h-tag)
-                catsAll['VH_HPNP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['NP2']])+')'
-                catsAll['HV_NPHP'] = '('+'&&'.join([self.catHtag['NP1'],self.catVtag['HP2']])+')'
-                self.cuts['VH_HPNP_control_region'] = '('+'('+'||'.join([catsAll['VH_HPNP'],catsAll['HV_NPHP']])+')'+'&&'+'('+'!'+'('+ '||'.join([self.cuts['VV_all'],self.cuts['VH_NPHP_control_region']]) +')'+')'+')'
-                '''
-                #only one CR inverting H-tag
-                #catsAll['VH_HPNP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['NP2']])+')'
-                #catsAll['HV_NPHP'] = '('+'&&'.join([self.catHtag['NP1'],self.catVtag['HP2']])+')'
-                #self.cuts['VH_HPNP_control_region'] = '('+'('+'||'.join([catsAll['VH_HPNP'],catsAll['HV_NPHP']])+')'+'&&'+'('+'!'+self.cuts['VV_all']+')'+')'
+                    #only one CR inverting H-tag
+                    #catsAll['VH_HPNP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['NP2']])+')'
+                    #catsAll['HV_NPHP'] = '('+'&&'.join([self.catHtag['NP1'],self.catVtag['HP2']])+')'
+                    #self.cuts['VH_HPNP_control_region'] = '('+'('+'||'.join([catsAll['VH_HPNP'],catsAll['HV_NPHP']])+')'+'&&'+'('+'!'+self.cuts['VV_all']+')'+')'
+                elif options.find('4')!=-1:
+                    print " ************ VH HPLP merged in VV HPLP! ********"
+                    #scheme 2: improves VV HPHP (VH_HPHP -> VV_HPHP -> VH_LPHP -> VV_HPLP)
+                    #at least one H tag HP (+ one V/H tag HP)
+                    catsAll['VH_HPHP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['HP2']])+')'
+                    catsAll['HV_HPHP'] = '('+'&&'.join([self.catHtag['HP1'],self.catVtag['HP2']])+')'
+                    catsAll['HH_HPHP'] = '('+'&&'.join([self.catHtag['HP1'],self.catHtag['HP2']])+')'
+                    self.cuts['VH_HPHP'] = '('+'||'.join([catsAll['VH_HPHP'],catsAll['HV_HPHP'],catsAll['HH_HPHP']])+')'
+
+                    # two V tag HP
+                    self.cuts['VV_HPHP'] = '('+'!'+self.cuts['VH_HPHP']+'&&'+'(' +  '&&'.join([self.catVtag['HP1'],self.catVtag['HP2']]) + ')' + ')'
+
+                    #at least one H-tag HP (+one V OR H-tag LP)
+                    catsAll['VH_LPHP'] = '('+'&&'.join([self.catVtag['LP1'],self.catHtag['HP2']])+')'
+                    catsAll['HV_HPLP'] = '('+'&&'.join([self.catHtag['HP1'],self.catVtag['LP2']])+')'
+                    catsAll['HH_HPLP'] = '('+'&&'.join([self.catHtag['HP1'],self.catHtag['LP2']])+')'
+                    catsAll['HH_LPHP'] = '('+'&&'.join([self.catHtag['LP1'],self.catHtag['HP2']])+')'
+                    self.cuts['VH_LPHP'] = '('+'('+'!'+self.cuts['VH_HPHP']+'&&!'+self.cuts['VV_HPHP']+')&&('+'||'.join([catsAll['VH_LPHP'],catsAll['HV_HPLP'],catsAll['HH_HPLP'],catsAll['HH_LPHP']])+')'+')'
+
+                    #at least one V-tag HP (+ one H-tag LP)
+                    catsAll['VH_HPLP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['LP2']])+')'
+                    catsAll['HV_LPHP'] = '('+'&&'.join([self.catHtag['LP1'],self.catVtag['HP2']])+')'
+                    self.cuts['VH_HPLP'] = '('+'('+'!'+self.cuts['VH_LPHP']+'&&!'+self.cuts['VH_HPHP']+'&&!'+self.cuts['VV_HPHP']+')&&('+'||'.join([catsAll['VH_HPLP'],catsAll['HV_LPHP']])+')'+')'
+                    # merging VH HPLP in VV HPLP
+                    self.cuts['VH_all'] =  '('+  '||'.join([self.cuts['VH_HPHP'],self.cuts['VH_LPHP']]) + ')'
+                    self.cuts['VV_HPLP'] = '(' +'('+'!'+self.cuts['VH_all']+') &&' + '(' + '('+  '&&'.join([self.catVtag['HP1'],self.catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([self.catVtag['HP2'],self.catVtag['LP1']]) + ')' + '||' +'('+'||'.join([catsAll['VH_HPLP'],catsAll['HV_LPHP']])+')'+')' + ')'
+
+                    self.cuts['VV_all'] = '('+  '||'.join([self.cuts['VV_HPHP'],self.cuts['VV_HPLP']]) + ')'
+                    self.cuts['VV_VH']= '('+  '||'.join([self.cuts['VH_all'],self.cuts['VV_all']]) + ')'
+
+
+                    #control region (invert w-tag)
+                    catsAll['VV_NPHP'] = '('+'&&'.join([self.catVtag['NP1'],self.catVtag['HP2']])+')'
+                    catsAll['VV_HPNP'] = '('+'&&'.join([self.catVtag['HP1'],self.catVtag['NP2']])+')'
+                    # I am excluding only the VH categories because it is already othogonal to VV and TTree.Draw doesn't like "overlapping" conditions
+                    self.cuts['VV_NPHP_control_region'] = '('+'('+'||'.join([catsAll['VV_NPHP'],catsAll['VV_HPNP']])+')'+'&&'+'('+'!'+self.cuts['VH_all']+')'+'&&'+'('+'!'+self.cuts['VV_all']+')'+')'
+
+                else:
+                    print " ************ VV only! ********"
+                    # two V tag HP
+                    self.cuts['VV_HPHP'] = '(' +  '&&'.join([self.catVtag['HP1'],self.catVtag['HP2']]) + ')'
+                    # one V tag HP
+                    self.cuts['VV_HPLP'] = '(' + '('+  '&&'.join([self.catVtag['HP1'],self.catVtag['LP2']]) + ')' + '||' + '(' + '&&'.join([self.catVtag['HP2'],self.catVtag['LP1']]) + ')' + ')'
+
+
             else:
                 #print "Use b-tagging sorting"
                 self.cuts['VH_HPHP'] = '('+  '&&'.join([self.catHtag['HP1'],self.catVtag['HP2']]) + ')'
@@ -347,6 +400,7 @@ class cuts():
 
 if __name__ == "__main__":
     c = cuts("init_VV_VH.json","2016","dijetbins_random")
+    if options.find('VV')!=-1: c = cuts("init_VV_VH.json","2016","dijetbins_random_VV")
     print c.HPSF_vtag['2016']
     print c.LPSF_vtag['2016']
     print c.minMJ
