@@ -27,6 +27,7 @@ parser.add_option("-b","--BR",dest="BR",type=float, help="branching ratio",defau
 parser.add_option("-r","--minMX",dest="minMX",type=float, help="smallest Mx to fit ",default=1000.0)
 parser.add_option("-R","--maxMX",dest="maxMX",type=float, help="largest Mx to fit " ,default=7000.0)
 parser.add_option("-t","--triggerweight",dest="triggerW",action="store_true",help="Use trigger weights",default=False)
+parser.add_option("--tau",dest="tau",action="store_true",help="use tau21?")
 
 (options,args) = parser.parse_args()
 
@@ -118,7 +119,6 @@ for mass in sorted(complete_mass.keys()):
         ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
         print " fraction of lumi ",ctx.lumi[year]/luminosity_tot 
         luminosity=   ctx.lumi[year]/luminosity_tot #str(ctx.lumi[year]/luminosity_tot)
-        if options.output.find("Run2") ==-1: luminosity = 1
         plotter.append(TreePlotter(complete_mass[mass][folder]+'.root','AnalysisTree'))
         plotter[-1].setupFromFile(complete_mass[mass][folder]+'.pck')
         if year == "2016": plotter[-1].addCorrectionFactor('genWeight','tree')
@@ -128,8 +128,18 @@ for mass in sorted(complete_mass.keys()):
         plotter[-1].addCorrectionFactor('xsec','tree')
         plotter[-1].addCorrectionFactor('puWeight','tree')
         plotter[-1].addCorrectionFactor(luminosity,'flat')
-        plotter[-1].addFriend("all","../interactive/migrationunc/"+complete_mass[mass][folder].split("/")[-1]+"_"+year+".root")
-        plotter[-1].addCorrectionFactor("all.SF",'tree')
+        if not options.tau:
+            print "using SF from tree"
+            plotter[-1].addFriend("all","../interactive/migrationunc/"+complete_mass[mass][folder].split("/")[-1]+"_"+year+".root")
+            plotter[-1].addCorrectionFactor("all.SF",'tree')
+        else:
+            print " using tau21 SF"
+            if "HPHP" in category:
+                SF=ctx.HPSF_vtag[year]*ctx.HPSF_vtag[year]
+            elif "HPLP" in category:
+                SF=ctx.HPSF_vtag[year]*ctx.LPSF_vtag[year]
+            print SF
+            plotter[-1].addCorrectionFactor(SF,'flat')
         plotter[-1].addCorrectionFactor('L1prefWeight','tree')
         if options.triggerW:
             plotter[-1].addCorrectionFactor('jj_triggerWeight','tree')	
