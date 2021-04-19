@@ -82,7 +82,7 @@ def doFit(fitter,histo,histo_nonRes,label,leg=''):
   print "set paramters of double CB constant around the ones from gaussian fit"
   fitter.w.var("mean").setVal(mean)
   fitter.w.var("mean").setConstant(1)
-  #fitter.w.var("sigma").setVal(sigma)
+  fitter.w.var("sigma").setVal(sigma)
   #fitter.w.var("sigma").setConstant(1)
   print "_____________________________________"
   fitter.importBinnedData(histo,['x'],'data')
