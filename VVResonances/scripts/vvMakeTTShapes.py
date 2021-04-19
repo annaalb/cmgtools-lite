@@ -259,7 +259,7 @@ def getPlotters(samples_in):
       plotters_[-1].setupFromFile(name+'.pck')
       plotters_[-1].addCorrectionFactor('xsec','tree')
       genweight='genWeight'
-      if (year == "2017" or year == "2018") and name.find("TT") !=-1:  genweight='genWeight_LO'
+      #if (year == "2017" or year == "2018") and name.find("TT") !=-1:  genweight='genWeight_LO'
       plotters_[-1].addCorrectionFactor(genweight,'tree')
       plotters_[-1].addCorrectionFactor('puWeight','tree')
       plotters_[-1].addCorrectionFactor(lumi,'flat')
@@ -345,7 +345,7 @@ def doFit(th1_projY,mjj_mean,mjj_error,N,category):
     #fitter.w.var("sigmaN").setMin(15.)
 
     fitter.w.var("f_g1")  .setMin(0.05)
-    fitter.w.var("f_res") .setMin(0.35) #following Thea's suggestion to set the minimum to a higher value to make the fit converge
+    fitter.w.var("f_res") .setMin(0.4) #following Thea's suggestion to set the minimum to a higher value to make the fit converge #0.55 for VH HPLP
     # parametrise W with Gaussian
     fitter.w.var("meanW") .setMin(75.)
     fitter.w.var("sigmaW").setMin(5)
