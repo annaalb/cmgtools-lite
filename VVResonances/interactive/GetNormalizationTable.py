@@ -32,9 +32,9 @@ def tablePreambole(txtfile,caption):
     txtfile.write("\\begin{table}[b]\n")
     txtfile.write("\\topcaption{%s yield and background yields extracted from the background-only fit together with post-fit uncertainties.}\n" %caption)
     txtfile.write("\centering\n")
-    txtfile.write("\\begin{tabular}{lccccccc}\n")
+    txtfile.write("\\begin{tabular}{lcccccc}\n")
     txtfile.write("\hline\n")
-    txtfile.write("Background & Data & Total  & QCD & \PW{}+jets & \PZ{}+jets & \\ttbar{} & other \\\\ \n")
+    txtfile.write("Background & Data & Total  & QCD &\\ttbar{} & \PW{}+jets & \PZ{}+jets \\\\ \n")
     txtfile.write("\hline\n")
 
 def tableClosing(txtfile,caption):
@@ -60,6 +60,8 @@ if __name__ == "__main__":
     eventstype=["Expected","Observed"]
     if options.period.find(",")!=-1 and len(options.period.split(",")) == 3: 
         year = "Run2"
+    elif options.period.find(",")!=-1 and len(options.period.split(",")) == 2:
+        year = "1617"
     else: year = options.period
 
 
@@ -97,7 +99,7 @@ if __name__ == "__main__":
                 for b in bkg:
                     total=total+int(round(exp[c][b]))
                 if prod == "VBF":
-                    text_file.write(" %s %s %s & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f \\\\ \n"%(c.split("_")[1],c.split("_")[2],c.split("_")[0],exp[c]["data"],total,exp[c]["nonRes"],exp[c]["Wjets"],exp[c]["Zjets"],totalTT,0))
+                    text_file.write(" %s %s %s & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f  \\\\ \n"%(c.split("_")[1],c.split("_")[2],c.split("_")[0],exp[c]["data"],total,exp[c]["nonRes"],totalTT,exp[c]["Wjets"],exp[c]["Zjets"]))
                     if evt == "Expected":
                         simpletext_file.write(" %s %s %s & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f &%.0f & %.0f & %.0f & %.0f & %.0f & %.0f  \\\\ \n"%(c.split("_")[1],c.split("_")[2],c.split("_")[0],exp[c]["data"],total,exp[c]["nonRes"],exp[c]["Wjets"],exp[c]["Zjets"],totalTT,exp[c]["TTJetsTop"],exp[c]["TTJetsW"],exp[c]["TTJetsNonRes"],exp[c]["TTJetsTNonResT"],exp[c]["TTJetsWNonResT"],exp[c]["TTJetsResWResT"]))
                     else:
@@ -105,7 +107,7 @@ if __name__ == "__main__":
 
 
                 else:
-                    text_file.write(" %s %s %s & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f \\\\ \n"%(c.split("_")[0],c.split("_")[1],"DY/gg",exp[c]["data"],total,exp[c]["nonRes"],exp[c]["Wjets"],exp[c]["Zjets"],totalTT,0))
+                    text_file.write(" %s %s %s & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f \\\\ \n"%(c.split("_")[0],c.split("_")[1],"DY/gg",exp[c]["data"],total,exp[c]["nonRes"],totalTT,exp[c]["Wjets"],exp[c]["Zjets"]))
                     if evt == "Expected":
                         simpletext_file.write(" %s %s %s & %.0f & %.0f & %.0f & %.0f & %.0f &%.0f & %.0f & %.0f & %.0f & %.0f & %.0f & %.0f \\\\ \n"%(c.split("_")[0],c.split("_")[1],"DY/gg",exp[c]["data"],total,exp[c]["nonRes"],exp[c]["Wjets"],exp[c]["Zjets"],totalTT,exp[c]["TTJetsTop"],exp[c]["TTJetsW"],exp[c]["TTJetsNonRes"],exp[c]["TTJetsTNonResT"],exp[c]["TTJetsWNonResT"],exp[c]["TTJetsResWResT"]))
                     else:
