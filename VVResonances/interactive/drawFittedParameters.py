@@ -15,7 +15,7 @@ cols = [46,30]
 colors = ["#4292c6","#41ab5d","#ef3b2c","#ffd300","#D02090","#fdae61","#abd9e9","#492a60","#780000"]
 #mstyle = [8,24,22,26,32]
 #linestyle=[1,2,1,2,3]
-markerstyle = [3,4,8,21,20,25,22,26]
+markerstyle = [21,8,23,4,25,32,22,26]
 linestyle = [1,2,3,4,5,6,7,8,9,1,2]
 mstyle = [8,4]
 
@@ -33,7 +33,7 @@ def getLegend(x1=0.5809045,y1=0.6363636,x2=0.9522613,y2=0.9020979):
   legend.SetLineColor(0)
   legend.SetShadowColor(0)
   legend.SetLineStyle(1)
-  legend.SetLineWidth(1)
+  legend.SetLineWidth(0)
   legend.SetFillColor(0)
   legend.SetFillStyle(0)
   legend.SetMargin(0.35)
@@ -134,7 +134,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
         beautify(gHPHP ,rt.TColor.GetColor(colors[i]),1,markerstyle[i])
         datasHP.append(gHPHP)
         fitsHP.append(fHPHP)
-        l.AddEntry(fHPHP,titles[i],"L")
+        l.AddEntry(fHPHP,titles[i],"LP")
     fitsHP[0].Draw("C")
     l2.AddEntry(fitsHP[0],category,"")
     fitsHP[0].GetXaxis().SetTitle("m_{X} [GeV]")
@@ -196,7 +196,10 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     tot[s],Mass[s] = array( 'd' ), array( 'd' )
     print " flipped "+s+" ",flipped[s]
     for i in range(flipped[s][categories[0]].GetN()) :
-        tot[s].append( flipped[s][categories[0]].GetY()[i]+flipped[s][categories[1]].GetY()[i]+flipped[s][categories[2]].GetY()[i]+flipped[s][categories[3]].GetY()[i]+flipped[s][categories[4]].GetY()[i])
+        totsum = 0
+        for c in categories: totsum += flipped[s][c].GetY()[i]
+
+        tot[s].append( totsum )
         Mass[s].append(flipped[s][categories[0]].GetX()[i] )
 
     print tot[s]
@@ -213,7 +216,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     gr_tot.SetMarkerColor(signalcolor[s])
     gr_tot.SetMarkerStyle(signalmarker[s])
     gr_tot.SetMinimum(0.)
-    gr_tot.SetMaximum(0.4)
+    gr_tot.SetMaximum(0.5)
     gr_tot.GetXaxis().SetLimits(1000.,8500.)
     gr_tot.SetTitle("")
     datatot.append(gr_tot)
@@ -232,6 +235,169 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
   ct.SaveAs(name+".pdf" )
   ct.SaveAs(name+".C"   )
   ct.SaveAs(name+".root")
+
+  tot_ggDY = {}
+  ct = getCanvas()
+  legt = getLegend(0.4,0.6363636,0.9522613,0.9020979)
+  ptt = getPavetext()
+  ct.Draw()
+  i=0
+  datatot_ggDY = []
+  for s,l in zip(signals,titles):
+    tot_ggDY[s] = array( 'd' )
+    for i in range(flipped[s][categories[0]].GetN()) :
+        totsum = 0
+        ggdysum = 0
+        for c in categories:
+            totsum += flipped[s][c].GetY()[i]
+            if "VBF" not in c: ggdysum += flipped[s][c].GetY()[i]
+        tot_ggDY[s].append( ggdysum/totsum )
+        Mass[s].append(flipped[s][categories[0]].GetX()[i] )
+
+    print tot_ggDY[s]
+
+    gr_tot_ggDY = TGraph(gr['VH_HPHP'][s].GetN(),Mass[s],tot_ggDY[s])
+    gr_tot_ggDY.SetLineColor(signalcolor[s])
+    gr_tot_ggDY.SetLineStyle(1)
+    gr_tot_ggDY.SetLineWidth(2)
+    gr_tot_ggDY.GetXaxis().SetTitle("m_{X} [GeV]")
+    gr_tot_ggDY.GetYaxis().SetTitle("% of total signal efficiency")
+    gr_tot_ggDY.GetYaxis().SetNdivisions(4,5,0)
+    gr_tot_ggDY.GetXaxis().SetNdivisions(5,5,0)
+
+    gr_tot_ggDY.SetMarkerColor(signalcolor[s])
+    gr_tot_ggDY.SetMarkerStyle(signalmarker[s])
+    gr_tot_ggDY.SetMinimum(0.5)
+    gr_tot_ggDY.SetMaximum(1.5)
+    gr_tot_ggDY.GetXaxis().SetLimits(1000.,8500.)
+    gr_tot_ggDY.SetTitle("")
+    datatot_ggDY.append(gr_tot_ggDY)
+
+    legt.AddEntry(gr_tot_ggDY,l+" ggDY", "LP")
+    i=i+1
+    datatot_ggDY[0].Draw("AC")
+    for i,(g) in enumerate(datatot_ggDY):
+        g.Draw("PLsame")
+
+
+  legt.Draw("same")
+ 
+  name = path+"signalEff%s_ggDYvsTotalVVVH_%s"  %(vbfsig,prelim)
+  ct.SaveAs(name+".png")
+  ct.SaveAs(name+".pdf" )
+  ct.SaveAs(name+".C"   )
+  ct.SaveAs(name+".root")
+
+
+  tot_VBF = {}
+  ct = getCanvas()
+  legt = getLegend(0.4,0.6363636,0.9522613,0.9020979)
+  ptt = getPavetext()
+  ct.Draw()
+  i=0
+  datatot_VBF = []
+  for s,l in zip(signals,titles):
+    tot_VBF[s] = array( 'd' )
+    for i in range(flipped[s][categories[0]].GetN()) :
+        totsum = 0
+        ggdysum = 0
+        for c in categories:
+            totsum += flipped[s][c].GetY()[i]
+            if "VBF" in c: ggdysum += flipped[s][c].GetY()[i]
+        tot_VBF[s].append( ggdysum/totsum )
+        Mass[s].append(flipped[s][categories[0]].GetX()[i] )
+
+    print tot_VBF[s]
+
+    gr_tot_VBF = TGraph(gr['VH_HPHP'][s].GetN(),Mass[s],tot_VBF[s])
+    gr_tot_VBF.SetLineColor(signalcolor[s])
+    gr_tot_VBF.SetLineStyle(1)
+    gr_tot_VBF.SetLineWidth(2)
+    gr_tot_VBF.GetXaxis().SetTitle("m_{X} [GeV]")
+    gr_tot_VBF.GetYaxis().SetTitle("% of total signal efficiency")
+    gr_tot_VBF.GetYaxis().SetNdivisions(4,5,0)
+    gr_tot_VBF.GetXaxis().SetNdivisions(5,5,0)
+
+    gr_tot_VBF.SetMarkerColor(signalcolor[s])
+    gr_tot_VBF.SetMarkerStyle(signalmarker[s])
+    gr_tot_VBF.SetMinimum(0.)
+    gr_tot_VBF.SetMaximum(0.5)
+    gr_tot_VBF.GetXaxis().SetLimits(1000.,8500.)
+    gr_tot_VBF.SetTitle("")
+    datatot_VBF.append(gr_tot_VBF)
+
+    legt.AddEntry(gr_tot_VBF,l+" VBF", "LP")
+    i=i+1
+    datatot_VBF[0].Draw("AC")
+    for i,(g) in enumerate(datatot_VBF):
+        g.Draw("PLsame")
+
+
+  legt.Draw("same")
+ 
+  name = path+"signalEff%s_VBFvsTotalVVVH_%s"  %(vbfsig,prelim)
+  ct.SaveAs(name+".png")
+  ct.SaveAs(name+".pdf" )
+  ct.SaveAs(name+".C"   )
+  ct.SaveAs(name+".root")
+
+  for cat in categories:
+      tot_cat = {}
+      ct = getCanvas()
+      legt = getLegend(0.3,0.6363636,0.9522613,0.9020979)
+      ptt = getPavetext()
+      ct.Draw()
+      i=0
+      datatot_cat = []
+      for s,l in zip(signals,titles):
+          tot_cat[s] = array( 'd' )
+          for i in range(flipped[s][categories[0]].GetN()) :
+              totsum = 0
+              ggdysum = 0
+              for c in categories:
+                  totsum += flipped[s][c].GetY()[i]
+                  if cat == c: 
+                      ggdysum += flipped[s][c].GetY()[i]
+              tot_cat[s].append( ggdysum/totsum )
+              Mass[s].append(flipped[s][categories[0]].GetX()[i] )
+
+          print tot_cat[s]
+
+          gr_tot_cat = TGraph(gr['VH_HPHP'][s].GetN(),Mass[s],tot_cat[s])
+          gr_tot_cat.SetLineColor(signalcolor[s])
+          gr_tot_cat.SetLineStyle(1)
+          gr_tot_cat.SetLineWidth(2)
+          gr_tot_cat.GetXaxis().SetTitle("m_{X} [GeV]")
+          gr_tot_cat.GetYaxis().SetTitle("% of total signal efficiency")
+          gr_tot_cat.GetYaxis().SetNdivisions(4,5,0)
+          gr_tot_cat.GetXaxis().SetNdivisions(5,5,0)
+
+          gr_tot_cat.SetMarkerColor(signalcolor[s])
+          gr_tot_cat.SetMarkerStyle(signalmarker[s])
+          gr_tot_cat.SetMinimum(0.)
+          gr_tot_cat.SetMaximum(0.5)
+          if cat == "VH_HPHP": gr_tot_cat.SetMaximum(1.)
+          if "VBF" in cat: gr_tot_cat.SetMaximum(0.4)
+          gr_tot_cat.GetXaxis().SetLimits(1000.,8500.)
+          gr_tot_cat.SetTitle("")
+          datatot_cat.append(gr_tot_cat)
+
+          legt.AddEntry(gr_tot_cat,l+" "+cat, "LP")
+          i=i+1
+          datatot_cat[0].Draw("AC")
+          for i,(g) in enumerate(datatot_cat):
+              g.Draw("PLsame")
+              
+              
+      legt.Draw("same")
+ 
+      name = path+"signalEff%s_%svsTotalVVVH_%s"  %(vbfsig,cat,prelim)
+      ct.SaveAs(name+".png")
+      ct.SaveAs(name+".pdf" )
+      ct.SaveAs(name+".C"   )
+      ct.SaveAs(name+".root")
+
+
 
 
 def doJetMass(leg,signals,titles,categories):
@@ -299,7 +465,7 @@ def doJetMass(leg,signals,titles,categories):
            datasHjet.append(gHPLP)
            fits.append(fHPHP)
            fitsHjet.append(fHPLP)
-           l.AddEntry(fHPHP,titles[i],"L")
+           l.AddEntry(fHPHP,titles[i],"LP")
        print datasHjet 
        if len(categories) > 1: l2.AddEntry(datas[0],categories[0],"LP") 
        if len(categories)>1: l2.AddEntry(datasHjet[0],categories[1],"LP")    
