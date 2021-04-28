@@ -56,7 +56,7 @@ for i,m in enumerate(massPoints):
     #execScript += 'eval `scramv1 runtime -sh` \n'
     execScript += "cmsenv\n"
     #execScript += "combine -m {mass} {options}  {file} --rMin {rMin} --rMax {rMax}\n".format(mass=m,options=options.options+suffixOpts,file=args[0],rMin=options.rMin,rMax=options.rMax)
-    execScript += "combine -m {mass} {options}  {file}\n".format(mass=m,options=options.options+suffixOpts,file=args[0],rMin=options.rMin,rMax=options.rMax)
+    execScript += "combine -m {mass} --cminDefaultMinimizerStrategy=0 {options}  {file}\n".format(mass=m,options=options.options+suffixOpts,file=args[0],rMin=options.rMin,rMax=options.rMax)
     f.write(execScript)
     f.close()
     os.system('chmod +x submit_{i}.sh'.format(i=i))
