@@ -14,8 +14,7 @@ import cuts
 
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
-ROOT.v5.TFormula.SetMaxima(10000) #otherwise we get an error that the TFormula called by the TTree draw has too many operators when running on the CR                                                                                                                          
-
+ROOT.v5.TFormula.SetMaxima(10000) #otherwise we get an error that the TFormula called by the TTree draw has too many operators when running on the CR
 def returnString(func):
     st='0'
     for i in range(0,func.GetNpar()):
@@ -294,9 +293,13 @@ for mass in sorted(complete_mass.keys()):
         year=folder.split("/")[-2]
         print "year ",year
         ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
-        luminosity=   ctx.lumi[year]/ctx.lumi["Run2"]
-        if options.output.find("1617") !=-1: luminosity= ctx.lumi[year]/ctx.lumi["1617"]
-        if options.output.find("Run2") ==-1 or options.output.find("1617") ==-1: luminosity = 1
+        luminosity = 1 #ctx.lumi[year]/ctx.lumi["Run2"]
+        if options.output.find("1617") !=-1:
+            luminosity = ctx.lumi[year]/ctx.lumi["1617"]
+            print "1617"
+        elif options.output.find("Run2") !=-1:
+            luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
+            print "ctx.lumi[year]/ctx.lumi['Run2'] "
         print " fraction of lumi ",luminosity
         plotter.append(TreePlotter(complete_mass[mass][folder]+'.root','AnalysisTree'))
         if year == "2016": plotter[-1].addCorrectionFactor('genWeight','tree')
