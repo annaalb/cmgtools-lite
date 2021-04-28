@@ -24,7 +24,7 @@ parser.add_option("-l","--log",dest="log",type=int,help="Log plot",default=1)
 parser.add_option("-t","--titleX",dest="titleX",default='M_{X} [GeV]',help="title of x axis")
 parser.add_option("-T","--titleY",dest="titleY",default='#sigma x #bf{#it{#Beta}}(X #rightarrow WW) [pb]  ',help="title of y axis")
 parser.add_option("-n","--name",dest="name",default='test',help="add a label to the output file name")
-
+parser.add_option("--spline",dest="spline",action='store_true',default=False)
 parser.add_option("-p","--period",dest="period",default='2016',help="period")
 parser.add_option("-f","--final",dest="final",type=int, default=1,help="Preliminary or not")
 parser.add_option("--hvt","--hvt",dest="hvt",type=int, default=0,help="do HVT (1) or do BulkG (2), (0) for single signal")
@@ -119,6 +119,21 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
    gtheoryZpDOWN  = thFileZp.Get("gtheoryDOWN")
    gtheoryZpSHADE = thFileZp.Get("grshade")
 
+  if gtheoryZp.GetN() != gtheoryWp.GetN() and options.spline == False:
+   print " length theory curve of "+signal1+" is "+str(gtheoryWp.GetN())+" and is different from "+signal2+" "+str(gtheoryZp.GetN())
+   print " use options spline! "
+   sys.exit()
+  else:
+   for i in range(gtheoryWp.GetN()):
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
+    gtheoryWp.GetPoint(i,x,y)
+    xz = ROOT.Double(0.)
+    yz = ROOT.Double(0.)
+    gtheoryZp.GetPoint(i,xz,yz)
+    if x != xz:
+     print signal1+" has mass "+str(x)+"different from "+str(xz)+" for signal "+signal2
+
   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
    thFileWHp       = ROOT.TFile.Open(filenameTHWHp,'READ')
    thFileZHp       = ROOT.TFile.Open(filenameTHZHp,'READ')
@@ -136,11 +151,6 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
     gtheoryZHpSHADE = thFileZHp.Get("grshade")
 
 
- xsecTot = array('d',[])
- xsecTotUp = array('d',[])
- xsecTotDown = array('d',[])
- shade_x = array('d',[])
- shade_y = array('d',[])
 
  for m in masses:
   year=options.period
@@ -172,171 +182,298 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
 
  if oneSignal == False:
   print " initializing theory for more than 1 signal!"
-  spline_x_wp = []
-  spline_y_wp = []
-  spline_y_wpUP = []
-  spline_y_wpDOWN = []
-  for i in range(gtheoryWp.GetN()):
-   x = ROOT.Double(0.)
-   y = ROOT.Double(0.)
-   gtheoryWp.GetPoint(i,x,y)
-   spline_y_wp.append(y)
-   spline_x_wp.append(x)
-   x = ROOT.Double(0.)
-   y = ROOT.Double(0.)
-   if options.theoryUnc:
-    gtheoryWpUP.GetPoint(i,x,y)
-    spline_y_wpUP.append(y)
-   x = ROOT.Double(0.)
-   y = ROOT.Double(0.)
-   if options.theoryUnc:
-    gtheoryWpDOWN.GetPoint(i,x,y)
-    spline_y_wpDOWN.append(y)
 
-  spline_y_zp = [] 
-  spline_x_zp = []
-  spline_y_zpUP = []
-  spline_y_zpDOWN = []
-  for i in range(gtheoryZp.GetN()):
-   x = ROOT.Double(0.)
-   y = ROOT.Double(0.)
-   gtheoryZp.GetPoint(i,x,y)
-   spline_y_zp.append(y)
-   spline_x_zp.append(x)
-   x = ROOT.Double(0.)
-   y = ROOT.Double(0.)
-   if options.theoryUnc:
-    gtheoryZpUP.GetPoint(i,x,y)  
-    spline_y_zpUP.append(y)
-   x = ROOT.Double(0.)
-   y = ROOT.Double(0.)
-   if options.theoryUnc:
-    gtheoryZpDOWN.GetPoint(i,x,y)
-    spline_y_zpDOWN.append(y)
 
-  if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
-   spline_x_whp = []
-   spline_y_whp = []
-   spline_y_whpUP = []
-   spline_y_whpDOWN = []
-   for i in range(gtheoryWHp.GetN()):
+  xsecTot = array('d',[])
+  xsecTotUp = array('d',[])
+  xsecTotDown = array('d',[])
+  shade_x = array('d',[])
+  shade_y = array('d',[])
+
+  if options.spline:
+   print " using spline!!! "
+   spline_x_wp = []
+   spline_y_wp = []
+   spline_y_wpUP = []
+   spline_y_wpDOWN = []
+   for i in range(gtheoryWp.GetN()):
     x = ROOT.Double(0.)
     y = ROOT.Double(0.)
-    gtheoryWHp.GetPoint(i,x,y)
-    spline_y_whp.append(y)
-    spline_x_whp.append(x)
+    gtheoryWp.GetPoint(i,x,y)
+    spline_y_wp.append(y)
+    spline_x_wp.append(x)
     x = ROOT.Double(0.)
     y = ROOT.Double(0.)
     if options.theoryUnc:
-     gtheoryWHpUP.GetPoint(i,x,y)
-     spline_y_whpUP.append(y)
+     gtheoryWpUP.GetPoint(i,x,y)
+     spline_y_wpUP.append(y)
     x = ROOT.Double(0.)
     y = ROOT.Double(0.)
     if options.theoryUnc:
-     gtheoryWHpDOWN.GetPoint(i,x,y)
-     spline_y_whpDOWN.append(y)
- 
-   spline_y_zhp = [] 
-   spline_x_zhp = []
-   spline_y_zhpUP = []
-   spline_y_zhpDOWN = []
-   for i in range(gtheoryZHp.GetN()):
+     gtheoryWpDOWN.GetPoint(i,x,y)
+     spline_y_wpDOWN.append(y)
+
+   spline_y_zp = []
+   spline_x_zp = []
+   spline_y_zpUP = []
+   spline_y_zpDOWN = []
+   for i in range(gtheoryZp.GetN()):
     x = ROOT.Double(0.)
     y = ROOT.Double(0.)
-    gtheoryZHp.GetPoint(i,x,y)
-    spline_y_zhp.append(y)
-    spline_x_zhp.append(x)
-    x = ROOT.Double(0.)
-    y = ROOT.Double(0.)
-    if options.theoryUnc:
-     gtheoryZHpUP.GetPoint(i,x,y)
-     spline_y_zhpUP.append(y)
+    gtheoryZp.GetPoint(i,x,y)
+    spline_y_zp.append(y)
+    spline_x_zp.append(x)
     x = ROOT.Double(0.)
     y = ROOT.Double(0.)
     if options.theoryUnc:
-     gtheoryZHpDOWN.GetPoint(i,x,y)
-     spline_y_zhpDOWN.append(y)
-
-
-
-  
-  spline_zp=ROOT.RooSpline1D(signal2+"_sigma",signal2+"_sigma",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zp))
-  print " initialized spline_zp "
-  spline_wp=ROOT.RooSpline1D(signal1+"_sigma",signal1+"_sigma",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wp))
-  if options.theoryUnc:
-   spline_zpUP=ROOT.RooSpline1D(signal2+"_sigmaUP",signal2+"_sigmaUP",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpUP))
-   spline_wpUP=ROOT.RooSpline1D(signal1+"_sigmaUP",signal1+"_sigmaUP",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpUP))
-   spline_zpDOWN=ROOT.RooSpline1D(signal2+"_sigmaDOWN",signal2+"_sigmaDOWN",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpDOWN))
-   spline_wpDOWN=ROOT.RooSpline1D(signal1+"_sigmaDOWN",signal1+"_sigmaDOWN",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpDOWN))
-   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
-    spline_zhp=ROOT.RooSpline1D(signal4+"_sigma",signal4+"_sigma",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhp))
-    spline_whp=ROOT.RooSpline1D(signal3+"_sigma",signal3+"_sigma",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whp))
+     gtheoryZpUP.GetPoint(i,x,y)
+     spline_y_zpUP.append(y)
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
     if options.theoryUnc:
-     spline_zhpUP=ROOT.RooSpline1D(signal4+"_sigmaUP",signal4+"_sigmaUP",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhpUP))
-     spline_whpUP=ROOT.RooSpline1D(signal3+"_sigmaUP",signal3+"_sigmaUP",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whpUP))
-     spline_zhpDOWN=ROOT.RooSpline1D(signal4+"_sigmaDOWN",signal4+"_sigmaDOWN",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhpDOWN))
-     spline_whpDOWN=ROOT.RooSpline1D(signal3+"_sigmaDOWN",signal3+"_sigmaDOWN",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whpDOWN))
- 
- for m in masses:
-  print " m ",m
-  m = m/1000.
-  MH.setVal(m)
+     gtheoryZpDOWN.GetPoint(i,x,y)
+     spline_y_zpDOWN.append(y)
 
-  if oneSignal == False:
-   tot = spline_zp.getVal(argset)+spline_wp.getVal(argset)
-   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
-    tot = tot + spline_zhp.getVal(argset)+spline_whp.getVal(argset)
-
-   if options.theoryUnc:
-    uncUp_zp = spline_zpUP.getVal(argset)-spline_zp.getVal(argset)
-    uncUp_wp = spline_wpUP.getVal(argset)-spline_wp.getVal(argset)
-    uncUp_zhp = 0
-    uncUp_whp = 0
     if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
-     uncUp_zhp = spline_zhpUP.getVal(argset)-spline_zhp.getVal(argset)
-     uncUp_whp = spline_whpUP.getVal(argset)-spline_whp.getVal(argset)
+     spline_x_whp = []
+     spline_y_whp = []
+     spline_y_whpUP = []
+     spline_y_whpDOWN = []
+     for i in range(gtheoryWHp.GetN()):
+      x = ROOT.Double(0.)
+      y = ROOT.Double(0.)
+      gtheoryWHp.GetPoint(i,x,y)
+      spline_y_whp.append(y)
+      spline_x_whp.append(x)
+      x = ROOT.Double(0.)
+      y = ROOT.Double(0.)
+      if options.theoryUnc:
+       gtheoryWHpUP.GetPoint(i,x,y)
+       spline_y_whpUP.append(y)
+      x = ROOT.Double(0.)
+      y = ROOT.Double(0.)
+      if options.theoryUnc:
+       gtheoryWHpDOWN.GetPoint(i,x,y)
+       spline_y_whpDOWN.append(y)
 
-    xsecTotUp.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
+     spline_y_zhp = []
+     spline_x_zhp = []
+     spline_y_zhpUP = []
+     spline_y_zhpDOWN = []
+     for i in range(gtheoryZHp.GetN()):
+      x = ROOT.Double(0.)
+      y = ROOT.Double(0.)
+      gtheoryZHp.GetPoint(i,x,y)
+      spline_y_zhp.append(y)
+      spline_x_zhp.append(x)
+      x = ROOT.Double(0.)
+      y = ROOT.Double(0.)
+      if options.theoryUnc:
+       gtheoryZHpUP.GetPoint(i,x,y)
+       spline_y_zhpUP.append(y)
+      x = ROOT.Double(0.)
+      y = ROOT.Double(0.)
+      if options.theoryUnc:
+       gtheoryZHpDOWN.GetPoint(i,x,y)
+       spline_y_zhpDOWN.append(y)
 
-    uncDown_zp = spline_zp.getVal(argset)-spline_zpDOWN.getVal(argset)
-    uncDown_wp = spline_wp.getVal(argset)-spline_wpDOWN.getVal(argset)
-    uncDown_zhp =0
-    uncDown_whp =0
+
+   spline_zp=ROOT.RooSpline1D(signal2+"_sigma",signal2+"_sigma",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zp))
+   print " initialized spline_zp "
+   spline_wp=ROOT.RooSpline1D(signal1+"_sigma",signal1+"_sigma",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wp))
+   if options.theoryUnc:
+    spline_zpUP=ROOT.RooSpline1D(signal2+"_sigmaUP",signal2+"_sigmaUP",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpUP))
+    spline_wpUP=ROOT.RooSpline1D(signal1+"_sigmaUP",signal1+"_sigmaUP",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpUP))
+    spline_zpDOWN=ROOT.RooSpline1D(signal2+"_sigmaDOWN",signal2+"_sigmaDOWN",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpDOWN))
+    spline_wpDOWN=ROOT.RooSpline1D(signal1+"_sigmaDOWN",signal1+"_sigmaDOWN",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpDOWN))
     if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
-     uncDown_zhp = spline_zhp.getVal(argset)-spline_zhpDOWN.getVal(argset)
-     uncDown_whp = spline_whp.getVal(argset)-spline_whpDOWN.getVal(argset)
+     spline_zhp=ROOT.RooSpline1D(signal4+"_sigma",signal4+"_sigma",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhp))
+     spline_whp=ROOT.RooSpline1D(signal3+"_sigma",signal3+"_sigma",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whp))
+     if options.theoryUnc:
+      spline_zhpUP=ROOT.RooSpline1D(signal4+"_sigmaUP",signal4+"_sigmaUP",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhpUP))
+      spline_whpUP=ROOT.RooSpline1D(signal3+"_sigmaUP",signal3+"_sigmaUP",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whpUP))
+      spline_zhpDOWN=ROOT.RooSpline1D(signal4+"_sigmaDOWN",signal4+"_sigmaDOWN",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhpDOWN))
+      spline_whpDOWN=ROOT.RooSpline1D(signal3+"_sigmaDOWN",signal3+"_sigmaDOWN",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whpDOWN))
+
+
+   for m in masses:
+    print " m ",m
+    m = m/1000.
+    MH.setVal(m)
+    tot = spline_zp.getVal(argset)+spline_wp.getVal(argset)
+    if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+     tot = tot + spline_zhp.getVal(argset)+spline_whp.getVal(argset)
+
+    if options.theoryUnc:
+     uncUp_zp = spline_zpUP.getVal(argset)-spline_zp.getVal(argset)
+     uncUp_wp = spline_wpUP.getVal(argset)-spline_wp.getVal(argset)
+     uncUp_zhp = 0
+     uncUp_whp = 0
+     if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+      uncUp_zhp = spline_zhpUP.getVal(argset)-spline_zhp.getVal(argset)
+      uncUp_whp = spline_whpUP.getVal(argset)-spline_whp.getVal(argset)
+
+     xsecTotUp.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
+
+     uncDown_zp = spline_zp.getVal(argset)-spline_zpDOWN.getVal(argset)
+     uncDown_wp = spline_wp.getVal(argset)-spline_wpDOWN.getVal(argset)
+     uncDown_zhp =0
+     uncDown_whp =0
+     if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+      uncDown_zhp = spline_zhp.getVal(argset)-spline_zhpDOWN.getVal(argset)
+      uncDown_whp = spline_whp.getVal(argset)-spline_whpDOWN.getVal(argset)
+
+     xsecTotDown.append( tot-math.sqrt(uncDown_zp*uncDown_zp+uncDown_wp*uncDown_wp + uncDown_zhp*uncDown_zhp+uncDown_whp*uncDown_whp) )
+
+
+     shade_x.append(m)
+     shade_y.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
+     
+    print " tot ",tot
+    xsecTot.append(tot)
+
+   if options.theoryUnc:
+    for i in range( len(massesTeV)-1, -1, -1 ):
+     shade_x.append(massesTeV[i])
+     shade_y.append(xsecTotDown[i])
+
+   gtheory = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTot)
+   gtheory.SetLineColor(ROOT.kRed)
+   gtheory.SetLineWidth(3)
+   if options.theoryUnc:
+    gtheoryUP = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTotUp)
+    gtheoryUP.SetLineColor(ROOT.kRed-2)
+    gtheoryUP.SetLineWidth(3)
+    gtheoryDOWN = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTotDown)
+    gtheoryDOWN.SetLineColor(ROOT.kRed-2)
+    gtheoryDOWN.SetLineWidth(3)
+    gtheorySHADE = ROOT.TGraphErrors(len(shade_x),shade_x,shade_y)
+    gtheorySHADE.SetLineColor(ROOT.kRed-2)
+    gtheorySHADE.SetLineWidth(3)
+
+  elif not options.spline:
+   print " using tgraph from theory file! "
+   MassXsec = array('d',[])
+   for i in range(gtheoryWp.GetN()):
+    # W
+    xw = ROOT.Double(0.)
+    yw = ROOT.Double(0.)
+    gtheoryWp.GetPoint(i,xw,yw)
+    print " xw ",xw
+    MassXsec.append(xw)
+    xwUp = ROOT.Double(0.)
+    ywUp = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryWpUP.GetPoint(i,xwUp,ywUp)
+    xwDown = ROOT.Double(0.)
+    ywDown = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryWpDOWN.GetPoint(i,xwDown,ywDown)
+
+    #Z
+    xz = ROOT.Double(0.)
+    yz = ROOT.Double(0.)
+    gtheoryZp.GetPoint(i,xz,yz)
+    if xz != xw:
+     print " masses are different!!!!! "
+     print " xz "+str(xz)+" != xw "+str(xw)
+     sys.exit()
+    xzUp = ROOT.Double(0.)
+    yzUp = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryZpUP.GetPoint(i,xzUp,yzUp)
+    xzDown = ROOT.Double(0.)
+    yzDown = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryZpDOWN.GetPoint(i,xzDown,yzDown)
+
+    ywh = 0.
+    yzh = 0.
+
+    if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+     # WH
+     xwh = ROOT.Double(0.)
+     ywh = ROOT.Double(0.)
+     gtheoryWHp.GetPoint(i,xwh,ywh)
+     xwhUp = ROOT.Double(0.)
+     ywhUp = ROOT.Double(0.)
+     if options.theoryUnc:
+      gtheoryWHpUP.GetPoint(i,xwhUp,ywhUp)
+      xwhDown = ROOT.Double(0.)
+      ywhDown = ROOT.Double(0.)
+      if options.theoryUnc:
+       gtheoryWHpDOWN.GetPoint(i,xwhDown,ywhDown)
+
+     #ZH
+     xzh = ROOT.Double(0.)
+     yzh = ROOT.Double(0.)
+     gtheoryZHp.GetPoint(i,xzh,yzh)
+     if xzh != xwh:
+      print " masses are different!!!!! "
+      print " xzh "+str(xzh)+" != xwh "+str(xwh)
+      sys.exit()
+     xzhUp = ROOT.Double(0.)
+     yzhUp = ROOT.Double(0.)
+     if options.theoryUnc:
+      gtheoryZHpUP.GetPoint(i,xzhUp,yzhUp)
+     xzhDown = ROOT.Double(0.)
+     yzhDown = ROOT.Double(0.)
+     if options.theoryUnc:
+      gtheoryZHpDOWN.GetPoint(i,xzhDown,yzhDown)
+
+
+
+    tot = yz +yw + yzh + ywh
+    print " tot ",tot
+    if options.theoryUnc:
+     uncUp_zp = yzUp-yz
+     uncUp_wp = ywUp-yw
+     uncUp_zhp = 0
+     uncUp_whp = 0
+     if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+      uncUp_zhp = yzhUp-yzh
+      uncUp_whp = ywhUp-ywh
+
+     xsecTotUp.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
+
+     uncDown_zp = yz-yzDown
+     uncDown_wp = yw-ywDown
+     uncDown_zhp =0
+     uncDown_whp =0
+     if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+      uncDown_zhp = yzh-yzhDown
+      uncDown_whp = ywh-ywhDown
  
-    xsecTotDown.append( tot-math.sqrt(uncDown_zp*uncDown_zp+uncDown_wp*uncDown_wp + uncDown_zhp*uncDown_zhp+uncDown_whp*uncDown_whp) )
+     xsecTotDown.append( tot-math.sqrt(uncDown_zp*uncDown_zp+uncDown_wp*uncDown_wp + uncDown_zhp*uncDown_zhp+uncDown_whp*uncDown_whp) )
 
 
-    shade_x.append(m)
-    shade_y.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
+     shade_x.append(xw)
+     shade_y.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
 
 
-   print " tot ",tot
-   xsecTot.append(tot)
+    print " tot ",tot
+    xsecTot.append(tot)
+
+   if options.theoryUnc:
+    for i in range( len(MassXsec)-1, -1, -1 ):
+     shade_x.append(MassXsec[i])
+     shade_y.append(xsecTotDown[i])
+
+   gtheory = ROOT.TGraphErrors(len(MassXsec),MassXsec,xsecTot)
+   gtheory.SetLineColor(ROOT.kRed)
+   gtheory.SetLineWidth(3)
+   if options.theoryUnc:
+    gtheoryUP = ROOT.TGraphErrors(len(MassXsec),MassXsec,xsecTotUp)
+    gtheoryUP.SetLineColor(ROOT.kRed-2)
+    gtheoryUP.SetLineWidth(3)
+    gtheoryDOWN = ROOT.TGraphErrors(len(MassXsec),MassXsec,xsecTotDown)
+    gtheoryDOWN.SetLineColor(ROOT.kRed-2)
+    gtheoryDOWN.SetLineWidth(3)
+    gtheorySHADE = ROOT.TGraphErrors(len(shade_x),shade_x,shade_y)
+    gtheorySHADE.SetLineColor(ROOT.kRed-2)
+    gtheorySHADE.SetLineWidth(3)
 
 
- if options.theoryUnc and not oneSignal:
-  for i in range( len(massesTeV)-1, -1, -1 ):
-   shade_x.append(massesTeV[i])
-   shade_y.append(xsecTotDown[i])
-
- if oneSignal == False:
-  gtheory = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTot)
-  gtheory.SetLineColor(ROOT.kRed)
-  gtheory.SetLineWidth(3)
-  if options.theoryUnc:
-   gtheoryUP = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTotUp)
-   gtheoryUP.SetLineColor(ROOT.kRed-2)
-   gtheoryUP.SetLineWidth(3)
-   gtheoryDOWN = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTotDown)
-   gtheoryDOWN.SetLineColor(ROOT.kRed-2)
-   gtheoryDOWN.SetLineWidth(3)
-   gtheorySHADE = ROOT.TGraphErrors(len(shade_x),shade_x,shade_y)
-   gtheorySHADE.SetLineColor(ROOT.kRed-2)
-   gtheorySHADE.SetLineWidth(3)
-   
 print " opening limit file ",args[0]
 f=ROOT.TFile(args[0])
 limit=f.Get("limit")
