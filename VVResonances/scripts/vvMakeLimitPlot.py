@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-# vvMakeLimitPlot.py Limits_BulkGWW_VV_HPHP_HPLP13TeV.root -x 1200 -X 4200 -s BulkGWW --hvt 2 --HVTworkspace results_QCD_pythia_signals_2016_tau21DDT_rho_VVpaper_HPHP_HPLP/workspace_JJ_BulkGWW_VV_13TeV.root -p 2016
-# vvMakeLimitPlot.py Limits_BulkGVV_HPLP_13TeV.root -x 1200 -X 4200 -b 0 -s BulkGVV  --hvt 2 --HVTworkspace workspace_JJ_BulkGVV_HPLP_13TeV_2016.root -p 2016
-#vvMakeLimitPlot.py limits.root -x 1200 -X 5200 -b 0 -s VprimeWV --hvt 1 ---HVTworkspace workspace_JJ_VprimeWV_13TeV.root
-#for single signal (workspace is needed to rescale the signal accordingly with what it is done when creating the datacard): 
-# vvMakeSingleLimitPlot.py Limits_BulkGWW_13TeV_2016_tau21DDT_rho_VVpaper.root -x 1200 -X 4200 -s BulkGWW  -p 2016 --hvt 0 --HVTworkspace workspace_JJ_BulkGWW_VV_13TeV_2016.root
+# vvMakeLimitPlot.py Limits_BulkGVV_13TeV_Run2_data_ggDYVBF_VVVH_partial_newbaseline.root  -o ExpLimits -s BulkGVV -n test -p ALL --hvt 0  --HVTworkspace results_Run2/workspace_JJ_BulkGVV_VBF_VVVH_13TeV_Run2_data_newbaseline.root --theoryUnc
+# vvMakeLimitPlot.py Limits_ZprimeWW_13TeV_Run2_data_ggDYVBF_VVVH_partial_newbaseline.root  -o ExpLimits -s ZprimeWW -n test -p ALL --hvt 0  --HVTworkspace results_Run2/workspace_JJ_ZprimeWW_VBF_VVVH_13TeV_Run2_data_newbaseline.root --theoryUnc
+
+
 import ROOT
 import optparse, time, sys, math
 from CMGTools.VVResonances.plotting.CMS_lumi import *
@@ -15,15 +14,15 @@ parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",default='limitPlot',help="Limit plot")
 parser.add_option("-s","--signal",dest="sig",type=str,help="Signal sample",default='BulkGWW')
 parser.add_option("--sigscale",dest="sigscale",type=float,help="maximum y",default=0.001)
-parser.add_option("-x","--minX",dest="minX",type=float,help="minimum x",default=1000.0)
-parser.add_option("-X","--maxX",dest="maxX",type=float,help="maximum x",default=5000.0)
+parser.add_option("-x","--minX",dest="minX",type=float,help="minimum x",default=1.3)
+parser.add_option("-X","--maxX",dest="maxX",type=float,help="maximum x",default=6.0)
 parser.add_option("-y","--minY",dest="minY",type=float,help="minimum y",default=0.00001)
 parser.add_option("-Y","--maxY",dest="maxY",type=float,help="maximum y",default=10)
 parser.add_option("-b","--blind",dest="blind",type=int,help="Not do observed ",default=1)
 parser.add_option("-l","--log",dest="log",type=int,help="Log plot",default=1)
 
 parser.add_option("-t","--titleX",dest="titleX",default='M_{X} [GeV]',help="title of x axis")
-parser.add_option("-T","--titleY",dest="titleY",default='#sigma x BR(X #rightarrow WW) [pb]  ',help="title of y axis")
+parser.add_option("-T","--titleY",dest="titleY",default='#sigma x #bf{#it{#Beta}}(X #rightarrow WW) [pb]  ',help="title of y axis")
 parser.add_option("-n","--name",dest="name",default='test',help="add a label to the output file name")
 
 parser.add_option("-p","--period",dest="period",default='2016',help="period")
@@ -31,15 +30,53 @@ parser.add_option("-f","--final",dest="final",type=int, default=1,help="Prelimin
 parser.add_option("--hvt","--hvt",dest="hvt",type=int, default=0,help="do HVT (1) or do BulkG (2), (0) for single signal")
 parser.add_option("--HVTworkspace","--HVTworkspace",dest="HVTworkspace",default="workspace_JJ_VprimeWV_13TeV.root",help="HVT workspace with spline interpolation")
 
-#    parser.add_option("-x","--minMVV",dest="minMVV",type=float,help="minimum MVV",default=1000.0)
-#    parser.add_option("-X","--maxMVV",dest="maxMVV",type=float,help="maximum MVV",default=13000.0)
+parser.add_option("--theoryUnc",dest="theoryUnc",action='store_true',default=False)
 
 (options,args) = parser.parse_args()
 #define output dictionary
 filename=options.output+"_"+options.sig+"_"+options.name
 setTDRStyle()
 
-masses = array('d',[i*100. for i in range(8,60)])
+
+oneSignal = True
+if 'WW' in options.sig or 'ZZ' in options.sig or 'WH' in options.sig or 'ZH' in options.sig or 'WZ' in options.sig:
+ oneSignal = True
+else:
+ oneSignal = False
+
+ isvbf = ''
+ if 'VBF' in options.sig: isvbf='VBF_'
+
+ if 'VprimeWV' in options.sig:
+   signal1 = '%sWprimeWZ'%isvbf
+   signal2 = '%sZprimeWW'%isvbf
+ elif 'VprimeVHinc' in options.sig:
+   signal1 = '%sWprimeWH'%isvbf
+   signal2 = '%sZprimeZH'%isvbf
+ elif options.sig == 'Wprime' or options.sig == 'VBF_Wprime':
+   signal1 = '%sWprimeWZ'%isvbf
+   signal2 = '%sWprimeWH'%isvbf
+ elif options.sig == 'Zprime' or options.sig == 'VBF_Zprime':
+   signal1 = '%sZprimeWW'%isvbf
+   signal2 = '%sZprimeZH'%isvbf
+ elif options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+   signal1 = '%sWprimeWZ'%isvbf
+   signal2 = '%sZprimeWW'%isvbf
+   signal3 = '%sWprimeWH'%isvbf
+   signal4 = '%sZprimeZH'%isvbf
+ elif 'BulkGVV' in options.sig:
+   signal1 = '%sBulkGWW'%isvbf
+   signal2 = '%sBulkGZZ'%isvbf
+ elif 'RadionVV' in options.sig:
+   signal1 = '%sRadionWW'%isvbf
+   signal2 = '%sRadionZZ'%isvbf
+
+print " oneSignal ",oneSignal
+
+
+
+masses = array('d',[i*100. for i in range(8,61)])
+massesTeV = array('d',[i*0.1 for i in range(8,61)])
 scaleLimits = {}
 for m in masses:
  scaleLimits[str(int(m))] = options.sigscale
@@ -48,26 +85,57 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
  fin = ROOT.TFile.Open(options.HVTworkspace,"READ")
  w = fin.Get("w")
   
- if options.hvt == 1:
-  filenameTHWp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/WprimeWZ.root"
-  filenameTHZp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/ZprimeWW.root"
- else:
-  filenameTHWp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/BulkGWW.root"
-  filenameTHZp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/BulkGZZ.root"
+ if oneSignal == False:
+  filenameTHWp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal1+".root"
+  filenameTHZp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal2+".root"
+  if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+   filenameTHWHp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal3+".root"
+   filenameTHZHp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal4+".root"
+
+  if options.sig.find("VBF") !=-1:
+   VBFstring="VBF_"
+   if options.sig.find("prime") !=-1: VBFstring="HVTC_"
+   filenameTHWp = filenameTHWp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+   filenameTHZp = filenameTHZp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+    filenameTHWHp = filenameTHWHp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+    filenameTHZHp = filenameTHZHp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+
+  print "filenameTHWp ",filenameTHWp
+  print "filenameTHZp ",filenameTHZp
      
- thFileWp       = ROOT.TFile.Open(filenameTHWp,'READ')   
- thFileZp       = ROOT.TFile.Open(filenameTHZp,'READ')  
- print "Opening file " ,thFileWp.GetName()
- gtheoryWp      = thFileWp.Get("gtheory")
- gtheoryWpUP    = thFileWp.Get("gtheoryUP")
- gtheoryWpDOWN  = thFileWp.Get("gtheoryDOWN")
- gtheoryWpSHADE = thFileWp.Get("grshade")
- print "Opening file " ,thFileZp.GetName()
- gtheoryZp      = thFileZp.Get("gtheory")
- gtheoryZpUP    = thFileZp.Get("gtheoryUP")
- gtheoryZpDOWN  = thFileZp.Get("gtheoryDOWN")
- gtheoryZpSHADE = thFileZp.Get("grshade")
-    
+  thFileWp       = ROOT.TFile.Open(filenameTHWp,'READ')
+  thFileZp       = ROOT.TFile.Open(filenameTHZp,'READ')
+  print "Opening file " ,thFileWp.GetName()
+  gtheoryWp      = thFileWp.Get("gtheory")
+  if options.theoryUnc:
+   gtheoryWpUP    = thFileWp.Get("gtheoryUP")
+   gtheoryWpDOWN  = thFileWp.Get("gtheoryDOWN")
+   gtheoryWpSHADE = thFileWp.Get("grshade")
+  print "Opening file " ,thFileZp.GetName()
+  gtheoryZp      = thFileZp.Get("gtheory")
+  if options.theoryUnc:
+   gtheoryZpUP    = thFileZp.Get("gtheoryUP")
+   gtheoryZpDOWN  = thFileZp.Get("gtheoryDOWN")
+   gtheoryZpSHADE = thFileZp.Get("grshade")
+
+  if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+   thFileWHp       = ROOT.TFile.Open(filenameTHWHp,'READ')
+   thFileZHp       = ROOT.TFile.Open(filenameTHZHp,'READ')
+   print "Opening file " ,thFileWHp.GetName()
+   gtheoryWHp      = thFileWHp.Get("gtheory")
+   if options.theoryUnc:
+    gtheoryWHpUP    = thFileWHp.Get("gtheoryUP")
+    gtheoryWHpDOWN  = thFileWHp.Get("gtheoryDOWN")
+    gtheoryWHpSHADE = thFileWHp.Get("grshade")
+   print "Opening file " ,thFileZHp.GetName()
+   gtheoryZHp      = thFileZHp.Get("gtheory")
+   if options.theoryUnc:
+    gtheoryZHpUP    = thFileZHp.Get("gtheoryUP")
+    gtheoryZHpDOWN  = thFileZHp.Get("gtheoryDOWN")
+    gtheoryZHpSHADE = thFileZHp.Get("grshade")
+
+
  xsecTot = array('d',[])
  xsecTotUp = array('d',[])
  xsecTotDown = array('d',[])
@@ -81,106 +149,195 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
   MH=w.var("MH")
   argset.add(MH)
   MH.setVal(m)
-  if options.hvt == 1:
-   func1 = w.function('ZprimeWW_JJ_VV_HPHP_13TeV_'+year+'_sigma')
-   func2 = w.function('WprimeWZ_JJ_VV_HPHP_13TeV_'+year+'_sigma')
-  elif options.hvt == 2: 
-   func1 = w.function('BulkGWW_JJ_VV_HPHP_13TeV_'+year+'_sigma') #orig
-   func2 = w.function('BulkGZZ_JJ_VV_HPHP_13TeV_'+year+'_sigma') #orig
-  elif options.hvt == 0 :
+  if oneSignal == False:
+   func1 = w.function(signal1+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
+   func2 = w.function(signal2+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
+   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+    func3 = w.function(signal3+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
+    func4 = w.function(signal4+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
+  else:
    func = w.function(options.sig+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
 
-  if options.hvt == 1 or options.hvt == 2:
-   scaleLimits[str(int(m))] = func1.getVal(argset)+func2.getVal(argset) 
-  else :
-   scaleLimits[str(int(m))] = func.getVal(argset)
+  if oneSignal == False:
+   scaleLimits[str(int(m))] = ROOT.TMath.Exp(func1.getVal(argset))+ROOT.TMath.Exp(func2.getVal(argset))
+   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]+ROOT.TMath.Exp(func3.getVal(argset))+ROOT.TMath.Exp(func4.getVal(argset))
+  else:
+   scaleLimits[str(int(m))] = ROOT.TMath.Exp(func.getVal(argset))
 
- spline_x_wp = []
- spline_y_wp = []
- spline_y_wpUP = []
- spline_y_wpDOWN = []  
- for i in range(gtheoryWp.GetN()):
+  if "prime" not in options.sig or "VBF" in options.sig:
+   print " rescaling limit !!!!! "
+   scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
+   if m > 5000. and "prime" not in options.sig: scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
+
+ if oneSignal == False:
+  print " initializing theory for more than 1 signal!"
+  spline_x_wp = []
+  spline_y_wp = []
+  spline_y_wpUP = []
+  spline_y_wpDOWN = []
+  for i in range(gtheoryWp.GetN()):
+   x = ROOT.Double(0.)
+   y = ROOT.Double(0.)
+   gtheoryWp.GetPoint(i,x,y)
+   spline_y_wp.append(y)
+   spline_x_wp.append(x)
+   x = ROOT.Double(0.)
+   y = ROOT.Double(0.)
+   if options.theoryUnc:
+    gtheoryWpUP.GetPoint(i,x,y)
+    spline_y_wpUP.append(y)
+   x = ROOT.Double(0.)
+   y = ROOT.Double(0.)
+   if options.theoryUnc:
+    gtheoryWpDOWN.GetPoint(i,x,y)
+    spline_y_wpDOWN.append(y)
+
+  spline_y_zp = [] 
+  spline_x_zp = []
+  spline_y_zpUP = []
+  spline_y_zpDOWN = []
+  for i in range(gtheoryZp.GetN()):
+   x = ROOT.Double(0.)
+   y = ROOT.Double(0.)
+   gtheoryZp.GetPoint(i,x,y)
+   spline_y_zp.append(y)
+   spline_x_zp.append(x)
+   x = ROOT.Double(0.)
+   y = ROOT.Double(0.)
+   if options.theoryUnc:
+    gtheoryZpUP.GetPoint(i,x,y)  
+    spline_y_zpUP.append(y)
+   x = ROOT.Double(0.)
+   y = ROOT.Double(0.)
+   if options.theoryUnc:
+    gtheoryZpDOWN.GetPoint(i,x,y)
+    spline_y_zpDOWN.append(y)
+
+  if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+   spline_x_whp = []
+   spline_y_whp = []
+   spline_y_whpUP = []
+   spline_y_whpDOWN = []
+   for i in range(gtheoryWHp.GetN()):
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
+    gtheoryWHp.GetPoint(i,x,y)
+    spline_y_whp.append(y)
+    spline_x_whp.append(x)
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryWHpUP.GetPoint(i,x,y)
+     spline_y_whpUP.append(y)
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryWHpDOWN.GetPoint(i,x,y)
+     spline_y_whpDOWN.append(y)
  
-  x = ROOT.Double(0.)
-  y = ROOT.Double(0.)
-  gtheoryWp.GetPoint(i,x,y)
-  spline_y_wp.append(y)
-  spline_x_wp.append(x*1000.)
-  
-  x = ROOT.Double(0.)
-  y = ROOT.Double(0.)
-  gtheoryWpUP.GetPoint(i,x,y)  
-  spline_y_wpUP.append(y)
+   spline_y_zhp = [] 
+   spline_x_zhp = []
+   spline_y_zhpUP = []
+   spline_y_zhpDOWN = []
+   for i in range(gtheoryZHp.GetN()):
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
+    gtheoryZHp.GetPoint(i,x,y)
+    spline_y_zhp.append(y)
+    spline_x_zhp.append(x)
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryZHpUP.GetPoint(i,x,y)
+     spline_y_zhpUP.append(y)
+    x = ROOT.Double(0.)
+    y = ROOT.Double(0.)
+    if options.theoryUnc:
+     gtheoryZHpDOWN.GetPoint(i,x,y)
+     spline_y_zhpDOWN.append(y)
 
-  x = ROOT.Double(0.)
-  y = ROOT.Double(0.)
-  gtheoryWpDOWN.GetPoint(i,x,y)  
-  spline_y_wpDOWN.append(y)
-    
- spline_y_zp = [] 
- spline_x_zp = []
- spline_y_zpUP = []
- spline_y_zpDOWN = [] 
- for i in range(gtheoryZp.GetN()):
+
+
+  
+  spline_zp=ROOT.RooSpline1D(signal2+"_sigma",signal2+"_sigma",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zp))
+  print " initialized spline_zp "
+  spline_wp=ROOT.RooSpline1D(signal1+"_sigma",signal1+"_sigma",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wp))
+  if options.theoryUnc:
+   spline_zpUP=ROOT.RooSpline1D(signal2+"_sigmaUP",signal2+"_sigmaUP",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpUP))
+   spline_wpUP=ROOT.RooSpline1D(signal1+"_sigmaUP",signal1+"_sigmaUP",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpUP))
+   spline_zpDOWN=ROOT.RooSpline1D(signal2+"_sigmaDOWN",signal2+"_sigmaDOWN",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpDOWN))
+   spline_wpDOWN=ROOT.RooSpline1D(signal1+"_sigmaDOWN",signal1+"_sigmaDOWN",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpDOWN))
+   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+    spline_zhp=ROOT.RooSpline1D(signal4+"_sigma",signal4+"_sigma",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhp))
+    spline_whp=ROOT.RooSpline1D(signal3+"_sigma",signal3+"_sigma",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whp))
+    if options.theoryUnc:
+     spline_zhpUP=ROOT.RooSpline1D(signal4+"_sigmaUP",signal4+"_sigmaUP",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhpUP))
+     spline_whpUP=ROOT.RooSpline1D(signal3+"_sigmaUP",signal3+"_sigmaUP",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whpUP))
+     spline_zhpDOWN=ROOT.RooSpline1D(signal4+"_sigmaDOWN",signal4+"_sigmaDOWN",MH,len(spline_x_zhp),array('d',spline_x_zhp),array('d',spline_y_zhpDOWN))
+     spline_whpDOWN=ROOT.RooSpline1D(signal3+"_sigmaDOWN",signal3+"_sigmaDOWN",MH,len(spline_x_whp),array('d',spline_x_whp),array('d',spline_y_whpDOWN))
  
-  x = ROOT.Double(0.)
-  y = ROOT.Double(0.)
-  gtheoryZp.GetPoint(i,x,y)
-  spline_y_zp.append(y)
-  spline_x_zp.append(x*1000.)
-
-  x = ROOT.Double(0.)
-  y = ROOT.Double(0.)
-  gtheoryZpUP.GetPoint(i,x,y)  
-  spline_y_zpUP.append(y)
-
-  x = ROOT.Double(0.)
-  y = ROOT.Double(0.)
-  gtheoryZpDOWN.GetPoint(i,x,y)  
-  spline_y_zpDOWN.append(y)
-       
- spline_zp=ROOT.RooSpline1D("Zprime_sigma","Zprime_sigma",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zp))  
- spline_wp=ROOT.RooSpline1D("Wprime_sigma","Wprime_sigma",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wp))  
- spline_zpUP=ROOT.RooSpline1D("Zprime_sigmaUP","Zprime_sigmaUP",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpUP))  
- spline_wpUP=ROOT.RooSpline1D("Wprime_sigmaUP","Wprime_sigmaUP",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpUP)) 
- spline_zpDOWN=ROOT.RooSpline1D("Zprime_sigmaDOWN","Zprime_sigmaDOWN",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpDOWN))  
- spline_wpDOWN=ROOT.RooSpline1D("Wprime_sigmaDOWN","Wprime_sigmaDOWN",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wpDOWN)) 
-  
  for m in masses:
- 
+  print " m ",m
+  m = m/1000.
   MH.setVal(m)
 
-  tot = spline_zp.getVal(argset)+spline_wp.getVal(argset)
-  xsecTot.append(tot)
+  if oneSignal == False:
+   tot = spline_zp.getVal(argset)+spline_wp.getVal(argset)
+   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+    tot = tot + spline_zhp.getVal(argset)+spline_whp.getVal(argset)
 
-  uncUp_zp = spline_zpUP.getVal(argset)-spline_zp.getVal(argset)
-  uncUp_wp = spline_wpUP.getVal(argset)-spline_wp.getVal(argset)
-  xsecTotUp.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp) )
-  
-  uncDown_zp = spline_zp.getVal(argset)-spline_zpDOWN.getVal(argset)
-  uncDown_wp = spline_wp.getVal(argset)-spline_wpDOWN.getVal(argset)
-  xsecTotDown.append( tot-math.sqrt(uncDown_zp*uncDown_zp+uncDown_wp*uncDown_wp) )
-    
-  shade_x.append(m)
-  shade_y.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp) )
+   if options.theoryUnc:
+    uncUp_zp = spline_zpUP.getVal(argset)-spline_zp.getVal(argset)
+    uncUp_wp = spline_wpUP.getVal(argset)-spline_wp.getVal(argset)
+    uncUp_zhp = 0
+    uncUp_whp = 0
+    if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+     uncUp_zhp = spline_zhpUP.getVal(argset)-spline_zhp.getVal(argset)
+     uncUp_whp = spline_whpUP.getVal(argset)-spline_whp.getVal(argset)
 
- for i in range( len(masses)-1, -1, -1 ):
-  shade_x.append(masses[i])
-  shade_y.append(xsecTotDown[i])
-       
- gtheory = ROOT.TGraphErrors(len(masses),masses,xsecTot)
- gtheory.SetLineColor(ROOT.kRed)
- gtheory.SetLineWidth(3)
- gtheoryUP = ROOT.TGraphErrors(len(masses),masses,xsecTotUp)
- gtheoryUP.SetLineColor(ROOT.kRed-2)
- gtheoryUP.SetLineWidth(3)
- gtheoryDOWN = ROOT.TGraphErrors(len(masses),masses,xsecTotDown)
- gtheoryDOWN.SetLineColor(ROOT.kRed-2)
- gtheoryDOWN.SetLineWidth(3)
- gtheorySHADE = ROOT.TGraphErrors(len(shade_x),shade_x,shade_y)
- gtheorySHADE.SetLineColor(ROOT.kRed-2)
- gtheorySHADE.SetLineWidth(3)
+    xsecTotUp.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
 
+    uncDown_zp = spline_zp.getVal(argset)-spline_zpDOWN.getVal(argset)
+    uncDown_wp = spline_wp.getVal(argset)-spline_wpDOWN.getVal(argset)
+    uncDown_zhp =0
+    uncDown_whp =0
+    if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+     uncDown_zhp = spline_zhp.getVal(argset)-spline_zhpDOWN.getVal(argset)
+     uncDown_whp = spline_whp.getVal(argset)-spline_whpDOWN.getVal(argset)
+ 
+    xsecTotDown.append( tot-math.sqrt(uncDown_zp*uncDown_zp+uncDown_wp*uncDown_wp + uncDown_zhp*uncDown_zhp+uncDown_whp*uncDown_whp) )
+
+
+    shade_x.append(m)
+    shade_y.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
+
+
+   print " tot ",tot
+   xsecTot.append(tot)
+
+
+ if options.theoryUnc and not oneSignal:
+  for i in range( len(massesTeV)-1, -1, -1 ):
+   shade_x.append(massesTeV[i])
+   shade_y.append(xsecTotDown[i])
+
+ if oneSignal == False:
+  gtheory = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTot)
+  gtheory.SetLineColor(ROOT.kRed)
+  gtheory.SetLineWidth(3)
+  if options.theoryUnc:
+   gtheoryUP = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTotUp)
+   gtheoryUP.SetLineColor(ROOT.kRed-2)
+   gtheoryUP.SetLineWidth(3)
+   gtheoryDOWN = ROOT.TGraphErrors(len(massesTeV),massesTeV,xsecTotDown)
+   gtheoryDOWN.SetLineColor(ROOT.kRed-2)
+   gtheoryDOWN.SetLineWidth(3)
+   gtheorySHADE = ROOT.TGraphErrors(len(shade_x),shade_x,shade_y)
+   gtheorySHADE.SetLineColor(ROOT.kRed-2)
+   gtheorySHADE.SetLineWidth(3)
+   
+print " opening limit file ",args[0]
 f=ROOT.TFile(args[0])
 limit=f.Get("limit")
 data={}
@@ -193,31 +350,34 @@ def rescaleaxis(g,scale=1000.):
     g.GetHistogram().Delete()
     g.SetHistogram(0)
     return
-    
+
+print " going to loop on event in limit! "
 for event in limit:
-    if float(event.mh)<options.minX or float(event.mh)>options.maxX:
+    mhTeV = event.mh/1000.
+    if float(mhTeV)<options.minX or float(mhTeV)>options.maxX:
         continue
     
-    if not (event.mh in data.keys()):
-        data[event.mh]={}
-    print "event.mh ",event.mh
+    if not (mhTeV in data.keys()):
+        data[mhTeV]={}
+    print "mhTeV ",mhTeV
     lim = event.limit*scaleLimits[str(int(event.mh))]
     if event.quantileExpected<0:            
-        data[event.mh]['obs']=lim
+        data[mhTeV]['obs']=lim
     if event.quantileExpected>0.02 and event.quantileExpected<0.03:            
-        data[event.mh]['-2sigma']=lim
+        data[mhTeV]['-2sigma']=lim
     if event.quantileExpected>0.15 and event.quantileExpected<0.17:            
-        data[event.mh]['-1sigma']=lim
+        data[mhTeV]['-1sigma']=lim
     if event.quantileExpected>0.49 and event.quantileExpected<0.51:            
         print "event.limit ",event.limit
-        print "scaleLimits[str(int(event.mh))] ",scaleLimits[str(int(event.mh))]
+        print "scaleLimits[str(int(mhTeV))] ",scaleLimits[str(int(event.mh))]
         print "lim ",lim
-        data[event.mh]['exp']=lim
+        data[mhTeV]['exp']=lim
     if event.quantileExpected>0.83 and event.quantileExpected<0.85:            
-        data[event.mh]['+1sigma']=lim
+        data[mhTeV]['+1sigma']=lim
     if event.quantileExpected>0.974 and event.quantileExpected<0.976:            
-        data[event.mh]['+2sigma']=lim
+        data[mhTeV]['+2sigma']=lim
 
+print "initializing TGraph"
 mean=ROOT.TGraphAsymmErrors()
 mean.SetName("mean")
 
@@ -241,10 +401,14 @@ line_minus2=ROOT.TGraph()
 line_minus2.SetName("line_minus2")
 
 
-
+print " start loop on data"
 N=0
 my_data_file = open(filename+'.txt', 'w')
 my_data_file.write('mass limit\n')
+
+print " data ",data
+print data.iteritems()
+
 for mass,info in data.iteritems():
     print 'Setting mass',mass,info
 
@@ -285,13 +449,13 @@ line_minus2.Sort()
 
 
 
-band68.SetFillColor(ROOT.kGreen)
+band68.SetFillColor(ROOT.kGreen+1)
 band68.SetLineWidth(3)
 band68.SetLineColor(ROOT.kWhite)
 band68.SetLineStyle(0)
 band68.SetMarkerStyle(0)
 
-band95.SetFillColor(ROOT.kYellow)
+band95.SetFillColor(ROOT.kOrange)
 band95.SetLineColor(ROOT.kWhite)
 
 bandObs.SetLineWidth(3)
@@ -306,63 +470,58 @@ line_plus1.SetLineWidth(1)
 line_plus1.SetLineColor(ROOT.kGreen+1)
 
 line_plus2.SetLineWidth(1)
-line_plus2.SetLineColor(ROOT.kOrange-2)
+line_plus2.SetLineColor(ROOT.kOrange)
 
 line_minus1.SetLineWidth(1)
 line_minus1.SetLineColor(ROOT.kGreen+1)
 
 line_minus2.SetLineWidth(1)
-line_minus2.SetLineColor(ROOT.kOrange-2)
+line_minus2.SetLineColor(ROOT.kOrange)
 
-if not options.hvt:
- gtheory = ROOT.TGraphErrors(1)
- gtheory.SetLineColor(ROOT.kRed)
- gtheory.SetLineWidth(3)
- gtheoryUP = ROOT.TGraphErrors(1)
- gtheoryUP.SetLineColor(ROOT.kRed-2)
- gtheoryUP.SetLineWidth(3)
- gtheoryDOWN = ROOT.TGraphErrors(1)
- gtheoryDOWN.SetLineColor(ROOT.kRed-2)
- gtheoryDOWN.SetLineWidth(3)
- gtheorySHADE = ROOT.TGraphErrors(1)
- gtheorySHADE.SetLineColor(ROOT.kRed-2)
- gtheorySHADE.SetLineWidth(3)
-
+if oneSignal == True:
  filenameTH = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/%s.root"%options.sig
+ if options.sig.find("VBF") !=-1 and options.sig.find("prime") !=-1: filenameTH = filenameTH.replace("VBF","HVTC")
  thFile       = ROOT.TFile.Open(filenameTH,'READ')   
  print "Opening file " ,thFile.GetName()
  gtheory      = thFile.Get("gtheory")
- gtheoryUP    = thFile.Get("gtheoryUP")
- gtheoryDOWN  = thFile.Get("gtheoryDOWN")
- gtheorySHADE = thFile.Get("grshade")
- 
- rescaleaxis(gtheory	)
- rescaleaxis(gtheoryUP	)
- rescaleaxis(gtheoryDOWN )
- rescaleaxis(gtheorySHADE)
- 
+
+ if options.theoryUnc:
+  gtheoryUP    = thFile.Get("gtheoryUP")
+  gtheoryDOWN  = thFile.Get("gtheoryDOWN")
+  gtheorySHADE = thFile.Get("grshade")
+
+ print " going to rescale axis"
+ rescaleaxis(gtheory,1	)
+ if options.theoryUnc:
+  rescaleaxis(gtheoryUP,1	)
+  rescaleaxis(gtheoryDOWN,1 )
+  rescaleaxis(gtheorySHADE,1)
+
 gtheory     .SetName("%s_gtheory"    %options.sig)
-gtheoryUP   .SetName("%s_gtheoryUP"  %options.sig)
-gtheoryDOWN .SetName("%s_gtheoryDOWN"%options.sig)
-gtheorySHADE.SetName("%s_grshade"    %options.sig)
-gtheorySHADE.SetLineColor(0)
-gtheorySHADE.SetFillColor(ROOT.kRed)
-gtheorySHADE.SetFillStyle(3013)
-gtheoryUP.SetLineColor(ROOT.kRed)
-gtheoryDOWN.SetLineColor(ROOT.kRed)
-gtheoryUP.SetLineWidth(1)
-gtheoryDOWN.SetLineWidth(1)
+gtheory.SetLineColor(ROOT.kRed)
+gtheory.SetLineWidth(3)
+if options.theoryUnc:
+ gtheoryUP   .SetName("%s_gtheoryUP"  %options.sig)
+ gtheoryDOWN .SetName("%s_gtheoryDOWN"%options.sig)
+ gtheorySHADE.SetName("%s_grshade"    %options.sig)
+ gtheorySHADE.SetLineColor(0)
+ gtheorySHADE.SetFillColor(ROOT.kRed)
+ gtheorySHADE.SetFillStyle(3013)
+ gtheoryUP.SetLineColor(ROOT.kRed)
+ gtheoryDOWN.SetLineColor(ROOT.kRed)
+ gtheoryUP.SetLineWidth(1)
+ gtheoryDOWN.SetLineWidth(1)
 # thFile.Close()
 
 #plotting information
-H_ref = 600; 
-W_ref = 800; 
+H_ref = 800; 
+W_ref = 800;
 W = W_ref
 H = H_ref
 
 T = 0.08*H_ref
 B = 0.12*H_ref 
-L = 0.12*W_ref
+L = 0.15*W_ref
 R = 0.04*W_ref
 c=ROOT.TCanvas("c","c",50,50,W,H)
 c.SetFillColor(0)
@@ -373,8 +532,8 @@ c.SetLeftMargin( L/W )
 c.SetRightMargin( R/W )
 c.SetTopMargin( T/H )
 c.SetBottomMargin( B/H )
-c.SetTickx(0)
-c.SetTicky(0)
+#c.SetTickx(0)
+#c.SetTicky(0)
 c.GetWindowHeight()
 c.GetWindowWidth()
 c.SetLogy()
@@ -382,39 +541,56 @@ c.SetLogy()
 c.SetLogy()
 c.cd()
 
-
+Model = "B"
+VBFtype="ggF "
+if "prime" in options.sig: VBFtype="DY "
+if "VBF" in options.sig:
+ VBFtype="VBF "
+ Model = "C"
 if "WprimeWZ"  in options.sig:
-  ltheory="#sigma_{TH}#timesBR(W'#rightarrowWZ) HVT_{B}"
-  ytitle ="#sigma x BR(W' #rightarrow WZ) [pb]  "
-  xtitle = "M_{W'} [GeV]"
+  ltheory="#sigma_{TH}#times BR(W'#rightarrowWZ) HVT_{"+Model+"}"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"W' #rightarrow WZ) [pb]  "
+  xtitle = "M_{"+VBFtype+"W'} [TeV]"
 if "BulkGWW" in options.sig:
-  ltheory="#sigma_{TH}#timesBR(G_{Bulk}#rightarrowWW) #tilde{k}=0.5"
-  ytitle ="#sigma x BR(G_{Bulk} #rightarrow WW) [pb]  "
-  xtitle = "M_{G_{Bulk}} [GeV]"
+  ltheory="#sigma_{TH}#times BR(G_{Bulk}#rightarrowWW) #tilde{k}=0.5"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"G_{Bulk} #rightarrow WW) [pb]  "
+  xtitle = "M_{G_{Bulk}} [TeV]"
 if "BulkGZZ" in options.sig:
-  ltheory="#sigma_{TH}#timesBR(G_{Bulk}#rightarrowZZ) #tilde{k}=0.5"  
-  ytitle ="#sigma x BR(G_{Bulk} #rightarrow ZZ) [pb]  "
-  xtitle = "M_{G_{Bulk}} [GeV]"
+  ltheory="#sigma_{TH}#times BR(G_{Bulk}#rightarrowZZ) #tilde{k}=0.5"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"G_{Bulk} #rightarrow ZZ) [pb]  "
+  xtitle = "M_{G_{Bulk}} [TeV]"
+if "RadionWW" in options.sig:
+  ltheory="#sigma_{TH}#times BR(Rad#rightarrowWW)"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Rad #rightarrow WW) [pb]  "
+  xtitle = "M_{Rad} [TeV]"
+if "RadionZZ" in options.sig:
+  ltheory="#sigma_{TH}#times BR(Rad#rightarrowZZ)"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Rad #rightarrow ZZ) [pb]  "
+  xtitle = "M_{Rad} [TeV]"
 if "ZprimeWW"  in options.sig:
-  ltheory="#sigma_{TH}#timesBR(Z'#rightarrowWW) HVT_{B}"
-  ytitle ="#sigma x BR(Z' #rightarrow WW) [pb]  "
-  xtitle = "M_{Z'} [GeV]"
+  ltheory="#sigma_{TH}#times BR(Z'#rightarrowWW) HVT_{"+Model+"}"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Z' #rightarrow WW) [pb]  "
+  xtitle = "M_{Z'} [TeV]"
 if "Vprime"  in options.sig:
-  ltheory="#sigma_{TH}#timesBR(V'#rightarrowWV) HVT_{B}"
-  ytitle ="#sigma x BR(V' #rightarrow WV) [pb]  "
-  xtitle = "M_{V'} [GeV]"
+  ltheory="#sigma_{TH}#times BR(V'#rightarrowWV) HVT_{"+Model+"}"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow WV) [pb]  "
+  xtitle = "M_{V'} [TeV]"
 if "BulkGVV"  in options.sig:
-  ltheory="#sigma_{TH}#timesBR(G_{Bulk}#rightarrowVV) #tilde{k}=0.5"  
-  ytitle ="#sigma x BR(G_{Bulk} #rightarrow VV) [pb]  "
-  xtitle = "M_{G_{Bulk}} [GeV]"
+  ltheory="#sigma_{TH}#times BR(G_{Bulk}#rightarrowVV) #tilde{k}=0.5"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"G_{Bulk} #rightarrow VV) [pb]  "
+  xtitle = "M_{G_{Bulk}} [TeV]"
+if "RadionVV"  in options.sig:
+  ltheory="#sigma_{TH}#times BR(Rad#rightarrowVV)"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Rad #rightarrow VV) [pb]  "
+  xtitle = "M_{Rad} [TeV]"
 if "ZprimeZH"  in options.sig:
-  ltheory="#sigma_{TH}#timesBR(Z'#rightarrowZH) HVT_{B}"
-  ytitle ="#sigma x BR(Z' #rightarrow ZH) [pb]  "
-  xtitle = "M_{Z'} [GeV]"
+  ltheory="#sigma_{TH}#times BR(Z'#rightarrowZH) HVT_{"+Model+"}"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Z' #rightarrow ZH) [pb]  "
+  xtitle = "M_{Z'} [TeV]"
 if "WprimeWH"  in options.sig:
-  ltheory="#sigma_{TH}#timesBR(W'#rightarrowWH) HVT_{B}"
-  ytitle ="#sigma x BR(W' #rightarrow WH) [pb]  "
-  xtitle = "M_{W'} [GeV]"
+  ltheory="#sigma_{TH}#times BR(W'#rightarrowWH) HVT_{"+Model+"}"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"W' #rightarrow WH) [pb]  "
+  xtitle = "M_{W'} [TeV]"
     
 frame=c.DrawFrame(options.minX,options.minY,options.maxX,options.maxY)
 frame.GetXaxis().SetTitle(xtitle)
@@ -426,6 +602,8 @@ frame.GetYaxis().SetTitleSize(0.05)
 frame.GetYaxis().SetTitleOffset(1.15)
 
 frame.Draw()
+
+print " frame done "
 band95.Draw("3same")
 band68.Draw("3same")
 # band68.Draw("XLsame")
@@ -434,165 +612,56 @@ line_plus2.Draw("Lsame")
 line_minus1.Draw("Lsame")
 line_minus2.Draw("Lsame")
 mean.Draw("Lsame")
+print " mean should be there"
 gtheory.Draw("Lsame")
-gtheorySHADE.Draw("Fsame")
+if options.theoryUnc: gtheorySHADE.Draw("Fsame")
 
 c.SetLogy(options.log)
 c.Draw()
 
+print " I have c "
 
-
-leg  = ROOT.TLegend(0.498995,0.6602591,0.9446734,0.9011917)
-leg2 = ROOT.TLegend(0.498995,0.6602591,0.9446734,0.9011917)
+leg  = ROOT.TLegend(0.4,0.6602591,0.9446734,0.9011917)
+leg2 = ROOT.TLegend(0.4,0.6602591,0.9446734,0.9011917)
 leg.SetTextSize(0.028)
 leg.SetLineColor(1)
 leg.SetShadowColor(0)
-leg.SetLineStyle(1)
-leg.SetLineWidth(1)
+leg.SetLineStyle(0)
+leg.SetLineWidth(0)
 leg.SetFillColor(ROOT.kWhite)
 # leg.SetFillStyle(0)
 leg.SetMargin(0.35)
 leg2.SetTextSize(0.028)
-leg2.SetLineColor(1)
+leg2.SetLineColor(0)
 leg2.SetShadowColor(0)
-leg2.SetLineStyle(1)
-leg2.SetLineWidth(1)
+leg2.SetLineStyle(0)
+leg2.SetLineWidth(0)
 leg2.SetFillColor(0)
 leg2.SetFillStyle(0)
 leg2.SetMargin(0.35)
-leg.SetBorderSize(1)
+leg.SetBorderSize(0)
 
-leg3 = ROOT.TLegend(0.498995,0.5,0.9446734,0.6)
+leg3 = ROOT.TLegend(0.4,0.5,0.9446734,0.6)
 leg3.SetTextSize(0.028)
-leg3.SetLineColor(1)
+leg3.SetLineColor(0)
 leg3.SetShadowColor(0)
-leg3.SetLineStyle(1)
-leg3.SetLineWidth(1)
+leg3.SetLineStyle(0)
+leg3.SetLineWidth(0)
 leg3.SetFillColor(ROOT.kWhite)
 leg3.SetBorderSize(0)
-
-MASSLONG, limits_b2g18_001 = array( 'd' ), array( 'd' )
-MASSLONG=[
-   1200.,
-   1300.,
-   1400.,
-   1500.,
-   1600.,
-   1700.,
-   1800.,
-   1900.,
-   2000.,
-   2100.,
-   2200.,
-   2300.,
-   2400.,
-   2500.,
-   2600.,
-   2700.,
-   2800.,
-   2900.,
-   3000.,
-   3100.,
-   3200.,
-   3300.,
-   3400.,
-   3500.,
-   3600.,
-   3700.,
-   3800.,
-   3900.,
-   4000.,
-   4100.,
-   4200.,
-   4300.,
-   4400.,
-   4500.,
-   4600.,
-   4700.,
-   4800.,
-   4900.,
-   5000.,
-   5100.,
-   5200.]
-limits_b2g18_001=[
-     0.0176875,
-     0.010875,
-     0.00809375,
-     0.005671875,
-     0.00446875,
-     0.003703125,
-     0.003046875,
-     0.0025625,
-     0.002179688,
-     0.001875,
-     0.001570313,
-     0.00140625,
-     0.001316406,
-     0.001128906,
-     0.001074219,
-     0.0009765625,
-     0.0008945313,
-     0.000828125,
-     0.0007617188,
-     0.0006992187,
-     0.0006464844,
-     0.0006015625,
-     0.0005605469,
-     0.0005019531,
-     0.0004921875,
-     0.0004589844,
-     0.0004296875,
-     0.0004042969,
-     0.0003798828,
-     0.0003574219,
-     0.0003398438,
-     0.0003193359,
-     0.0003027344,
-     0.0002871094,
-     0.0002753906,
-     0.000265625,
-     0.0002587891,
-     0.0002558594,
-     0.0002568359,
-     0.0002548828,
-     0.0002675781]
-VV3D= ROOT.TGraph(41,np.array(MASSLONG),np.array(limits_b2g18_001))
-VV3D.SetName("VV3D")
-VV3D.SetTitle("");
-#VV3D.SetFillColor(1);
-VV3D.SetLineColor(429);
-VV3D.SetLineStyle(1);
-VV3D.SetLineWidth(3);
-VV3D.SetMarkerStyle(20);
-if options.sig.find("H")==-1: leg3.AddEntry(VV3D,"B2G-18-002 (16+17)","L")
-
-
-MASSSHORT=[1200.,1300.,1400.,1500.,1600.,1700.,1800.,1900.,2000.,2100.,2200.,2300.,2400.,2500.,2600.,2700.,2800.,2900.,3000.]
-limits_VH_2016=[0.050,0.032,0.027,0.020,0.017,0.014,0.012, 0.010,0.009,0.008,0.0068,0.006,0.0052,0.0049,0.0045,0.004,0.0038,0.0034,0.0031]
-VH2016=ROOT.TGraph(19,np.array(MASSSHORT),np.array(limits_VH_2016))
-VH2016.SetName("VH2016")
-VH2016.SetTitle("");
-#VH2016.SetFillColor(1);
-VH2016.SetLineColor(427);
-VH2016.SetLineStyle(5);
-VH2016.SetLineWidth(3);
-VH2016.SetMarkerStyle(20);
-if options.sig.find("H")!=-1: leg3.AddEntry(VH2016,"B2G-17-002 (2016)","L")
-
 
 if options.blind==0: leg.AddEntry(bandObs, "Observed", "Lp")
 leg.AddEntry(band68, "Expected #pm 1 std. deviation", "f")
 leg.AddEntry(band95 , "Expected #pm 2 std. deviation", "f")
 leg.AddEntry(gtheory, ltheory, "L")
 
+print " now you have the band legend"
 if not options.blind: leg2.AddEntry(bandObs, " ", "")
 leg2.AddEntry(mean, " ", "L")
 leg2.AddEntry(mean, " ", "L")
 leg2.AddEntry(gtheory, " ", "")
       
-
-
-
+print " now you have the legend "
 
 if options.final:
     cmslabel_final(c,options.period,11)
@@ -604,14 +673,9 @@ leg3.Draw()
 c.Update()
 c.RedrawAxis()
 
+print " now I have a new axis"
 if options.blind==0:
     bandObs.Draw("PLsame")
-
-
-if options.sig.find("H")==-1:
- print " draw VV3D"
- VV3D.Draw("Lsame")
-if options.sig.find("H")!=-1: VH2016.Draw("Lsame")
 
 c.SaveAs(filename+".png")    
 c.SaveAs(filename+".pdf")    
