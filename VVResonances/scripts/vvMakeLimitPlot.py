@@ -162,17 +162,17 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
   if oneSignal == False:
    func1 = w.function(signal1+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
    func2 = w.function(signal2+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
-   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
-    func3 = w.function(signal3+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
-    func4 = w.function(signal4+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
-  else:
-   func = w.function(options.sig+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
-
-  if oneSignal == False:
    scaleLimits[str(int(m))] = ROOT.TMath.Exp(func1.getVal(argset))+ROOT.TMath.Exp(func2.getVal(argset))
    if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+    try:
+     func3 = w.function(signal3+'inc_JJ_VV_HPHP_13TeV_'+year+'_sigma')
+     func4 = w.function(signal4+'inc_JJ_VV_HPHP_13TeV_'+year+'_sigma')
+    except:
+     func3 = w.function(signal3+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
+     func4 = w.function(signal4+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
     scaleLimits[str(int(m))] = scaleLimits[str(int(m))]+ROOT.TMath.Exp(func3.getVal(argset))+ROOT.TMath.Exp(func4.getVal(argset))
   else:
+   func = w.function(options.sig+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
    scaleLimits[str(int(m))] = ROOT.TMath.Exp(func.getVal(argset))
 
   if "prime" not in options.sig or "VBF" in options.sig:
@@ -709,6 +709,10 @@ if "ZprimeWW"  in options.sig:
   ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Z' #rightarrow WW) [pb]  "
   xtitle = "M_{Z'} [TeV]"
 if "Vprime"  in options.sig:
+  ltheory="#sigma_{TH}#times BR(V'#rightarrowVV, VH) HVT_{"+Model+"}"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow VV, VH) [pb]  "
+  xtitle = "M_{V'} [TeV]"
+if "VprimeWV"  in options.sig:
   ltheory="#sigma_{TH}#times BR(V'#rightarrowWV) HVT_{"+Model+"}"
   ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow WV) [pb]  "
   xtitle = "M_{V'} [TeV]"
@@ -806,7 +810,7 @@ else:
     cmslabel_prelim(c,options.period,11)
 leg.Draw()
 leg2.Draw()
-leg3.Draw()
+#leg3.Draw()
 c.Update()
 c.RedrawAxis()
 
