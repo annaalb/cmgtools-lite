@@ -1,7 +1,7 @@
 import ROOT as rt
 
 class CMSPlotLabel:
-    def __init__(self,text='CMS',extraText='Preliminary',lumiPeriods={'2015':{'lumi':'2.6 fb^{-1}','energy':'13 TeV'},'2016':{'lumi':'35.9 fb^{-1}','energy':'13 TeV'},'2017':{'lumi':'(2017) 41.4 fb^{-1}','energy':'13 TeV'},'2018':{'lumi':'59.7 fb^{-1} ','energy':'(13 TeV)'},'ALL':{'lumi':'137.2 fb^{-1} ','energy':'(13 TeV)'},'sim17':{'lumi':'(2017)','energy':'13 TeV'},'sim16':{'lumi':'(2016)','energy':'13 TeV'},'sim':{'lumi':'','energy':'13 TeV'}}):
+    def __init__(self,text='CMS',extraText='Preliminary',lumiPeriods={'2015':{'lumi':'2.6 fb^{-1}','energy':'13 TeV'},'2016':{'lumi':'36 fb^{-1}','energy':'13 TeV'},'2017':{'lumi':'(2017) 42 fb^{-1}','energy':'13 TeV'},'2018':{'lumi':'60 fb^{-1} ','energy':'(13 TeV)'},'ALL':{'lumi':'138 fb^{-1} ','energy':'(13 TeV)'},'sim17':{'lumi':'(2017)','energy':'13 TeV'},'sim16':{'lumi':'(2016)','energy':'13 TeV'},'sim':{'lumi':'','energy':'13 TeV'}}):
         self.cmsText=text
         self.cmsTextFont=61
         self.extraText=extraText
