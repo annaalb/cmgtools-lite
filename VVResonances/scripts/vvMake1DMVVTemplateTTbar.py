@@ -190,9 +190,16 @@ for folder in folders:
                 print "now working with cuts "
                 ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
                 print "lumi for year "+year+" = ",ctx.lumi[year]
-                luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
-                if options.output.find("1617") !=-1: luminosity = ctx.lumi[year]/ctx.lumi["1617"]
-                if options.output.find("Run2") ==-1 or options.output.find("1617") ==-1: luminosity = 1
+                luminosity = 1 #ctx.lumi[year]/ctx.lumi["Run2"]
+                if options.output.find("1617") !=-1:
+                    luminosity = ctx.lumi[year]/ctx.lumi["1617"]
+                    print "1617"
+                elif options.output.find("Run2") !=-1:
+                    luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
+                    print "ctx.lumi[year]/ctx.lumi['Run2'] "
+                else:
+                    luminosity = 1
+                print " lumi rewight ",luminosity
                 fnameParts=filename.split('.')
                 fname=fnameParts[0]
                 ext=fnameParts[1]
@@ -201,7 +208,7 @@ for folder in folders:
                 dataPlotters[-1].setupFromFile(folder+'/'+fname+'.pck')
                 dataPlotters[-1].addCorrectionFactor('xsec','tree')
                 genweight='genWeight'
-                if (year == "2017" or year == "2018") and fname.find("TT") !=-1:  genweight='genWeight_LO'
+                #if (year == "2017" or year == "2018") and fname.find("TT") !=-1:  genweight='genWeight_LO'
                 dataPlotters[-1].addCorrectionFactor(genweight,'tree')
                 dataPlotters[-1].addCorrectionFactor('puWeight','tree')
                 dataPlotters[-1].addCorrectionFactor(luminosity,'flat')
