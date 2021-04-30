@@ -83,13 +83,19 @@ def smoothTail1D(proj):
         return 0
     scale = proj.Integral()
     proj.Scale(1.0/scale)
-    
+
+
+    #beginFitX = 2100#1500
+    #endX = 2800
+    #if options.output.find("HPHP")!=-1:
+    #    beginFitX=1100
+    #    endX = 1500
     
     beginFitX = 1246 #2100#1500
     endX = 2000 #2800
-    #if options.output.find("LP")!=-1: #irene removed if on 2016 period as Vjets are from 2017 or 2018
-    #    beginFitX=1246
-    #    endX = 1800
+    if options.output.find("LP")!=-1: #irene removed if on 2016 period as Vjets are from 2017 or 2018
+        beginFitX=1246
+        endX = 1800
     expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",2000,8000)
     expo.SetParameters(0,16.,2.)
     expo.SetParLimits(2,1.,20.)
@@ -138,9 +144,17 @@ print "year ",year
 print "now working with cuts "
 ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
 print "lumi for year "+year+" = ",ctx.lumi[year]
-luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
-if options.output.find("1617") !=-1: luminosity = ctx.lumi[year]/ctx.lumi["1617"]
-if options.output.find("Run2") ==-1 or options.output.find("1617") ==-1: luminosity = 1
+luminosity = 1 #ctx.lumi[year]/ctx.lumi["Run2"]
+if options.output.find("1617") !=-1:
+    luminosity = ctx.lumi[year]/ctx.lumi["1617"]
+    print "1617"
+elif options.output.find("Run2") !=-1:
+    luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
+    print "ctx.lumi[year]/ctx.lumi['Run2'] "
+else:
+    luminosity = 1
+print " lumi rewight ",luminosity
+
 for filename in os.listdir(folder):
     for sampleType in sampleTypes:
         if filename.find(sampleType)!=-1:
@@ -176,6 +190,12 @@ for filename in os.listdir(folder):
             if filename.find("W") !=-1 or filename.find('Z') != -1:
                 print "applying k factors "
                 dataPlotters[-1].addCorrectionFactor("kfactor",'tree')
+            #if filename.find("W") !=-1 or filename.find('Z') != -1:
+            #    print "applying k factors qcd"
+            #    dataPlotters[-1].addCorrectionFactor("kfactor_qcd",'tree')
+            #if filename.find("W") !=-1 or filename.find('Z') != -1:
+            #    print "applying k factors ew"
+            #    dataPlotters[-1].addCorrectionFactor("kfactor_ew",'tree')
 
             dataPlotters[-1].filename=fname
 
