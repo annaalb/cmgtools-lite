@@ -96,13 +96,19 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
    VBFstring="VBF_"
    if options.sig.find("prime") !=-1: VBFstring="HVTC_"
    filenameTHWp = filenameTHWp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+   filenameTHWp = filenameTHWp.replace("_VBF_","_")
    filenameTHZp = filenameTHZp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+   filenameTHZp = filenameTHZp.replace("_VBF_","_")
    if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
     filenameTHWHp = filenameTHWHp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+    filenameTHWHp = filenameTHWHp.replace("_VBF_","_")
     filenameTHZHp = filenameTHZHp.replace("theoryXsec/","theoryXsec/"+VBFstring)
+    filenameTHZHp = filenameTHZHp.replace("_VBF_","_")
 
   print "filenameTHWp ",filenameTHWp
   print "filenameTHZp ",filenameTHZp
+  print "filenameTHWHp ",filenameTHWHp
+  print "filenameTHZHp ",filenameTHZHp
      
   thFileWp       = ROOT.TFile.Open(filenameTHWp,'READ')
   thFileZp       = ROOT.TFile.Open(filenameTHZp,'READ')
@@ -616,7 +622,8 @@ line_minus2.SetLineWidth(1)
 line_minus2.SetLineColor(ROOT.kOrange)
 
 if oneSignal == True:
- filenameTH = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/%s.root"%options.sig
+ thesignal = options.sig.replace("inc","")
+ filenameTH = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/%s.root"%thesignal
  if options.sig.find("VBF") !=-1 and options.sig.find("prime") !=-1: filenameTH = filenameTH.replace("VBF","HVTC")
  thFile       = ROOT.TFile.Open(filenameTH,'READ')   
  print "Opening file " ,thFile.GetName()
@@ -709,8 +716,8 @@ if "ZprimeWW"  in options.sig:
   ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Z' #rightarrow WW) [pb]  "
   xtitle = "M_{Z'} [TeV]"
 if "Vprime"  in options.sig:
-  ltheory="#sigma_{TH}#times BR(V'#rightarrowVV, VH) HVT_{"+Model+"}"
-  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow VV, VH) [pb]  "
+  ltheory="#sigma_{TH}#times BR(V'#rightarrowVV+VH) HVT_{"+Model+"}"
+  ytitle ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow VV+VH) [pb]  "
   xtitle = "M_{V'} [TeV]"
 if "VprimeWV"  in options.sig:
   ltheory="#sigma_{TH}#times BR(V'#rightarrowWV) HVT_{"+Model+"}"
