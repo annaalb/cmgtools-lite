@@ -1,24 +1,24 @@
 {
-    "_comment": "lumis from https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM" ,
-    "lumi16" : 35920.0,
+    "_comment": "lumis from https://twiki.cern.ch/twiki/bin/viewauth/CMS/TWikiLUM - 19/04/2021" ,
+    "lumi16" : 36330.0,
     "lumi17" : 41530.0,
     "lumi18" : 59740.0,
-    "lumi1617": 77450.0,
-    "lumi161718": 137190.0,
-    "unc_lumi16": 1.025,
+    "lumi1617": 77860.0,
+    "lumi161718": 137600.0,
+    "unc_lumi16": 1.012,
     "unc_lumi17": 1.023,
     "unc_lumi18": 1.025,
     "unc_lumi1617": 1.013,
-    "unc_lumi161718": 1.018,
+    "unc_lumi161718": 1.016,
 
     "_commentOnSF":"from Loukas for map-decorrelated MD pt 400-800 for WvsQCD, pt >600 for ZHbbvsQCD",
-    "wtag_SF_HP" : {"2016": 1.000, "2017": 0.873, "2018": 0.840},
-    "wtag_SF_LP" : {"2016": 1.055, "2017": 1.301, "2018": 1.164},
-    "wtag_SF_NP" : {"2016": 1.055, "2017": 1.301, "2018": 1.164},
+    "wtag_SF_HP" : {"2016": 1.287, "2017": 0.823, "2018": 0.757},
+    "wtag_SF_LP" : {"2016": 1.098, "2017": 1.185, "2018": 1.064},
+    "wtag_SF_NP" : {"2016": 1.098, "2017": 1.185, "2018": 1.064},
 
-    "W_tag_unc_HP" : {"2016": 0.066, "2017": 0.054, "2018": 0.045},
-    "W_tag_unc_LP" : {"2016": 0.145, "2017": 0.165, "2018": 0.113},
-    "W_tag_unc_NP" : {"2016": 0.145, "2017": 0.165, "2018": 0.113},
+    "W_tag_unc_HP" : {"2016": 0.197, "2017": 0.059, "2018": 0.057},
+    "W_tag_unc_LP" : {"2016": 0.101, "2017": 0.094, "2018": 0.073},
+    "W_tag_unc_NP" : {"2016": 0.101, "2017": 0.094, "2018": 0.073},
     
     "htag_SF_HP" : {"2016": 1.049, "2017": 0.998, "2018": 1.079},
     "htag_SF_LP" : {"2016": 0.981, "2017": 1.066, "2018": 1.053},
@@ -26,11 +26,11 @@
     "H_tag_unc_HP" : {"2016": 0.040, "2017": 0.035, "2018": 0.099},
     "H_tag_unc_LP" : {"2016": 0.026, "2017": 0.046, "2018": 0.069},
 
-    "top_tag_SF_HP" : {"2016": 1.064, "2017": 0.988, "2018": 0.979},
-    "top_tag_SF_LP" : {"2016": 0.898, "2017": 1.085, "2018": 1.061},
+    "top_tag_SF_HP" : {"2016": 0.949, "2017": 0.990, "2018": 0.919},
+    "top_tag_SF_LP" : {"2016": 0.990, "2017": 1.050, "2018": 1.050},
 
-    "TOP_tag_unc_HP" : {"2016": 0.066, "2017": 0.025, "2018": 0.020},
-    "TOP_tag_unc_LP" : {"2016": 0.059, "2017": 0.067, "2018": 0.050},
+    "TOP_tag_unc_HP" : {"2016": 0.065, "2017": 0.033, "2018": 0.029},
+    "TOP_tag_unc_LP" : {"2016": 0.042, "2017": 0.041, "2018": 0.034},
 
     "wtag_slope" : 0.00016413146996,
     "wtag_intercept" : 1.05677793512,
@@ -79,7 +79,7 @@
     },
     
 
-    "tagger_pt_dependence" : {"signal":"((1+0.07*log(MH/2/300))*(1+0.07*log(MH/2/300)))","Zjets":"(1+0.07*log(MH/2/300))","Wjets":"(1+0.07*log(MH/2/300))","resT":"1","resW":"((1+0.07*log(MH/2/300))*(1+0.07*log(MH/2/300)))","nonresT":"1","resTnonresT":"1","resWnonresT":"(1+0.07*log(MH/2/300))","resTresW":"(1+0.07*log(MH/2/300))"},
+    "tagger_pt_dependence" : {"signal":"((1+0.07*log(MH/2/300))*(1+0.07*log(MH/2/300))-1)","Zjets":"(1+0.07*log(MH/2/300)-1)","Wjets":"(1+0.07*log(MH/2/300)-1)","resT":"1","resW":"((1+0.07*log(MH/2/300))*(1+0.07*log(MH/2/300))-1)","nonresT":"1","resTnonresT":"1","resWnonresT":"(1+0.07*log(MH/2/300)-1)","resTresW":"(1+0.07*log(MH/2/300)-1)"},
     "_commentOnPU":"estimated by Jen varying the PU xsec 4.6% up/down in the UHH framework, for VBF and non-VBF signals and bkg in gg/DY and VBF categories separately",
     "PU_unc" :{"ggDY":{"signal":"1.01","signalVBF":"1.01","PRbackground":"1.001"},
 	       "VBF":{"signal":"1.04","signalVBF":"1.01","PRbackground":"1.02"}},
@@ -113,13 +113,13 @@
     "l1Htag161718" : "jj_l1_DeepBoosted_ZHbbvsQCD__XX_MD_default_161718",
     "l2Htag161718" : "jj_l2_DeepBoosted_ZHbbvsQCD__XX_MD_default_161718",
     
-    "WP_HP_Wtag16" : "0p10",
-    "WP_HP_Wtag17" : "0p10",
-    "WP_HP_Wtag18" : "0p10",
+    "WP_HP_Wtag16" : "0p05",
+    "WP_HP_Wtag17" : "0p05",
+    "WP_HP_Wtag18" : "0p05",
     "WP_LP_Wtag16" : "0p20",
     "WP_LP_Wtag17" : "0p20",
     "WP_LP_Wtag18" : "0p20",
-    "WP_HP_Wtag161718" : "0p10",
+    "WP_HP_Wtag161718" : "0p05",
     "WP_LP_Wtag161718" : "0p20",
     "WP_NP_Wtag16" : "0p20",
     "WP_NP_Wtag17" : "0p20",
@@ -198,12 +198,12 @@
     
 
     "tt_smoothening" : { "" : "VBF_NP:2400.,NP:3000.,VV_HPHP:3000.,VV_HPLP:1800.,VH_HPHP:3000.,VH_HPLP:2000.,VH_LPHP:3000.,VBF_VV_HPLP:2200.,VBF_VV_HPHP:3000.,VBF_VH_HPHP:3000.,VBF_VH_HPLP:2400.,VBF_VH_LPHP:2400.",
-			 "resT" : "NP:3000.,VV_HPHP:3000.,VV_HPLP:1800.,VH_HPHP:3000.,VH_HPLP:2000.,VH_LPHP:3000.,VBF_VV_HPLP:1600.,VBF_VV_HPHP:2200.,VBF_VH_HPHP:2400.,VBF_VH_HPLP:2200.,VBF_VH_HPHP:2200.",
+			 "resT" : "NP:3000.,VV_HPHP:3000.,VV_HPLP:3400.,VH_HPHP:3000.,VH_HPLP:3000.,VH_LPHP:3000.,VBF_VV_HPLP:1600.,VBF_VV_HPHP:2200.,VBF_VH_HPHP:2400.,VBF_VH_HPLP:2200.,VBF_VH_HPHP:2200.",
 			 "resW": "NP:1800.,VV_HPHP:1800.,VV_HPLP:1400.,VH_HPHP:1400.,VH_HPLP:1400.,VH_LPHP:1200.,VBF_VV_HPLP:1600.,VBF_VV_HPHP:1600.,VBF_VH_HPHP:1300.,VBF_VH_HPLP:1300.",
-			 "resTnonresT": "NP:3000.,VV_HPHP:1600.,VV_HPLP:1600.,VH_HPHP:3000.,VH_HPLP:3000.,VH_LPHP:2200.,VBF_VV_HPLP:2000.,VBF_VV_HPHP:2800.,VBF_VH_HPLP:2400.,VBF_VH_LPHP:2400.",
+			 "resTnonresT": "NP:3000.,VV_HPHP:1600.,VV_HPLP:2600.,VH_HPHP:3000.,VH_HPLP:2800.,VH_LPHP:2800.,VBF_VV_HPLP:2000.,VBF_VV_HPHP:2800.,VBF_VH_HPLP:2400.,VBF_VH_LPHP:2400.",
 			 "resWnonresT": "NP:2000.,VV_HPHP:1600.,VV_HPLP:1600.,VH_HPHP:1800.,VH_HPLP:2000.,VH_LPHP:1800.,VBF_VV_HPLP:1600.,VBF_VV_HPHP:1700.,VBF_VH_HPHP:1700.,VBF_VH_HPLP:1400.,VBF_VH_LPHP:1600.",
-			 "resTresW" : "NP:3000.,VV_HPHP:1800.,VV_HPLP:1800.,VH_HPHP:1800.,VH_HPLP:2800.,VH_LPHP:2200.,VBF_VV_HPLP:1600.,VBF_VV_HPHP:3000.,VBF_VH_HPHP:1800.,VBF_VH_HPLP:1600.,VBF_VH_LPHP:1600.",
-			 "nonresT" : "NP:3000.,VV_HPHP:1400.,VV_HPLP:1800.,VH_HPHP:2000.,VH_HPLP:1800.,VH_LPHP:2000.,VBF_VV_HPHP:1800.,VBF_VH_HPHP:1800.,VBF_VH_HPLP:1800."}
+			 "resTresW" : "NP:3000.,VV_HPHP:2200.,VV_HPLP:1800.,VH_HPHP:1800.,VH_HPLP:2800.,VH_LPHP:2200.,VBF_VV_HPLP:1600.,VBF_VV_HPHP:3000.,VBF_VH_HPHP:1800.,VBF_VH_HPLP:1600.,VBF_VH_LPHP:1600.",
+			 "nonresT" : "NP:3000.,VV_HPHP:2000.,VV_HPLP:1800.,VH_HPHP:1800.,VH_HPLP:1800.,VH_LPHP:2000.,VBF_VV_HPHP:1800.,VBF_VH_HPHP:1800.,VBF_VH_HPLP:1800."}
 
 
 
