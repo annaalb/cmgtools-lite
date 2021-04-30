@@ -26,6 +26,8 @@ parser = optparse.OptionParser()
 parser.add_option("-y","--year",dest="year",default='2016',help="year of data taking")
 parser.add_option("-s","--signal",dest="signal",help="signal to categorise",default='ZprimeToZh')
 parser.add_option("-d","--directory",dest="directory",help="directory with signal samples",default='deepAK8V2/')
+parser.add_option("-v","--vv",dest="vv",help="make only vv categories?",action='store_true')
+parser.add_option("-f","--four",dest="four",help="VH HPLP is merged in VV HPHP",action='store_true')
 
 (options,args) = parser.parse_args()
 
@@ -158,6 +160,125 @@ def selectSignalTree(cs,sample):
     signaltree_VH_HPLP.Write()
     signaltree_VV_HPLP.Write()
     signaltree_VV_NPHP.Write()
+    finaltree.Write()
+    bigtree.Write()
+    outfile.Close()
+    return tmpname
+
+def selectSignalTree4(cs,sample):
+    print sample
+    chain = ROOT.TChain('AnalysisTree')
+    tmpname = "/tmp/tmp_"+time.strftime("%Y%m%d-%H%M%S")
+    outfile = ROOT.TFile(tmpname+'.root','RECREATE')
+    for signal in sample:
+        rfile = signal+".root"
+        chain.Add(rfile)
+        print " entries ",chain.GetEntries()
+    bigtree = chain.CopyTree("1")
+
+    finaltree = chain.CopyTree(cs['common']+'*'+cs['acceptance'])
+    print "VBF "
+    finaltreeVBF = chain.CopyTree(cs['common_VBF']+'*'+cs['acceptance'])
+    signaltree_VBF_VH_HPHP = finaltreeVBF.CopyTree(cs['VH_HPHP'])
+    signaltree_VBF_VV_HPHP = finaltreeVBF.CopyTree(cs['VV_HPHP'])#all other categories before are explicitly removed so that each event can only live in one category!!
+    signaltree_VBF_VH_LPHP = finaltreeVBF.CopyTree(cs['VH_LPHP'])
+    signaltree_VBF_VV_HPLP = finaltreeVBF.CopyTree(cs['VV_HPLP'])
+    print " common_VV * acceptance ",cs['common_VV']+'*'+cs['acceptance']
+    finaltreeVV = chain.CopyTree(cs['common_VV']+'*'+cs['acceptance'])
+    print 'overall entries in tree '+str(chain.GetEntries())
+    print 'entries after analysis selections '+str(finaltree.GetEntries())
+    print "VH HPHP ",cs['VH_HPHP']
+    signaltree_VH_HPHP = finaltreeVV.CopyTree(cs['VH_HPHP'])
+    print "VV HPHP ",cs['VV_HPHP']
+    signaltree_VV_HPHP = finaltreeVV.CopyTree(cs['VV_HPHP'])#all other categories before are explicitly removed so that each event can only live in one category!!
+    signaltree_VH_LPHP = finaltreeVV.CopyTree(cs['VH_LPHP'])
+    signaltree_VV_HPLP = finaltreeVV.CopyTree(cs['VV_HPLP'])
+    signaltree_VV_NPHP = finaltreeVV.CopyTree(cs['VV_NPHP_control_region'])
+    #rest = finaltree.CopyTree('!('+cs['VV_HPLP']+')*!('+cs['VH_LPHP']+')*!('+cs['VH_HPLP']+')*!('+cs['VH_HPHP']+')*!('+cs['VV_HPHP']+')*!('+cs['VV_NPHP_control_region']+')')
+    print ' #event VH_HPHP '+str(signaltree_VH_HPHP.GetEntries())+' #event VV_HPHP '+str(signaltree_VV_HPHP.GetEntries())+' #event VH_LPHP '+str(signaltree_VH_LPHP.GetEntries())+' #event VV_HPLP '+str(signaltree_VV_HPLP.GetEntries())
+    print ' #event in control region',signaltree_VV_NPHP.GetEntries()
+    #print '#event no category '+str(rest.GetEntries())
+    sumcat = signaltree_VH_HPHP.GetEntries()+signaltree_VV_HPHP.GetEntries()+signaltree_VH_LPHP.GetEntries()+signaltree_VV_HPLP.GetEntries()
+    print 'sum '+str(sumcat)
+    print 'overall signal efficiency after selection cut '+str(finaltree.GetEntries()/float(chain.GetEntries()))
+    print 'signal efficiency after category cuts '+str(sumcat/float(chain.GetEntries()))
+    if finaltree.GetEntries() !=0 :
+        print 'efficiency of all category cuts '+str(sumcat/float(finaltree.GetEntries()))
+    else:
+        print ' no events left after preselection, presumably it is a low pt bin sample '
+    signaltree_VBF_VH_HPHP.SetName('VBF_VH_HPHP')
+    signaltree_VBF_VV_HPHP.SetName('VBF_VV_HPHP')
+    signaltree_VBF_VH_LPHP.SetName('VBF_VH_LPHP')
+    signaltree_VBF_VV_HPLP.SetName('VBF_VV_HPLP')
+
+    signaltree_VH_HPHP.SetName('VH_HPHP')
+    signaltree_VV_HPHP.SetName('VV_HPHP')
+    signaltree_VH_LPHP.SetName('VH_LPHP')
+    signaltree_VV_HPLP.SetName('VV_HPLP')
+    signaltree_VV_NPHP.SetName('VV_NPHP')
+    bigtree.SetName('all')
+    finaltree.SetName('commonacceptance')
+    signaltree_VBF_VH_HPHP.Write()
+    signaltree_VBF_VV_HPHP.Write()
+    signaltree_VBF_VH_LPHP.Write()
+    signaltree_VBF_VV_HPLP.Write()
+
+    signaltree_VH_HPHP.Write()
+    signaltree_VV_HPHP.Write()
+    signaltree_VH_LPHP.Write()
+    signaltree_VV_HPLP.Write()
+    signaltree_VV_NPHP.Write()
+    finaltree.Write()
+    bigtree.Write()
+    outfile.Close()
+    return tmpname
+
+def selectSignalTreeVV(cs,sample):
+    print sample
+    chain = ROOT.TChain('AnalysisTree')
+    tmpname = "/tmp/tmp_"+time.strftime("%Y%m%d-%H%M%S")
+    outfile = ROOT.TFile(tmpname+'.root','RECREATE')
+    for signal in sample:
+        rfile = signal+".root"
+        chain.Add(rfile)
+        print " entries ",chain.GetEntries()
+    bigtree = chain.CopyTree("1")
+
+    finaltree = chain.CopyTree(cs['common']+'*'+cs['acceptance'])
+    print "VBF "
+    finaltreeVBF = chain.CopyTree(cs['common_VBF']+'*'+cs['acceptance'])
+    signaltree_VBF_VV_HPHP = finaltreeVBF.CopyTree(cs['VV_HPHP'])#all other categories before are explicitly removed so that each event can only live in one category!!
+    signaltree_VBF_VV_HPLP = finaltreeVBF.CopyTree(cs['VV_HPLP'])
+    print " common_VV * acceptance ",cs['common_VV']+'*'+cs['acceptance']
+    finaltreeVV = chain.CopyTree(cs['common_VV']+'*'+cs['acceptance'])
+    print 'overall entries in tree '+str(chain.GetEntries())
+    print 'entries after analysis selections '+str(finaltree.GetEntries())
+    signaltree_VV_HPHP = finaltreeVV.CopyTree(cs['VV_HPHP'])
+    print "VV HPHP ",cs['VV_HPHP']
+    signaltree_VV_HPLP = finaltreeVV.CopyTree(cs['VV_HPLP'])
+    #rest = finaltree.CopyTree('!('+cs['VV_HPLP']+')*!('+cs['VH_LPHP']+')*!('+cs['VH_HPLP']+')*!('+cs['VH_HPHP']+')*!('+cs['VV_HPHP']+')*!('+cs['VV_NPHP_control_region']+')')
+    print ' #event VV_HPHP '+str(signaltree_VV_HPHP.GetEntries())+' #event VV_HPLP '+str(signaltree_VV_HPLP.GetEntries())
+    #print '#event no category '+str(rest.GetEntries())
+    sumcat = signaltree_VV_HPHP.GetEntries()+signaltree_VV_HPLP.GetEntries()
+    print 'sum '+str(sumcat)
+    print 'overall signal efficiency after selection cut '+str(finaltree.GetEntries()/float(chain.GetEntries()))
+    print 'signal efficiency after category cuts '+str(sumcat/float(chain.GetEntries()))
+    if finaltree.GetEntries() !=0 :
+        print 'efficiency of all category cuts '+str(sumcat/float(finaltree.GetEntries()))
+    else:
+        print ' no events left after preselection, presumably it is a low pt bin sample '
+    signaltree_VBF_VV_HPHP.SetName('VBF_VV_HPHP')
+    signaltree_VBF_VV_HPLP.SetName('VBF_VV_HPLP')
+
+    signaltree_VV_HPHP.SetName('VV_HPHP')
+    signaltree_VV_HPLP.SetName('VV_HPLP')
+    bigtree.SetName('all')
+    finaltree.SetName('commonacceptance')
+    signaltree_VBF_VV_HPHP.Write()
+    signaltree_VBF_VV_HPLP.Write()
+
+    signaltree_VV_HPHP.Write()
+    signaltree_VV_HPLP.Write()
     finaltree.Write()
     bigtree.Write()
     outfile.Close()
@@ -333,7 +454,7 @@ class myTree:
     jj_l1_jetTag           = bytearray(6)
     jj_l2_jetTag           = bytearray(6)
     
-    category               =  bytearray(7)
+    category               =  bytearray(12)
     newTree = None
     File = None
 
@@ -637,6 +758,245 @@ class myTree:
         print 'number of events with 2 Ws in this category '+str(twoW)
         print 'number of events with 2 tops in this category '+str(twotop)
 
+    def setOutputTreeBranchValuesVV(self,cat,ctx,tmpname,year,LO):
+        print " setOutputTreeBranchValuesVV ",cat
+        rf = ROOT.TFile(tmpname+'.root','READ')
+        cattree = rf.Get(cat)
+        print " cat "+cat+" "+str(cattree.GetEntries())
+
+
+        ZHbb_branch_l1 = cattree.GetBranch(ctx.varl1Htag)
+        ZHbb_leaf_l1 = ZHbb_branch_l1.GetLeaf(ctx.varl1Htag)
+        W_branch_l1 = cattree.GetBranch(ctx.varl1Wtag)
+        W_leaf_l1 = W_branch_l1.GetLeaf(ctx.varl1Wtag)
+        ZHbb_branch_l2 = cattree.GetBranch(ctx.varl2Htag)
+        ZHbb_leaf_l2 = ZHbb_branch_l2.GetLeaf(ctx.varl2Htag)
+        W_branch_l2 = cattree.GetBranch(ctx.varl2Wtag)
+        W_leaf_l2 = W_branch_l2.GetLeaf(ctx.varl2Wtag)
+
+        WPHP_ZHbb_branch_l1 = cattree.GetBranch(ctx.WPHPl1Htag)
+        WPHP_ZHbb_leaf_l1 = WPHP_ZHbb_branch_l1.GetLeaf(ctx.WPHPl1Htag)
+        WPHP_W_branch_l1 = cattree.GetBranch(ctx.WPHPl1Wtag)
+        WPHP_W_leaf_l1 = WPHP_W_branch_l1.GetLeaf(ctx.WPHPl1Wtag)
+
+        WPHP_ZHbb_branch_l2 = cattree.GetBranch(ctx.WPHPl2Htag)
+        WPHP_ZHbb_leaf_l2 = WPHP_ZHbb_branch_l2.GetLeaf(ctx.WPHPl2Htag)
+        WPHP_W_branch_l2 = cattree.GetBranch(ctx.WPHPl2Wtag)
+        WPHP_W_leaf_l2 = WPHP_W_branch_l2.GetLeaf(ctx.WPHPl2Wtag)
+
+
+        WPLP_ZHbb_branch_l1 = cattree.GetBranch(ctx.WPLPl1Htag)
+        WPLP_ZHbb_leaf_l1 = WPLP_ZHbb_branch_l1.GetLeaf(ctx.WPLPl1Htag)
+        WPLP_W_branch_l1 = cattree.GetBranch(ctx.WPLPl1Wtag)
+        WPLP_W_leaf_l1 = WPLP_W_branch_l1.GetLeaf(ctx.WPLPl1Wtag)
+
+        WPLP_ZHbb_branch_l2 = cattree.GetBranch(ctx.WPLPl2Htag)
+        WPLP_ZHbb_leaf_l2 = WPLP_ZHbb_branch_l2.GetLeaf(ctx.WPLPl2Htag)
+        WPLP_W_branch_l2 = cattree.GetBranch(ctx.WPLPl2Wtag)
+        WPLP_W_leaf_l2 = WPLP_W_branch_l2.GetLeaf(ctx.WPLPl2Wtag)
+
+
+        WPNP_W_branch_l1 = cattree.GetBranch(ctx.WPNPl1Wtag)
+        WPNP_W_leaf_l1 = WPNP_W_branch_l1.GetLeaf(ctx.WPNPl1Wtag)
+        WPNP_W_branch_l2 = cattree.GetBranch(ctx.WPNPl2Wtag)
+        WPNP_W_leaf_l2 = WPNP_W_branch_l2.GetLeaf(ctx.WPNPl2Wtag)
+
+        noW=0
+        oneW=0
+        twoW=0
+        notop=0
+        onetop=0
+        twotop=0
+        Wintop=0
+        Wnotintop=0
+        twoWnotintop=0
+	count = 0
+	nEvents = cattree.GetEntries()
+        for count,event in enumerate(cattree):
+
+	    if count%10000==0: print "Event",count,"/",nEvents
+
+            self.puWeight.rf       = event.puWeight
+            self.genWeight.rf      = event.genWeight
+            if LO == True: self.genWeight.rf      = event.genWeight_LO
+            self.xsec.rf           = event.xsec
+            self.evt.rl            = event.evt
+            self.lumi.ri           = event.lumi
+            self.run.ri = event.run
+
+            self.jj_l1_mergedVTruth.ri = event.jj_l1_mergedVTruth
+            self.jj_l2_mergedVTruth.ri = event.jj_l2_mergedVTruth
+            try:
+                self.jj_l1_mergedHbbTruth.ri = event.jj_l1_mergedHTruth
+                self.jj_l2_mergedHbbTruth.ri = event.jj_l2_mergedHTruth
+                Hbb1=event.jj_l1_mergedHTruth
+                Hbb2=event.jj_l2_mergedHTruth
+            except:
+                self.jj_l1_mergedHbbTruth.ri = 0
+                self.jj_l2_mergedHbbTruth.ri = 0
+                Hbb1=0
+                Hbb2=0
+            try:
+                self.jj_l1_mergedHbbTruth.ri = event.jj_l1_mergedHbbTruth
+                self.jj_l2_mergedHbbTruth.ri = event.jj_l2_mergedHbbTruth
+                Hbb1=event.jj_l1_mergedHbbTruth
+                Hbb2=event.jj_l2_mergedHbbTruth
+            except:
+                self.jj_l1_mergedHbbTruth.ri = 0
+                self.jj_l2_mergedHbbTruth.ri = 0
+                Hbb1=0
+                Hbb2=0
+            try:
+                self.jj_l1_mergedHccTruth.ri = event.jj_l1_mergedHccTruth
+                self.jj_l2_mergedHccTruth.ri = event.jj_l2_mergedHccTruth
+                Hcc1=event.jj_l1_mergedHccTruth
+                Hcc2=event.jj_l2_mergedHccTruth
+            except:
+                self.jj_l1_mergedHccTruth.ri = 0
+                self.jj_l2_mergedHccTruth.ri = 0
+                Hcc1=0
+                Hcc2=0
+            try:
+                self.jj_l1_mergedHggTruth.ri = event.jj_l1_mergedHggTruth
+                self.jj_l2_mergedHggTruth.ri = event.jj_l2_mergedHggTruth
+                Hgg1=event.jj_l1_mergedHggTruth
+                Hgg2=event.jj_l2_mergedHggTruth
+            except:
+                self.jj_l1_mergedHggTruth.ri = 0
+                self.jj_l2_mergedHggTruth.ri = 0
+                Hgg1=0
+                Hgg2=0
+            try:
+                self.jj_l1_mergedHVV4qTruth.ri = event.jj_l1_mergedHVVTruth_4q
+                self.jj_l2_mergedHVV4qTruth.ri = event.jj_l2_mergedHVVTruth_4q
+                HVV4q1=event.jj_l1_mergedHVVTruth_4q
+                HVV4q2=event.jj_l2_mergedHVVTruth_4q
+            except:
+                self.jj_l1_mergedHVV4qTruth.ri = 0
+                self.jj_l2_mergedHVV4qTruth.ri = 0
+                HVV4q1=0
+                HVV4q2=0
+            try:
+                self.jj_l1_mergedHVVlepTruth.ri = event.jj_l1_mergedHVVTruth_lept
+                self.jj_l2_mergedHVVlepTruth.ri = event.jj_l2_mergedHVVTruth_lept
+                HVVlep1=event.jj_l1_mergedHVVTruth_lept
+                HVVlep2=event.jj_l2_mergedHVVTruth_lept
+            except:
+                self.jj_l1_mergedHVVlepTruth.ri = 0
+                self.jj_l2_mergedHVVlepTruth.ri = 0
+                HVVlep1=0
+                HVVlep2=0
+
+            try:
+                self.jj_l1_mergedTopTruth.ri = event.jj_l1_mergedTopTruth
+                self.jj_l2_mergedTopTruth.ri = event.jj_l2_mergedTopTruth
+                top1=event.jj_l1_mergedTopTruth
+                top2=event.jj_l2_mergedTopTruth
+            except:
+                self.jj_l1_mergedTopTruth.ri = 0
+                self.jj_l2_mergedTopTruth.ri = 0
+                top1=0
+                top2=0
+            #print " event top ",event.jj_l1_mergedTopTruth,event.jj_l2_mergedTopTruth
+            #print " self top ",self.jj_l1_mergedTopTruth.ri,self.jj_l2_mergedTopTruth.ri
+            HTruth1 = 0
+            HTruth2 = 0
+            if self.jj_l1_mergedHbbTruth.ri == 1 or self.jj_l1_mergedHccTruth.ri == 1  or self.jj_l1_mergedHggTruth.ri == 1 or self.jj_l1_mergedHVV4qTruth.ri == 1 or self.jj_l1_mergedHVVlepTruth.ri ==1:
+                HTruth1 = 1
+            if self.jj_l2_mergedHbbTruth.ri == 1 or self.jj_l2_mergedHccTruth.ri == 1  or self.jj_l2_mergedHggTruth.ri == 1 or self.jj_l2_mergedHVV4qTruth.ri == 1 or self.jj_l2_mergedHVVlepTruth.ri ==1:
+                HTruth2 = 1
+
+
+            self.jj_l1_mergedZbbTruth.ri = event.jj_l1_mergedZbbTruth
+            self.jj_l2_mergedZbbTruth.ri = event.jj_l2_mergedZbbTruth
+            if cat !='all':
+                self.category[:12] = cat
+            else: self.category[:12] = "0"
+
+
+            CMS_eff_vtag_sf = [1.0,1.0] #for up and down variations
+            CMS_eff_htag_sf = [1.0,1.0]
+            CMS_mistag_top_sf = [1.0,1.0]
+
+
+            # this depends now on the actual cuts in the analysis!!
+            if W_leaf_l1.GetValue() > WPHP_W_leaf_l1.GetValue():
+                self.jj_l1_jetTag[:6] = 'HPVtag'
+            elif W_leaf_l1.GetValue() > WPLP_W_leaf_l1.GetValue():
+                self.jj_l1_jetTag[:6] = 'LPVtag'
+            else:
+                self.jj_l1_jetTag[:6] = 'Notag'
+                
+            if W_leaf_l2.GetValue() > WPHP_W_leaf_l2.GetValue():
+                self.jj_l2_jetTag[:6] = 'HPVtag'
+            elif W_leaf_l2.GetValue() > WPLP_W_leaf_l2.GetValue():
+                self.jj_l2_jetTag[:6] = 'LPVtag'
+            else:
+                self.jj_l2_jetTag[:6] = 'Notag'
+
+
+            tag1=self.jj_l1_jetTag[:6]
+            tag2=self.jj_l2_jetTag[:6]
+            jet = 1
+            SF1,SFW1,SFH1 = calculateSF(self,event,ctx,year,jet,top1,top2,HTruth1,HTruth2,tag1,tag2)
+            jet = 2
+            SF2,SFW2,SFH2 = calculateSF(self,event,ctx,year,jet,top1,top2,HTruth1,HTruth2,tag1,tag2)
+            SF = SF1*SF2
+            #pt dependent part
+            # I calculate 2 additional SF to take into account the impact the tagger pt dependence separately for each tagger
+            # if the jet is W tagged, the SF to take into account the pt dependence for the W gets modified while the one taking into account the H tagger gets the nominal value
+            Hsfpt= SFH1*SFH2
+            Wsfpt= SFW1*SFW2
+            if (tag1.find('Htag') != tag2.find('Htag')) or (tag1.find('Vtag') != tag2.find('Vtag')):
+                jet = 1
+                CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,SF2,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
+                jet = 2
+                CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,SF1,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
+            else:
+                jet = 1
+                CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,1.0,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
+                jet = 2
+                CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf = calculateSFUnc(self,event,ctx,year,jet,1.0,CMS_eff_vtag_sf,CMS_eff_htag_sf,CMS_mistag_top_sf,top1,top2,HTruth1,HTruth2,tag1,tag2)
+
+
+            if CMS_eff_htag_sf[0] == 1 and CMS_eff_htag_sf[1] == 1: CMS_eff_htag_sf = [SF,SF]
+            if CMS_eff_vtag_sf[0] == 1 and CMS_eff_vtag_sf[1] == 1: CMS_eff_vtag_sf = [SF,SF]
+            if CMS_mistag_top_sf[0] == 1 and CMS_mistag_top_sf[1] == 1: CMS_mistag_top_sf = [SF,SF]
+            self.Wsfpt.rf = Wsfpt
+            self.Hsfpt.rf = Hsfpt
+
+
+            self.sf.rf = SF
+            self.jj_l1_pt.rf = event.jj_l1_pt
+            self.jj_l2_pt.rf = event.jj_l2_pt
+            self.CMS_eff_vtag_sf_up.rf = CMS_eff_vtag_sf[0]
+            self.CMS_eff_vtag_sf_down.rf = CMS_eff_vtag_sf[1]
+            self.CMS_eff_htag_sf_up.rf = CMS_eff_htag_sf[0]
+            self.CMS_eff_htag_sf_down.rf = CMS_eff_htag_sf[1]
+            self.CMS_mistag_top_sf_up.rf = CMS_mistag_top_sf[0]
+            self.CMS_mistag_top_sf_down.rf = CMS_mistag_top_sf[1]
+            if event.jj_l1_mergedVTruth == 0 and event.jj_l2_mergedVTruth ==0 : noW=noW+1 
+            if event.jj_l1_mergedVTruth == 1 and event.jj_l2_mergedVTruth ==1 : twoW=twoW+1
+            if ( (event.jj_l1_mergedVTruth == 0 and event.jj_l2_mergedVTruth ==1) or  (event.jj_l1_mergedVTruth == 1 and event.jj_l2_mergedVTruth ==0)): oneW=oneW+1
+            if ((event.jj_l1_mergedTopTruth ==0 and event.jj_l2_mergedTopTruth ==1) or (event.jj_l1_mergedTopTruth ==1 and event.jj_l2_mergedTopTruth ==0)): onetop=onetop+1
+            if event.jj_l1_mergedTopTruth ==0 and event.jj_l2_mergedTopTruth ==0 : notop=notop+1
+            if ((event.jj_l1_mergedVTruth == 1 and event.jj_l1_mergedTopTruth ==0) or  (event.jj_l2_mergedVTruth == 1 and event.jj_l2_mergedTopTruth ==0)): Wnotintop=Wnotintop+1
+            if ((event.jj_l1_mergedVTruth == 1 and event.jj_l1_mergedTopTruth ==0) and  (event.jj_l2_mergedVTruth == 1 and event.jj_l2_mergedTopTruth ==0)): twoWnotintop=twoWnotintop+1
+            if event.jj_l1_mergedTopTruth ==1 and event.jj_l2_mergedTopTruth ==1 : twotop=twotop+1
+            if((event.jj_l1_mergedVTruth==0 and event.jj_l2_mergedVTruth ==1  and event.jj_l2_mergedTopTruth ==1 ) or  (event.jj_l1_mergedVTruth == 1  and event.jj_l1_mergedTopTruth ==1 and event.jj_l2_mergedVTruth ==0)): Wintop=Wintop+1
+            self.newTree.Fill()
+
+        #print 'number of events in this category '+str(self.newTree.GetEntries())
+        print 'number of events without Ws in this category '+str(noW)
+        print 'number of events without tops in this category '+str(notop)
+        print 'number of events with 1 W in this category '+str(oneW)
+        print 'number of Ws in top in this category '+str(Wintop)
+        print 'number of event with 1 W not top in this category '+str(Wnotintop)
+        print 'number of event with 2 Ws not top in this category '+str(twoWnotintop)
+        print 'number of events with 1 top in this category '+str(onetop)
+        print 'number of events with 2 Ws in this category '+str(twoW)
+        print 'number of events with 2 tops in this category '+str(twotop)
+
     def test(self):
         for event in self.newTree:
             print event.jj_l1_mergedVTruth
@@ -650,6 +1010,7 @@ if __name__=='__main__':
     if options.directory.find(options.year)== -1: print 'ATTENTION: are you sure you are using the right directory for '+options.year+' data?'    
     period = options.year
     ctx  = cuts.cuts("init_VV_VH.json",period,"random_dijetbins",True)
+    if options.vv == True: ctx  = cuts.cuts("init_VV_VH.json",period,"random_dijetbins_VV",True)
     samples=""
     basedir=options.directory
     filePeriod=options.year
@@ -674,26 +1035,60 @@ if __name__=='__main__':
         print 'init new tree'
         outtree = myTree(sample,outfile)
         outtreeAll = myTree(sample,outfile)
-        tmpfilename = selectSignalTree(ctx.cuts,samplelist[sample])
+        if options.vv == True:
+            print " running on VV only!! "
+            tmpfilename = selectSignalTreeVV(ctx.cuts,samplelist[sample])
+        elif options.four == True:
+            print " merging VH HPLP in VV HPLP!! "
+            tmpfilename = selectSignalTree4(ctx.cuts,samplelist[sample])
+        else:
+            tmpfilename = selectSignalTree(ctx.cuts,samplelist[sample])
+
+
         print " tmpfilename ",tmpfilename
         LO = False
-        if (filePeriod == "2017" or filePeriod == "2018") and (sample.find("QCD")==-1 or sample.find("Jets")==-1):  LO = True
-        outtree.setOutputTreeBranchValues('VBF_VH_HPHP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VBF_VV_HPHP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VBF_VH_LPHP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VBF_VH_HPLP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VBF_VV_HPLP',ctx,tmpfilename,filePeriod,LO)
+        #if (filePeriod == "2017" or filePeriod == "2018") and (sample.find("QCD")==-1 or sample.find("Jets")==-1):  LO = True
+        if options.vv == True:
+            print " running on VV only!! "
+            outtree.setOutputTreeBranchValuesVV('VBF_VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValuesVV('VBF_VV_HPLP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValuesVV('VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValuesVV('VV_HPLP',ctx,tmpfilename,filePeriod,LO)
+        elif options.four == True:
+            print " merging VH HPLP in VV HPLP!! "
+            outtree.setOutputTreeBranchValues('VBF_VH_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VBF_VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VBF_VH_LPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VBF_VV_HPLP',ctx,tmpfilename,filePeriod,LO)
 
-        outtree.setOutputTreeBranchValues('VH_HPHP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VV_HPHP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VH_LPHP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VH_HPLP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VV_HPLP',ctx,tmpfilename,filePeriod,LO)
-        outtree.setOutputTreeBranchValues('VV_NPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VH_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VH_LPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VV_HPLP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VV_NPHP',ctx,tmpfilename,filePeriod,LO)
+
+        else:
+            outtree.setOutputTreeBranchValues('VBF_VH_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VBF_VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VBF_VH_LPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VBF_VH_HPLP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VBF_VV_HPLP',ctx,tmpfilename,filePeriod,LO)
+
+            outtree.setOutputTreeBranchValues('VH_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VV_HPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VH_LPHP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VH_HPLP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VV_HPLP',ctx,tmpfilename,filePeriod,LO)
+            outtree.setOutputTreeBranchValues('VV_NPHP',ctx,tmpfilename,filePeriod,LO)
+
         outtree.write('signalregion')
-        outtreeAll.setOutputTreeBranchValues('all',ctx,tmpfilename,filePeriod,LO)
+        if options.vv == True:
+            print " running on VV only!! "
+            outtreeAll.setOutputTreeBranchValuesVV('all',ctx,tmpfilename,filePeriod,LO)
+        else:
+            outtreeAll.setOutputTreeBranchValues('all',ctx,tmpfilename,filePeriod,LO)
         outfile.cd()
         outtreeAll.write('all')
-        
+
         os.system("rm "+tmpfilename+".root")
-        
+
