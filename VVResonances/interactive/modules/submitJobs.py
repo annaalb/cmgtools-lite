@@ -9,7 +9,8 @@ import subprocess, thread
 from array import array
 ROOT.gROOT.SetBatch(True)
 
-timeCheck = "200"
+#reduced to speed the job sending, if jobs are not finished always enter "n" to the questions and rerun the same command with option "--sendjobs False" to merge once jobs are done
+timeCheck = "1" 
 userName=os.environ['USER']
 
 
@@ -243,11 +244,11 @@ def Make2DDetectorParam(rootFile,template,cut,samples,jobname="DetPar",bins="200
     print
     return joblist, files   
     
-def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobName="1DMVV",wait=True,binning='',addOption="",sendjobs=True):
+def Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,binsMVV,minMVV,maxMVV,samples,jobName="1DMVV",wait=True,binning='',addOption="",sendjobs=True,doKfactors=False):
 
     command='vvMake1DMVVTemplateWithKernels.py'
     if rootFile.find("TT")!=-1: command='vvMake1DMVVTemplateTTbar.py'
-
+    if doKfactors == True: command='vvMake1DMVVTemplateVjets.py'
     print 
     print 'START: Make1DMVVTemplateWithKernels with parameters:'
     print command
@@ -760,12 +761,13 @@ def merge2DDetectorParam(jobList,files,resFile,binsxStr,jobname,template="QCD_Pt
         print " outname used for copy: "+str(outname)
         os.system( 'cp %s %s'%(outname,resFile) )
 
-def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbinsMVV,name,filename): # ,samples):
+def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbinsMVV,name,filename,doKfactors=False,doTau=False): # ,samples):
 	print "Merging 1D templates"
 	print
 	print "Jobs to merge :   " ,jobList
 	print "Files ran over:   " ,files
-	
+	print " doing k factors ? ",doKfactors
+        print " jobname ",jobname
         outdir = 'res'+jobname
         jobdir = 'tmp'+jobname
 
@@ -805,21 +807,34 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
             finalHistos = {}
             finalHistos['histo_nominal'] = ROOT.TH1F("histo_nominal_out","histo_nominal_out",binsMVV,minMVV,maxMVV)
             finalHistos['mvv_nominal'] = ROOT.TH1F("mvv_nominal_out","mvv_nominal_out",binsMVV,minMVV,maxMVV)
-            if jobname.find("TT") !=-1:  finalHistos['histo_noreweight'] = ROOT.TH1F("histo_noreweight_out","histo_noreweight_out",binsMVV,minMVV,maxMVV)
+            if jobname.find("TT") !=-1 and doTau == False:
+                finalHistos['histo_noreweight'] = ROOT.TH1F("histo_noreweight_out","histo_noreweight_out",binsMVV,minMVV,maxMVV)
+                finalHistos['histo_doublereweight'] = ROOT.TH1F("histo_doublereweight_out","histo_doublereweight_out",binsMVV,minMVV,maxMVV)
+            if (jobname.find("WJets") !=-1 or jobname.find("ZJets") !=-1)  and doKfactors == True:
+                print " ******** adding kfactors hists "
+                finalHistos['histo_noreweight'] = ROOT.TH1F("histo_noreweight_out","histo_noreweight_out",binsMVV,minMVV,maxMVV)
+                finalHistos['histo_doublereweight'] = ROOT.TH1F("histo_doublereweight_out","histo_doublereweight_out",binsMVV,minMVV,maxMVV)
             if HCALbinsMVV!="":
                 a,b,bins = HCALbinsMVV.split(" ")
                 binning = getBinning(bins)
                 binning = array("f",binning)
                 finalHistos['histo_nominal'] = ROOT.TH1F("histo_nominal_out","histo_nominal_out",len(binning)-1,binning)
                 finalHistos['mvv_nominal'] = ROOT.TH1F("mvv_nominal_out","mvv_nominal_out",len(binning)-1,binning)
-                if jobname.find("TT") !=-1: finalHistos['histo_noreweight'] = ROOT.TH1F("histo_noreweight_out","histo_noreweight_out",len(binning)-1,binning)
+                if jobname.find("TT") !=-1:
+                    finalHistos['histo_noreweight'] = ROOT.TH1F("histo_noreweight_out","histo_noreweight_out",len(binning)-1,binning)
+                    finalHistos['histo_doublereweight'] = ROOT.TH1F("histo_doublereweight_out","histo_doublereweight_out",len(binning)-1,binning)
+                if (jobname.find("W") !=-1 or jobname.find("Z") !=-1)  and doKfactors == True:
+                    print " ******** adding kfactors hists "
+                    finalHistos['histo_noreweight'] = ROOT.TH1F("histo_noreweight_out","histo_noreweight_out",len(binning)-1,binning)
+                    finalHistos['histo_doublereweight'] = ROOT.TH1F("histo_doublereweight_out","histo_doublereweight_out",len(binning)-1,binning)
+
             for f in jobsPerSample[s]:
                 
                 inf = ROOT.TFile.Open(f,'READ')
-                
+
                 for h in inf.GetListOfKeys():
-                    
-                    if (h.GetName() == 'histo_nominal' and h.GetTitle() == 'histo_nominal') or (h.GetName() == 'mvv_nominal' and h.GetTitle() == 'mvv_nominal') or  (h.GetName() == 'histo_noreweight' and h.GetTitle() == 'histo_noreweight'):
+
+                    if (h.GetName() == 'histo_nominal' and h.GetTitle() == 'histo_nominal') or (h.GetName() == 'mvv_nominal' and h.GetTitle() == 'mvv_nominal') or  (h.GetName() == 'histo_noreweight' and h.GetTitle() == 'histo_noreweight') or (h.GetName() == 'histo_doublereweight'and h.GetTitle() ==  'histo_doublereweight'):
                         
                         histo = ROOT.TH1F()
                         histo = inf.Get(h.GetName())
@@ -832,7 +847,13 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
             outf.cd()  
             finalHistos['histo_nominal'].Write('histo_nominal')
             finalHistos['mvv_nominal'].Write('mvv_nominal')
-            if jobname.find("TT") !=-1: finalHistos['histo_noreweight'].Write('histo_noreweight')
+            if jobname.find("TT") !=-1 and doTau == False:
+                finalHistos['histo_noreweight'].Write('histo_noreweight')
+                finalHistos['histo_doublereweight'].Write('histo_doublereweight')
+            if (jobname.find("W") !=-1 or jobname.find("Z") !=-1)  and doKfactors == True:
+                finalHistos['histo_noreweight'].Write('histo_noreweight')
+                finalHistos['histo_doublereweight'].Write('histo_doublereweight')
+
             outf.Close()
             outf.Delete()
 
@@ -849,7 +870,7 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
             if f.find('QCD_HT') != -1: mg_files.append('./'+outdir+'_out'+'/'+f)
             elif f.find('QCD_Pt_') != -1: pythia_files.append('./'+outdir+'_out'+'/'+f)
             elif f.find('QCD_Pt-') != -1: herwig_files.append('./'+outdir+'_out'+'/'+f)
-            elif f.find("TT")!= -1: tt_files.append('./'+outdir+'_out'+'/'+f)
+            elif f.find("TT")!= -1 and doTau== False: tt_files.append('./'+outdir+'_out'+'/'+f)
             else: dijet_files.append('./'+outdir+'_out'+'/'+f)
 	 
         doMadGraph = False
@@ -929,6 +950,13 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
             histo_NLO = fhadd_dijet.Get('histo_nominal')
             histo_NLO.SetName('histo_nominal')
             histo_NLO.SetTitle('histo_nominal')
+            if doKfactors == True:
+                histo_noK = fhadd_dijet.Get('histo_noreweight')
+                histo_noK.SetName('histo_noreweight')
+                histo_noK.SetTitle('histo_noreweight')
+                histo_2EW = fhadd_dijet.Get('histo_doublereweight')
+                histo_2EW.SetName('histo_doublereweight')
+                histo_2EW.SetTitle('histo_doublereweight')
 
             doDijet = True
 
@@ -1163,34 +1191,37 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
             print "doing VJETS!!"
             mvv_NLO.Write('mvv_nominal')
             histo_NLO.Write('histo_nominal')
+            if doKfactors == True:
+                histo_noK.Write('histo_noreweight')
+                histo_2EW.Write('histo_doublereweight')
+
+            if doKfactors == False:
+                print "Now pT"
+                alpha=1.5/float(maxMVV)
+                histogram_pt_up,histogram_pt_down=unequalScale(histo_NLO,"histo_nominal_PT",alpha)
+                histogram_pt_down.SetName('histo_nominal_PTDown')
+                histogram_pt_down.SetTitle('histo_nominal_PTDown')
+                histogram_pt_down.Write('histo_nominal_PTDown')
+                histogram_pt_up.SetName('histo_nominal_PTUp')
+                histogram_pt_up.SetTitle('histo_nominal_PTUp')
+                histogram_pt_up.Write('histo_nominal_PTUp')
+
+                print "Now OPT"
+                alpha=1.5*float(minMVV)
+                histogram_opt_up,histogram_opt_down=unequalScale(histo_NLO,"histo_nominal_OPT",alpha,-1)
+                histogram_opt_down.SetName('histo_nominal_OPTDown')
+                histogram_opt_down.SetTitle('histo_nominal_OPTDown')
+                histogram_opt_down.Write('histo_nominal_OPTDown')
+                histogram_opt_up.SetName('histo_nominal_OPTUp')
+                histogram_opt_up.SetTitle('histo_nominal_OPTUp')
+                histogram_opt_up.Write('histo_nominal_OPTUp')
 
 
-            print "Now pT"
-            alpha=1.5/float(maxMVV)
-            histogram_pt_up,histogram_pt_down=unequalScale(histo_NLO,"histo_nominal_PT",alpha)
-            histogram_pt_down.SetName('histo_nominal_PTDown')
-            histogram_pt_down.SetTitle('histo_nominal_PTDown')
-            histogram_pt_down.Write('histo_nominal_PTDown')
-            histogram_pt_up.SetName('histo_nominal_PTUp')
-            histogram_pt_up.SetTitle('histo_nominal_PTUp')
-            histogram_pt_up.Write('histo_nominal_PTUp')
-
-            print "Now OPT"
-            alpha=1.5*float(minMVV)
-            histogram_opt_up,histogram_opt_down=unequalScale(histo_NLO,"histo_nominal_OPT",alpha,-1)
-            histogram_opt_down.SetName('histo_nominal_OPTDown')
-            histogram_opt_down.SetTitle('histo_nominal_OPTDown')
-            histogram_opt_down.Write('histo_nominal_OPTDown')
-            histogram_opt_up.SetName('histo_nominal_OPTUp')
-            histogram_opt_up.SetTitle('histo_nominal_OPTUp')
-            histogram_opt_up.Write('histo_nominal_OPTUp')
-
-
-            if doPythia:
-                histogram_NLODown=mirror(histo_NLO,histo_nominal,"histo_NLODown")
-                histogram_NLODown.SetName('histo_NLODown')
-                histogram_NLODown.SetTitle('histo_NLODown')
-                histogram_NLODown.Write('histo_NLODown')
+                if doPythia:
+                    histogram_NLODown=mirror(histo_NLO,histo_nominal,"histo_NLODown")
+                    histogram_NLODown.SetName('histo_NLODown')
+                    histogram_NLODown.SetTitle('histo_NLODown')
+                    histogram_NLODown.Write('histo_NLODown')
 
 
             c = ROOT.TCanvas("c","C",600,400)
@@ -1201,39 +1232,65 @@ def merge1DMVVTemplate(jobList,files,jobname,purity,binsMVV,minMVV,maxMVV,HCALbi
             histo_NLO.GetYaxis().SetTitle("arbitrary scale")
             histo_NLO.GetYaxis().SetTitleOffset(1.5)
             histo_NLO.GetXaxis().SetTitle("dijet mass")
-            sf = histo_NLO.Integral()
-            histogram_pt_up     .Scale(sf/histogram_pt_up.Integral())
-            histogram_pt_down   .Scale(sf/histogram_pt_down.Integral())
-            histogram_opt_up    .Scale(sf/histogram_opt_up.Integral())
-            histogram_opt_down  .Scale(sf/histogram_opt_down.Integral())
             histo_NLO.Draw("hist")
+            l = ROOT.TLegend(0.17,0.2,0.6,0.33)
+            l.AddEntry(mvv_NLO,"simulation","lp")
+            l.AddEntry(histo_NLO,"template","l")
+            histo_NLO.SetMinimum(0.0000000000001)
+            sf = histo_NLO.Integral()
+            if doKfactors == False:
+                if histogram_pt_up.Integral() !=0:
+                    histogram_pt_up     .Scale(sf/histogram_pt_up.Integral())
+                if histogram_pt_down.Integral() != 0:
+                    histogram_pt_down   .Scale(sf/histogram_pt_down.Integral())
+                if histogram_opt_up.Integral() !=0:
+                    histogram_opt_up    .Scale(sf/histogram_opt_up.Integral())
+                if histogram_opt_down.Integral() !=0:
+                    histogram_opt_down  .Scale(sf/histogram_opt_down.Integral())
 
-            histogram_pt_up.SetLineColor(ROOT.kRed)
-            histogram_pt_up.SetLineWidth(2)
-            histogram_pt_up.Draw("histsame")
-            histogram_pt_down.SetLineColor(ROOT.kRed)
-            histogram_pt_down.SetLineWidth(2)
-            histogram_pt_down.Draw("histsame")
-            histogram_opt_up.SetLineColor(ROOT.kGreen)
-            histogram_opt_up.SetLineWidth(2)
-            histogram_opt_up.Draw("histsame")
-            histogram_opt_down.SetLineColor(ROOT.kGreen)
-            histogram_opt_down.SetLineWidth(2)
-            histogram_opt_down.Draw("histsame")
+                histogram_pt_up.SetLineColor(ROOT.kRed)
+                histogram_pt_up.SetLineWidth(2)
+                histogram_pt_up.Draw("histsame")
+                histogram_pt_down.SetLineColor(ROOT.kRed)
+                histogram_pt_down.SetLineWidth(2)
+                histogram_pt_down.Draw("histsame")
+                histogram_opt_up.SetLineColor(ROOT.kGreen)
+                histogram_opt_up.SetLineWidth(2)
+                histogram_opt_up.Draw("histsame")
+                histogram_opt_down.SetLineColor(ROOT.kGreen)
+                histogram_opt_down.SetLineWidth(2)
+                histogram_opt_down.Draw("histsame")
+                l.AddEntry(histogram_pt_up,"#propto m_{jj}","l")
+                l.AddEntry(histogram_opt_up,"#propto 1/m_{jj}","l")
+
+            else:
+                if histo_noK.Integral() !=0:
+                    histo_noK     .Scale(sf/histo_noK.Integral())
+                if histo_2EW.Integral() !=0:
+                    histo_2EW     .Scale(sf/histo_2EW.Integral())
+                histo_noK.SetLineColor(ROOT.kRed)
+                histo_noK.SetLineWidth(2)
+                histo_noK.SetLineStyle(2)
+                histo_noK.Draw("histsame")
+                histo_2EW.SetLineColor(ROOT.kGreen+1)
+                histo_2EW.SetLineWidth(2)
+                histo_2EW.SetLineStyle(3)
+                histo_2EW.Draw("histsame")
+
+                l.AddEntry(histo_noK,"no K-factors","l")
+                l.AddEntry(histo_2EW,"2 EW factors","l")
+
             text = ROOT.TLatex()
             text.DrawLatexNDC(0.13,0.92,"#font[62]{CMS} #font[52]{Simulation}")
-            mvv_NLO.Scale(sf/mvv_NLO.Integral())
+            if mvv_NLO.Integral() != 0:
+                mvv_NLO.Scale(sf/mvv_NLO.Integral())
             mvv_NLO.SetMarkerColor(ROOT.kBlack)
             mvv_NLO.SetMarkerStyle(7)
             mvv_NLO.Draw("same")
             c.SetLogy()
 
 
-            l = ROOT.TLegend(0.17,0.2,0.6,0.33)
-            l.AddEntry(mvv_NLO,"simulation","lp")
-            l.AddEntry(histo_NLO,"template","l")
-            l.AddEntry(histogram_pt_up,"#propto m_{jj}","l")
-            l.AddEntry(histogram_opt_up,"#propto 1/m_{jj}","l")
+
             l.Draw("same")
 
             tmplabel = name
@@ -2386,8 +2443,9 @@ def makePseudoDataVjets(input,kernel,mc,output,lumi,workspace,year,purity,rescal
 
 
 
-def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,purity,rescale):
-
+def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,purity,rescale,qcdsf):
+ cat = purity
+ if "VBF" in input and purity.find("VBF") == -1: cat = "VBF_"+purity
  pwd = os.getcwd()
  pwd = "/"
  ROOT.gRandom.SetSeed(123)
@@ -2411,67 +2469,89 @@ def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,pu
  zbins = array("f",getListOfBinsLowEdge(hmcin,"z"))
  hout = ROOT.TH3F('data','data',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
  nEventsQCD = int(hmcin.Integral()*lumi)
- #if rescale == True: nEventsQCD = int(hmcin.Integral()*137190.0)
+ if rescale == True: 
+     print "QCD will be riscale by ",qcdsf
+     nEventsQCD = int(hmcin.Integral()*lumi*qcdsf)
  print "Expected QCD events: ",nEventsQCD
  hout.FillRandom(hdata,nEventsQCD)
  
- ws_file = ROOT.TFile.Open(workspace,'READ')
- ws = ws_file.Get('w')
- ws_file.Close()
- #ws.Print()
 
- modelWjets = ws.pdf('shapeBkg_Wjets_JJ_%s_13TeV_%s'%(purity,year))
- modelZjets = ws.pdf('shapeBkg_Zjets_JJ_%s_13TeV_%s'%(purity,year))
- category = ws.obj("CMS_channel==CMS_channel::JJ_"+purity+"_13TeV_%s"%year)
 
- MJ1= ws.var("MJ1");
- MJ2= ws.var("MJ2");
- MJJ= ws.var("MJJ");
- args = ROOT.RooArgSet(MJ1,MJ2,MJJ)
- ### Wjets
- print "n_exp_binJJ_"+purity+"_13TeV_%s_proc_Wjets"%year
- o_norm_wjets = ws.obj("n_exp_binJJ_"+purity+"_13TeV_%s_proc_Wjets"%year)
- hout_wjets = ROOT.TH3F('wjets','wjets',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
- 
- nEventsW = o_norm_wjets.getVal()
- print "Expected W+jets events: ",nEventsW
- wjets = modelWjets.generate(args,int(nEventsW))
- if wjets!=None:
-  #print signal.sumEntries()
-  for i in range(0,int(wjets.sumEntries())):
-   a = wjets.get(i)
-   it = a.createIterator()
-   var = it.Next()
-   x=[]
-   while var:
-       x.append(var.getVal())
-       var = it.Next()
-   #print x
-   hout_wjets.Fill(x[0],x[1],x[2])
+
+ if "VBF" in input and purity.find("VBF") == -1:
+     print " Vjets from norm "
+     finW = ROOT.TFile.Open('results_'+year+'/JJ_'+year+"_WJets_"+cat+".root",'READ')
+     hmcW = finW.Get('WJets')
+     nEventsW = int(hmcW.Integral()*lumi)
+     hout_W = ROOT.TH3F('data_W','data_tW',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+     hout_W.FillRandom(hmcW,nEventsW)
+     hout.Add(hout_W)
+     finZ = ROOT.TFile.Open('results_'+year+'/JJ_'+year+"_ZJets_"+cat+".root",'READ')
+     hmcZ = finZ.Get('ZJets')
+     nEventsZ = int(hmcZ.Integral()*lumi)
+     hout_Z = ROOT.TH3F('data_Z','data_Z',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+     hout_Z.FillRandom(hmcZ,nEventsZ)
+     hout.Add(hout_Z)
+ else:
+     print "Vjets from WS"
+     ws_file = ROOT.TFile.Open(workspace,'READ')
+     ws = ws_file.Get('w')
+     ws_file.Close()
+     #ws.Print()
+
+     modelWjets = ws.pdf('shapeBkg_Wjets_JJ_%s_13TeV_%s'%(purity,year))
+     modelZjets = ws.pdf('shapeBkg_Zjets_JJ_%s_13TeV_%s'%(purity,year))
+     category = ws.obj("CMS_channel==CMS_channel::JJ_"+purity+"_13TeV_%s"%year)
+
+     MJ1= ws.var("MJ1");
+     MJ2= ws.var("MJ2");
+     MJJ= ws.var("MJJ");
+     args = ROOT.RooArgSet(MJ1,MJ2,MJJ)
+     ### Wjets
+     print "n_exp_binJJ_"+cat+"_13TeV_%s_proc_Wjets"%year
+     o_norm_wjets = ws.obj("n_exp_binJJ_"+cat+"_13TeV_%s_proc_Wjets"%year)
+     hout_wjets = ROOT.TH3F('wjets','wjets',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+
+     nEventsW = o_norm_wjets.getVal()
+     print "Expected W+jets events: ",nEventsW
+     wjets = modelWjets.generate(args,int(nEventsW))
+     if wjets!=None:
+         #print signal.sumEntries()
+         for i in range(0,int(wjets.sumEntries())):
+             a = wjets.get(i)
+             it = a.createIterator()
+             var = it.Next()
+             x=[]
+             while var:
+                 x.append(var.getVal())
+                 var = it.Next()
+                 #print x
+             hout_wjets.Fill(x[0],x[1],x[2])
+
+     hout.Add(hout_wjets)
+
+     ### Zjets
+     print "n_exp_binJJ_"+cat+"_13TeV_%s_proc_Zjets"%year
+     o_norm_zjets = ws.obj("n_exp_binJJ_"+cat+"_13TeV_%s_proc_Zjets"%year)
+     hout_zjets = ROOT.TH3F('zjets','zjets',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+
+     nEventsZ = o_norm_zjets.getVal()
+     print "Expected Z+jets events: ",nEventsZ
+     zjets = modelZjets.generate(args,int(nEventsZ))
+     if zjets!=None:
+        #print signal.sumEntries()
+        for i in range(0,int(zjets.sumEntries())):
+            a = zjets.get(i)
+            it = a.createIterator()
+            var = it.Next()
+            x=[]
+            while var:
+                x.append(var.getVal())
+                var = it.Next()
+                #print x
+            hout_zjets.Fill(x[0],x[1],x[2])
       
- hout.Add(hout_wjets)
- ### Zjets
- print "n_exp_binJJ_"+purity+"_13TeV_%s_proc_Zjets"%year
- o_norm_zjets = ws.obj("n_exp_binJJ_"+purity+"_13TeV_%s_proc_Zjets"%year)
- hout_zjets = ROOT.TH3F('zjets','zjets',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
- 
- nEventsZ = o_norm_zjets.getVal()
- print "Expected Z+jets events: ",nEventsZ
- zjets = modelZjets.generate(args,int(nEventsZ))
- if zjets!=None:
-  #print signal.sumEntries()
-  for i in range(0,int(zjets.sumEntries())):
-   a = zjets.get(i)
-   it = a.createIterator()
-   var = it.Next()
-   x=[]
-   while var:
-       x.append(var.getVal())
-       var = it.Next()
-   #print x
-   hout_zjets.Fill(x[0],x[1],x[2])
-      
- hout.Add(hout_zjets)
+     hout.Add(hout_zjets)
  
  ftt = ROOT.TFile.Open(input_tt,'READ')
  hin_tt = ftt.Get('TTJets')
