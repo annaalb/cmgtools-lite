@@ -55,10 +55,14 @@ if options.name.find("1617")!=-1: period = "1617"
 
 showallTT=False
 signalName = "ZprimeZH"
+if options.name.find("ZHinc")!=-1:
+    signalName="ZprimeZHinc"
 if options.name.find("WZ")!=-1:
     signalName="WprimeWZ"
 if options.name.find("WH")!=-1:
     signalName="WprimeWH"
+if options.name.find("WHinc")!=-1:
+    signalName="WprimeWHinc"
 if options.name.find("ZprimeWW")!=-1:
     signalName="ZprimeWW"
 if options.name.find("BulkGWW")!=-1:
@@ -174,7 +178,7 @@ if __name__=="__main__":
          expected[bkg] = [ (args[pdf1Name[period]].getComponents())["n_exp_binJJ_"+purity+"_13TeV_"+period+"_proc_"+bkg],0.]
          norms[bkg] = expected[bkg][0].getVal()
          print "Expected number of "+bkg+" events:",(expected[bkg][0].getVal()),"   ("+period+")"
-     jsonfile = open("Expected_"+period+"_"+options.channel+".json","w")
+     jsonfile = open(options.output+"/Expected_"+period+"_"+options.channel+".json","w")
      json.dump(norms,jsonfile)
      jsonfile.close()
      all_expected[period] = expected
@@ -268,7 +272,7 @@ if __name__=="__main__":
                     jsonfileslopes = open(options.jsonname+"Slopes_"+options.channel+".json","w")
                     json.dump(slopes,jsonfileslopes)
                     jsonfileslopes.close()
-        jsonfile = open("Observed_"+period+"_"+options.channel+".json","w")
+        jsonfile = open(options.output+"/Observed_"+period+"_"+options.channel+".json","w")
         json.dump(norms,jsonfile)
         jsonfile.close()
         if options.fitSignal:
