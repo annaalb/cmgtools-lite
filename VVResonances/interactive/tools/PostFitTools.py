@@ -358,11 +358,11 @@ class Postfitplotter():
         if self.options.name.find("2018")!=-1: period = "2018"
         if self.options.name.find("1617")!=-1: period = "1617"
         if self.options.name.find("Run2")!=-1: period = "Run2"
-        if period =="2016":  CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
-        if period =="2017":  CMS_lumi.lumi_13TeV = "41.5 fb^{-1}"
-        if period =="2018":  CMS_lumi.lumi_13TeV = "59.7 fb^{-1}"
-        if period =="1617":  CMS_lumi.lumi_13TeV = "77.4 fb^{-1}"
-        if period =="Run2":  CMS_lumi.lumi_13TeV = "137.2 fb^{-1}"
+        if period =="2016":  CMS_lumi.lumi_13TeV = "36 fb^{-1}"
+        if period =="2017":  CMS_lumi.lumi_13TeV = "42 fb^{-1}"
+        if period =="2018":  CMS_lumi.lumi_13TeV = "60 fb^{-1}"
+        if period =="1617":  CMS_lumi.lumi_13TeV = "78 fb^{-1}"
+        if period =="Run2":  CMS_lumi.lumi_13TeV = "138 fb^{-1}"
         CMS_lumi.writeExtraText = 1
         CMS_lumi.lumi_sqrtS = "13 TeV (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
         CMS_lumi.extraText = self.options.prelim
@@ -554,7 +554,15 @@ class Postfitplotter():
             histos[2].SetLineStyle(6)
             histos[1].Draw("histsame") 
             histos[2].Draw("histsame")
-        hdata.Draw("samePE0")         
+        drawBox = False
+        if self.options.blind == True and axis!='z' and ( xrange == '55,215' or yrange == '55,215') :
+            drawBox = True
+            hdata.GetXaxis().SetRangeUser(55,65)
+            hdata.DrawCopy("sameE0")
+            hdata.GetXaxis().SetRangeUser(140,215)
+            hdata.Draw("samePE0")
+        else:
+            hdata.Draw("samePE0")
         leg.SetLineColor(0)
         
         nevents = {}
@@ -694,6 +702,10 @@ class Postfitplotter():
             graphs = self.addPullPlot(hdata,histos[0],nBins,errors[0])
         # graphs = addRatioPlot(hdata,histos[0],nBins,errors[0])
         graphs[0].Draw("HIST")
+        if self.options.blind == True and axis != 'z' and drawBox == True:
+            box = ROOT.TBox(65,graphs[0].GetMinimum(),140,graphs[0].GetMaximum())
+            box.SetFillColor(0)
+            box.Draw("same")
 
         pad2.Modified()
         pad2.Update()
@@ -1094,8 +1106,19 @@ class Projection():
     
     def draw_error_band(self,norms,rpdf1,pdf_sig):
         histo_central = self.htot
-        norm1 = norms["nonRes"][0].getVal()+norms["Wjets"][0].getVal()+norms["Zjets"][0].getVal()+norms["TTJetsTNonResT"][0].getVal()+norms["TTJetsWNonResT"][0].getVal()+norms["TTJetsW"][0].getVal()+norms["TTJetsNonRes"][0].getVal()+norms["TTJetsResWResT"][0].getVal()+norms["TTJetsTop"][0].getVal()
-        err_norm1 = math.sqrt(norms["nonRes"][1]*norms["nonRes"][1]+norms["Wjets"][1]*norms["Wjets"][1]+norms["Zjets"][1]*norms["Zjets"][1]+norms["TTJetsTNonResT"][1]*norms["TTJetsTNonResT"][1]+norms["TTJetsWNonResT"][1]*norms["TTJetsWNonResT"][1]+norms["TTJetsW"][1]*norms["TTJetsW"][1]+norms["TTJetsNonRes"][1]*norms["TTJetsNonRes"][1]+norms["TTJetsResWResT"][1]*norms["TTJetsResWResT"][1]+norms["TTJetsTop"][1]*norms["TTJetsTop"][1])
+        print norms
+        try:
+            norms["TTJetsTNonResT"][0].getVal()
+            allbkg = True
+        except:
+            allbkg = False
+        if allbkg == True:
+            norm1 = norms["nonRes"][0].getVal()+norms["Wjets"][0].getVal()+norms["Zjets"][0].getVal()+norms["TTJetsTNonResT"][0].getVal()+norms["TTJetsWNonResT"][0].getVal()+norms["TTJetsW"][0].getVal()+norms["TTJetsNonRes"][0].getVal()+norms["TTJetsResWResT"][0].getVal()+norms["TTJetsTop"][0].getVal()
+            err_norm1 = math.sqrt(norms["nonRes"][1]*norms["nonRes"][1]+norms["Wjets"][1]*norms["Wjets"][1]+norms["Zjets"][1]*norms["Zjets"][1]+norms["TTJetsTNonResT"][1]*norms["TTJetsTNonResT"][1]+norms["TTJetsWNonResT"][1]*norms["TTJetsWNonResT"][1]+norms["TTJetsW"][1]*norms["TTJetsW"][1]+norms["TTJetsNonRes"][1]*norms["TTJetsNonRes"][1]+norms["TTJetsResWResT"][1]*norms["TTJetsResWResT"][1]+norms["TTJetsTop"][1]*norms["TTJetsTop"][1])
+        else:
+            norm1 = norms["nonRes"][0].getVal()+norms["Wjets"][0].getVal()+norms["Zjets"][0].getVal()
+            err_norm1 = math.sqrt(norms["nonRes"][1]*norms["nonRes"][1]+norms["Wjets"][1]*norms["Wjets"][1]+norms["Zjets"][1]*norms["Zjets"][1])
+
         x_min = self.Binslowedge
         proj = self.axis
         rand = ROOT.TRandom3(1234);
