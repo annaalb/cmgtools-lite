@@ -142,8 +142,8 @@ if "ZprimeWW"  in options.sig:
     plotB2G18002= True
     plotATLASVVhad=True
 if "Vprime"  in options.sig:
-  ltheory="#sigma_{TH}#times BR(V'#rightarrowWV) HVT_{"+Model+"}"
-  titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow WV) [pb]  "
+  ltheory="#sigma_{TH}#times BR(V'#rightarrow(VV+VH)) HVT_{"+Model+"}"
+  titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow VV+VH) [pb]  "
   titleX = "M_{V'} [TeV]"
 if "BulkGVV"  in options.sig:
   ltheory="#sigma_{TH}#times BR(G_{Bulk}#rightarrowVV) #tilde{k}=0.5"
@@ -198,14 +198,14 @@ if scaleBR:
       func1 = w.function(signal1+'_JJ_VV_HPHP_13TeV_Run2_sigma')
       func2 = w.function(signal2+'_JJ_VV_HPHP_13TeV_Run2_sigma')
       scaleLimits[str(int(m))] = ROOT.TMath.Exp(func1.getVal(argset))+ROOT.TMath.Exp(func2.getVal(argset))
-    if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
-      try:
-        func3 = w.function(signal3+'inc_JJ_VV_HPHP_13TeV_Run2_sigma')
-        func4 = w.function(signal4+'inc_JJ_VV_HPHP_13TeV_Run2_sigma')
-      except:
-        func3 = w.function(signal3+'_JJ_VV_HPHP_13TeV_Run2_sigma')
-        func4 = w.function(signal4+'_JJ_VV_HPHP_13TeV_Run2_sigma')
-      scaleLimits[str(int(m))] = scaleLimits[str(int(m))]+ROOT.TMath.Exp(func3.getVal(argset))+ROOT.TMath.Exp(func4.getVal(argset))
+      if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
+        try:
+          func3 = w.function(signal3+'inc_JJ_VV_HPHP_13TeV_Run2_sigma')
+          func4 = w.function(signal4+'inc_JJ_VV_HPHP_13TeV_Run2_sigma')
+        except:
+          func3 = w.function(signal3+'_JJ_VV_HPHP_13TeV_Run2_sigma')
+          func4 = w.function(signal4+'_JJ_VV_HPHP_13TeV_Run2_sigma')
+        scaleLimits[str(int(m))] = scaleLimits[str(int(m))]+ROOT.TMath.Exp(func3.getVal(argset))+ROOT.TMath.Exp(func4.getVal(argset))
     else:
       func = w.function(options.sig+'_JJ_VV_HPHP_13TeV_Run2_sigma')
       scaleLimits[str(int(m))] = ROOT.TMath.Exp(func.getVal(argset))
