@@ -28,7 +28,7 @@ plotATLASVVsemilep=False # https://www.hepdata.net/record/ins1793572 - Eur.Phys.
 plotATLASVVhad=False  # https://www.hepdata.net/record/91052 - JHEP 09 (2019) 091, 2019.
 plotATLASVHhad = False # https://www.hepdata.net/record/ins1806507 - Phys.Rev.D 102 (2020) 112008, 2020.
 plotCMSsemilep = False # B2G-19-002 pas CMS semi lep Run2
-plotCMSZZsemilep = False # B2G-20-008 CMS BulkGZZ semilep Run2
+plotCMSsemilepZnunu = False # B2G-20-008 CMS Z(nunu)V(qq) semilep Run2
 
 #//////
 plotVH2016=False
@@ -120,6 +120,7 @@ if "BulkGZZ" in options.sig:
   titleX = "M_{G_{Bulk}} [TeV]"
   if "compareB2G18002" not in options.name:
     plotCMSsemilep = True
+    plotCMSsemilepZnunu = True
   if "VBF" not in options.sig:
     plotB2G18002 = True
 if "RadionWW" in options.sig:
@@ -332,17 +333,15 @@ if plotCMSsemilep:
   leg.AddEntry(CMS19002semilep,"B2G-19-002 semilep (Run2)","L")
 
 
-##### CMS B2G-20-008 semilep Run2 ZZ
-MASSSHORT=[1.3,2.0,2.7,3.4,4.0,4.5]
-limits_ZZ_CMS=[0.006,0.0011,0.00055,0.00038,0.0003,0.00028]
-ZZ20008=ROOT.TGraph(6,np.array(MASSSHORT),np.array(limits_ZZ_CMS))
-ZZ20008.SetName("ZZ20008")
-ZZ20008.SetTitle("");
-ZZ20008.SetLineColor(427);
-ZZ20008.SetLineStyle(5);
-ZZ20008.SetLineWidth(3);
-ZZ20008.SetMarkerStyle(20);
-if plotCMSZZsemilep: leg.AddEntry(ZZ20008,"B2G-20-008 semilep (Run2)","L")
+##### CMS B2G-20-008 semilep Run2 Z(nunu)V(qq)
+if plotCMSsemilepZnunu:
+  CMSZnunuV20008=ROOT.TGraph("Limits_B2G-20-009-pas/limit_"+options.sig+"_Run2_B2G_20_008.txt","%lg %lg")
+  CMSZnunuV20008.SetTitle("");
+  CMSZnunuV20008.SetLineColor(427);
+  CMSZnunuV20008.SetLineStyle(5);
+  CMSZnunuV20008.SetLineWidth(3);
+  CMSZnunuV20008.SetMarkerStyle(20);
+  leg.AddEntry(CMSZnunuV20008,"B2G-20-008 semilep (Run2)","L")
 
 
 
@@ -406,7 +405,7 @@ if plotATLASVVhad: VVhadATLAS.Draw("Lsame")
 if plotATLASVVsemilep: VVsemilepATLAS.Draw("Lsame")
 if plotATLASVHhad: VHhadATLAS.Draw("Lsame")
 if plotCMSsemilep: CMS19002semilep.Draw("Lsame")
-if plotCMSZZsemilep: ZZ20008.Draw("Lsame")
+if plotCMSsemilepZnunu: CMSZnunuV20008.Draw("Lsame")
 
 
 for i,g in enumerate(tgraphs):
