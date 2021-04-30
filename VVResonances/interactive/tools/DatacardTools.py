@@ -2,10 +2,11 @@
 import sys, os
 import json
 import ROOT
+import math
   
 class DatacardTools():
 
- def __init__(self,scales,scalesHiggs,tagger_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,sfQCD,pseudodata,outlabel,doCorrelation=True,fitvjetsmjj=False):
+ def __init__(self,scales,scalesHiggs,tagger_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,sfQCD,pseudodata,outlabel,doCorrelation=True,fitvjetsmjj=False,doKfactors=False,sfVjets=1):
   
   self.scales=scales
   self.tagger_pt_dependence=tagger_pt_dependence
@@ -14,12 +15,13 @@ class DatacardTools():
   self.JER_unc = JER_unc
   self.lumi_unc = lumi_unc
   self.sfQCD = sfQCD
+  self.sfVjets = sfVjets
   self.pseudodata = pseudodata
   self.outlabel = outlabel
   self.scalesHiggs=scalesHiggs
   self.doCorrelation= doCorrelation
   self.fitvjetsmjj = fitvjetsmjj
- 
+  self.kfactors = doKfactors
 
  def AddOneSignal(self,card,dataset,category,sig,resultsDir,ncontrib):
 
@@ -31,8 +33,8 @@ class DatacardTools():
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq1"%sig,"MJ1" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig,"MJ2" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.product3D("%s"%sig,"%s_Wqq1"%sig,"%s_Wqq2"%sig,"%s_MVV"%sig)
-        if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        else: card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        else: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
 	
        elif 'WprimeWZ' in sig:
 
@@ -62,8 +64,8 @@ class DatacardTools():
          if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
          else: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         else:
-         if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
-         else: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
+         if 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+         else: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
                 
        elif 'BulkG' in sig or 'Radion' in sig:
        
@@ -72,13 +74,13 @@ class DatacardTools():
         card.addMJJSignalParametricShapeNOEXP("%s_Wqq2"%sig,"MJ2" ,resultsDir+"/JJ_%s_%s_MJrandom_"%(sig,dataset)+"NP.json",{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
         card.product3D("%s"%sig,"%s_Wqq1"%sig,"%s_Wqq2"%sig,"%s_MVV"%sig)
 
-        if sig=='BulkGWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/BulkG.json","sigma","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='BulkGZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/BulkG.json","sigma","BRZZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='RadionWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/Radion.json","sigma","BRWW",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='RadionZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/Radion.json","sigma","BRZZ",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='VBF_BulkGWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_BulkG.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        if sig=='BulkGWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/BulkG.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='BulkGZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/BulkG.json","sigma","BRZZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='RadionWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/Radion.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='RadionZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/Radion.json","sigma","BRZZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='VBF_BulkGWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_BulkG.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         elif sig=='VBF_BulkGZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_BulkG.json","sigma","BRZZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-        elif sig=='VBF_RadionWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib-1,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_Radion.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+        elif sig=='VBF_RadionWW': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_Radion.json","sigma","BRWW",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         elif sig=='VBF_RadionZZ': card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/VBF_Radion.json","sigma","BRZZ",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
        
        elif 'H' in sig:
@@ -107,15 +109,15 @@ class DatacardTools():
         card.sumSimple("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")
 
         if not "sigOnly" in self.outlabel:
-           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
-           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
-           elif 'Zprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
-           elif 'Wprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
+           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Zprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Wprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         else:
-           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
-           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
-           elif 'Zprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
-           elif 'Wprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],500.0)
+           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Zprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Wprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
 
 
  def AddMultipleSignals(self,card,dataset,category,sig,resultsDir,ncontrib):
@@ -124,28 +126,28 @@ class DatacardTools():
   if 'VBF' in sig: isvbf='VBF_'
   
   if 'VprimeWV' in sig:
-   self.AddOneSignal(card,dataset,p,'%sWprimeWZ'%isvbf,resultsDir[dataset],ncontrib)
-   self.AddOneSignal(card,dataset,p,'%sZprimeWW'%isvbf,resultsDir[dataset],ncontrib-1)
-  elif 'VprimeVH' in sig:
-   self.AddOneSignal(card,dataset,p,'%sWprimeWH'%isvbf,resultsDir[dataset],ncontrib)
-   self.AddOneSignal(card,dataset,p,'%sZprimeZH'%isvb,resultsDir[dataset],ncontrib-1)
+   self.AddOneSignal(card,dataset,category,'%sWprimeWZ'%isvbf,resultsDir,ncontrib)
+   self.AddOneSignal(card,dataset,category,'%sZprimeWW'%isvbf,resultsDir,ncontrib-1)
+  elif 'VprimeVHinc' in sig:
+   self.AddOneSignal(card,dataset,category,'%sWprimeWHinc'%isvbf,resultsDir,ncontrib)
+   self.AddOneSignal(card,dataset,category,'%sZprimeZHinc'%isvbf,resultsDir,ncontrib-1)
   elif sig == 'Wprime' or sig == 'VBF_Wprime':
-   self.AddOneSignal(card,dataset,p,'%sWprimeWZ'%isvbf,resultsDir[dataset],ncontrib)
-   self.AddOneSignal(card,dataset,p,'%sWprimeWH'%isvbf,resultsDir[dataset],ncontrib-1)
+   self.AddOneSignal(card,dataset,category,'%sWprimeWZ'%isvbf,resultsDir,ncontrib)
+   self.AddOneSignal(card,dataset,category,'%sWprimeWHinc'%isvbf,resultsDir,ncontrib-1)
   elif sig == 'Zprime' or sig == 'VBF_Zprime':
-   self.AddOneSignal(card,dataset,p,'%sZprimeWW'%isvbf,resultsDir[dataset],ncontrib)
-   self.AddOneSignal(card,dataset,p,'%sZprimeZH'%isvbf,resultsDir[dataset],ncontrib-1)
+   self.AddOneSignal(card,dataset,category,'%sZprimeWW'%isvbf,resultsDir,ncontrib)
+   self.AddOneSignal(card,dataset,category,'%sZprimeZHinc'%isvbf,resultsDir,ncontrib-1)
   elif sig == 'Vprime' or sig == 'VBF_Vprime':
-   self.AddOneSignal(card,dataset,p,'%sWprimeWZ'%isvbf,resultsDir[dataset],ncontrib)
-   self.AddOneSignal(card,dataset,p,'%sZprimeWW'%isvbf,resultsDir[dataset],ncontrib-1)
-   self.AddOneSignal(card,dataset,p,'%sWprimeWH'%isvbf,resultsDir[dataset],ncontrib-2)
-   self.AddOneSignal(card,dataset,p,'%sZprimeZH'%isvbf,resultsDir[dataset],ncontrib-3)
+   self.AddOneSignal(card,dataset,category,'%sWprimeWZ'%isvbf,resultsDir,ncontrib)
+   self.AddOneSignal(card,dataset,category,'%sZprimeWW'%isvbf,resultsDir,ncontrib-1)
+   self.AddOneSignal(card,dataset,category,'%sWprimeWHinc'%isvbf,resultsDir,ncontrib-2)
+   self.AddOneSignal(card,dataset,category,'%sZprimeZHinc'%isvbf,resultsDir,ncontrib-3)
   elif 'BulkGVV' in sig:
-   self.AddOneSignal(card,dataset,p,'%sBulkGWW'%isvbf,resultsDir[dataset],ncontrib)
-   self.AddOneSignal(card,dataset,p,'%sBulkGZZ'%isvbf,resultsDir[dataset],ncontrib-1)
+   self.AddOneSignal(card,dataset,category,'%sBulkGWW'%isvbf,resultsDir,ncontrib)
+   self.AddOneSignal(card,dataset,category,'%sBulkGZZ'%isvbf,resultsDir,ncontrib-1)
   elif 'RadionVV' in sig:
-   self.AddOneSignal(card,dataset,p,'%sRadionWW'%isvbf,resultsDir[dataset],ncontrib)
-   self.AddOneSignal(card,dataset,p,'%sRadionZZ'%isvbf,resultsDir[dataset],ncontrib-1)
+   self.AddOneSignal(card,dataset,category,'%sRadionWW'%isvbf,resultsDir,ncontrib)
+   self.AddOneSignal(card,dataset,category,'%sRadionZZ'%isvbf,resultsDir,ncontrib-1)
           
  #default implementation not working
  def AddTTBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib):
@@ -381,14 +383,17 @@ class DatacardTools():
         norm = open(normjson,"r")
         norms = json.load(norm)
         for i in range(0,len(contrib)):
-            print " contrib "+contrib[i]+" tagger_pt_dependence "+self.tagger_pt_dependence[contrib[i]]
-            if self.tagger_pt_dependence[contrib[i]] == "1" :
-             print " no pt dep"
-             card.addYield(mappdf[contrib[i]],ncontrib+i,norms[contrib[i]])
-            else:
-             print " pt dep"
-             card.addYieldWithUncertainty(mappdf[contrib[i]],ncontrib+i,norms[contrib[i]],"CMS_tagger_PtDependence",self.tagger_pt_dependence[contrib[i]],1.0)
-	          
+         print "*****  no tagger pt reweight for tt"
+         card.addYield(mappdf[contrib[i]],ncontrib+i,norms[contrib[i]])
+         '''
+         print " contrib "+contrib[i]+" tagger_pt_dependence "+self.tagger_pt_dependence[contrib[i]]
+         if self.tagger_pt_dependence[contrib[i]] == "1" :
+          print " no pt dep"
+          card.addYield(mappdf[contrib[i]],ncontrib+i,norms[contrib[i]])
+         else:
+          print " pt dep"
+          card.addYieldWithUncertainty(mappdf[contrib[i]],ncontrib+i,norms[contrib[i]],"CMS_tagger_PtDependence",self.tagger_pt_dependence[contrib[i]],1.0)
+         '''
  def AddWResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib,uncertainty=[]):
        print "add Wres background"  
        sys.path.append(resultsDir)
@@ -398,8 +403,13 @@ class DatacardTools():
        # W+jets 
        if self.fitvjetsmjj == True:
         card.addMVVMinorBkgParametricShape("Wjets_mjj",["MJJ"],rootFileMVV,uncertainty)
+       elif self.kfactors == True:
+        print "<<<<<<<<         <<<<<<<     using kfactors!!!    >>>>>>>   >>>>>>>>>>>>"
+        card.addHistoShapeFromFile("Wjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['Kfactors:CMS_VV_JJ_Wjets_Kfactors'],False,0)
        else:
+        print " >>>>>>>>>>>> usual V+jets MVV "
         card.addHistoShapeFromFile("Wjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+category,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+category],False,0)
+
        card.addMJJSignalShapeNOEXP("Wjets_mjetRes_l1","MJ1","",getattr(module,'Wjets_TTbar_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
        print " addGaussianShape"
        card.addGaussianShape("Wjets_mjetNonRes_l2","MJ2",getattr(module,'Wjets_TTbar_%s_nonRes'%category))
@@ -409,8 +419,12 @@ class DatacardTools():
         card.product3D("Wjets_c1","Wjets_mjetRes_l1","Wjets_mjetNonRes_l2","Wjets_mjj_c1")
 
        # jets + W
-       if self.fitvjetsmjj == False:
+       if self.fitvjetsmjj == False and self.kfactors == False:
+        print " >>>>>>>>>>>> usual V+jets MVV "
         card.addHistoShapeFromFile("Wjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Wjets_PTZ_'+category,'OPT:CMS_VV_JJ_Wjets_OPTZ_'+category],False,0)
+       elif self.kfactors == True:
+        card.addHistoShapeFromFile("Wjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['Kfactors:CMS_VV_JJ_Wjets_Kfactors'],False,0)
+
        card.addMJJSignalShapeNOEXP("Wjets_mjetRes_l2","MJ2","",getattr(module,'Wjets_TTbar_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
        card.addGaussianShape("Wjets_mjetNonRes_l1","MJ1",getattr(module,'Wjets_TTbar_%s_nonRes'%category))
        if self.fitvjetsmjj == True:
@@ -426,7 +440,9 @@ class DatacardTools():
            print "add small yield"
            card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets",0.0000000000001)
        else:
-           card.addFixedYieldFromFileWithUncertainty('Wjets',ncontrib,rootFileNorm,"WJets",1.0,"CMS_tagger_PtDependence",self.tagger_pt_dependence["Wjets"],1.0)
+           #card.addFixedYieldFromFileWithUncertainty('Wjets',ncontrib,rootFileNorm,"WJets",1.0,"CMS_tagger_PtDependence",self.tagger_pt_dependence["Wjets"],1.0)
+           print "*****  no tagger pt reweight for W jets "
+           card.addFixedYieldFromFile('Wjets',ncontrib,rootFileNorm,"WJets",self.sfVjets) #,"CMS_tagger_PtDependence",self.tagger_pt_dependence["Wjets"],1.0)
 
  def AddZResBackground(self,card,dataset,category,rootFileMVV,rootFileNorm,resultsDir,ncontrib,uncertainty=[]):
        print "add Zres background"
@@ -438,8 +454,13 @@ class DatacardTools():
        if self.fitvjetsmjj == True:
         #card.addMVVMinorBkgParametricShape("Zjets_mjj_c1",["MJJ"],rootFileMVV,uncertainty)
         card.addMVVMinorBkgParametricShape("Zjets_mjj",["MJJ"],rootFileMVV,uncertainty)
+       elif self.kfactors == True:
+        print "<<<<<<<<         <<<<<<<     using kfactors!!!    >>>>>>>   >>>>>>>>>>>>"
+        card.addHistoShapeFromFile("Zjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['Kfactors:CMS_VV_JJ_Zjets_Kfactors'],False,0)
        else:
+        print " >>>>>>>>>>>> usual V+jets MVV "
         card.addHistoShapeFromFile("Zjets_mjj_c1",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+category,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+category],False,0)
+
        card.addMJJSignalShapeNOEXP("Zjets_mjetRes_l1","MJ1","",getattr(module,'Zjets_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
        card.addGaussianShape("Zjets_mjetNonRes_l2","MJ2",getattr(module,'Zjets_%s_nonRes'%category))
        if self.fitvjetsmjj == True:
@@ -448,8 +469,11 @@ class DatacardTools():
         card.product3D("Zjets_c1","Zjets_mjetRes_l1","Zjets_mjetNonRes_l2","Zjets_mjj_c1")
            
        # jets + Z
-       if self.fitvjetsmjj == False:
+       if self.fitvjetsmjj == False and self.kfactors == False:
+        print " >>>>>>>>>>>> usual V+jets MVV "
         card.addHistoShapeFromFile("Zjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['PT:CMS_VV_JJ_Zjets_PTZ_'+category,'OPT:CMS_VV_JJ_Zjets_OPTZ_'+category],False,0)
+       elif self.kfactors == True:
+        card.addHistoShapeFromFile("Zjets_mjj_c2",["MJJ"],rootFileMVV,"histo_nominal",['Kfactors:CMS_VV_JJ_Zjets_Kfactors'],False,0)
        card.addMJJSignalShapeNOEXP("Zjets_mjetRes_l2","MJ2","",getattr(module,'Zjets_%s_Res'%category),{'CMS_scale_prunedj':1.},{'CMS_res_prunedj':1.},self.scales)
        card.addGaussianShape("Zjets_mjetNonRes_l1","MJ1",getattr(module,'Zjets_%s_nonRes'%category))
        if self.fitvjetsmjj == True:
@@ -463,19 +487,32 @@ class DatacardTools():
        elif self.outlabel.find("sigOnly")!=-1 or self.outlabel.find("sigonly")!=-1 or self.pseudodata.find("ttbar")!=-1:
            card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets",0.0000000000001)
        else:
-           card.addFixedYieldFromFileWithUncertainty('Zjets',ncontrib,rootFileNorm,"ZJets",1.0,"CMS_tagger_PtDependence",self.tagger_pt_dependence["Zjets"],1.0)
+           #card.addFixedYieldFromFileWithUncertainty('Zjets',ncontrib,rootFileNorm,"ZJets",1.0,"CMS_tagger_PtDependence",self.tagger_pt_dependence["Zjets"],1.0)
+           print "*****  no tagger pt reweight for Z jets "
+           card.addFixedYieldFromFile('Zjets',ncontrib,rootFileNorm,"ZJets",self.sfVjets) #,"CMS_tagger_PtDependence",self.tagger_pt_dependence["Wjets"],1.0)
+
        print "stop Zres background"
    
- def AddNonResBackground(self,card,dataset,category,rootFile3DPDF,rootFileNorm,ncontrib):
+ def AddNonResBackground(self,card,dataset,category,rootFile3DPDF,rootFileNorm,ncontrib,RESCALE,indir):
       
       card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile3DPDF,"histo",['PT:CMS_VV_JJ_nonRes_PT_'+category,'OPT:CMS_VV_JJ_nonRes_OPT_'+category,'TurnOn:CMS_VV_JJ_nonRes_TurnOn_'+category,'altshape:CMS_VV_JJ_nonRes_altshape_'+category,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+category],False,0)
       #card.addHistoShapeFromFile("nonRes",["MJ1","MJ2","MJJ"],rootFile3DPDF,"histo",['PT:CMS_VV_JJ_nonRes_PT_'+category,'OPT:CMS_VV_JJ_nonRes_OPT_'+category,'altshape:CMS_VV_JJ_nonRes_altshape_'+category,'altshape2:CMS_VV_JJ_nonRes_altshape2_'+category,'PT6:CMS_VV_JJ_nonRes_PT6_'+category,'OPT6:CMS_VV_JJ_nonRes_OPT6_'+category,'OPT3:CMS_VV_JJ_nonRes_OPT3_'+category,'TurnOn:CMS_VV_JJ_nonRes_TurnOn_'+category,'PT3:CMS_VV_JJ_nonRes_PT3_'+category],False,0) #,'PT4:CMS_VV_JJ_nonRes_PT4_'+category,'OPT4:CMS_VV_JJ_nonRes_OPT4_'+category,'PT5:CMS_VV_JJ_nonRes_PT5_'+category,'OPT5:CMS_VV_JJ_nonRes_OPT5_'+category,'PT6:CMS_VV_JJ_nonRes_PT6_'+category,'OPT6:CMS_VV_JJ_nonRes_OPT6_'+category],False,0)
           
       if self.outlabel.find("sigonly")!=-1 or self.outlabel.find("sigOnly")!=-1 or self.pseudodata.find("ttbar")!=-1:
           card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",0.0000000000001)
+      elif RESCALE==True:
+          normExp = open(indir+"/Expected_"+dataset+"_"+category+".json","r")
+          normsExp = json.load(normExp)
+          normObs = open(indir+"/Observed_"+dataset+"_"+category+".json","r")
+          normsObs = json.load(normObs)
+          rescale=normsObs["nonRes"]/normsExp["nonRes"]
+          print " obs/exp ",rescale
+          rescale=rescale*self.sfQCD
+          print" final rescale ",rescale
+          card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",rescale)
       else:
           card.addFixedYieldFromFile("nonRes",ncontrib,rootFileNorm,"nonRes",self.sfQCD)
- 
+
  def AddData(self,card,fileData,histoName,scaleData):
 
       card.importBinnedData(fileData,histoName,["MJ1","MJ2","MJJ"],'data_obs',scaleData)
@@ -583,7 +620,7 @@ class DatacardTools():
          card.addSystematic("CMS_VV_JJ_"+mappdf[contrib[i]]+"_TOPPTZ_"+category,"param",[0,1.])
 
        
- def AddSigSystematics(self,card,sig,dataset,category,correlate,case,resultsDir="results_Run2/"):
+ def AddOneSigSystematics(self,card,sig,dataset,category,correlate,case,resultsDir="results_Run2/"):
       print " signal ",sig
       production = "nonVBFcat"
       productionBKG = "ggDY"
@@ -593,7 +630,7 @@ class DatacardTools():
        productionBKG = "VBF"
       if sig.find("VBF") !=-1:
        signaltype = "VBFsig"
-
+      print " case ",case
       if case != "0":
        # JES & JER uncertainties: migration uncertainties betwenn VBF and non VBF categories do to the mjj cut on the VBF jets + shape uncertainties
        #migration
@@ -624,17 +661,19 @@ class DatacardTools():
         print "case ",case,"not found!"
 
        #shape
-       if case=="1":
-        card.addSystematic("CMS_jes_scale_j","param",[0.0,0.012])
-        #card.addSystematic("CMS_jes_res_j","param",[0.0,0.04])
-        #card.addSystematic("CMS_jer_scale_j","param",[0.0,0.002])
-        card.addSystematic("CMS_jer_res_j","param",[0.0,0.06])
-       else:
-        print "case ",case,"not found!"
+      print " adding CMS_jes_scale_j "
+      card.addSystematic("CMS_jes_scale_j","param",[0.0,0.012])
+      #card.addSystematic("CMS_jes_res_j","param",[0.0,0.04])
+      #card.addSystematic("CMS_jer_scale_j","param",[0.0,0.002])
+      #card.addSystematic("CMS_jer_res_j","param",[0.0,0.06])
+      card.addSystematic("CMS_jer_res_j","param",[0.0,0.08])
 
       card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
-      card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
+      #card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
+      #print " *!*!*!!*!*!*!*!*!*!*!*!*!**!*!*! removed 1 sigma smearing in the jet mass!!!! !*!*!*!*!*!*!**!*!"
+      card.addSystematic("CMS_res_prunedj","param",[0.08,0.16])
       card.addSystematic("CMS_pdf","lnN",{'%s'%sig:1.01})
+
       production = "ggDY"
       signaltype = "signal"
       if category.find("VBF") !=-1:
@@ -643,7 +682,8 @@ class DatacardTools():
        signaltype = "signalVBF"
       print " production mode ",production
       print "adding PU systematics"
-      card.addSystematic("CMS_PU","lnN",{'%s'%sig:self.PU_unc[production][signaltype],"Wjets":self.PU_unc[production]["PRbackground"],"Zjets":self.PU_unc[production]["PRbackground"],'TTJetsW':self.PU_unc[production]["PRbackground"],'TTJetsTop':self.PU_unc[production]["PRbackground"],'TTJetsNonRes':self.PU_unc[production]["PRbackground"],'TTJetsWNonResT':self.PU_unc[production]["PRbackground"],'TTJetsResWResT':self.PU_unc[production]["PRbackground"],'TTJetsTNonResT':self.PU_unc[production]["PRbackground"]})
+      card.addSystematic("CMS_PU","lnN",{"Wjets":self.PU_unc[production]["PRbackground"],"Zjets":self.PU_unc[production]["PRbackground"],'TTJetsW':self.PU_unc[production]["PRbackground"],'TTJetsTop':self.PU_unc[production]["PRbackground"],'TTJetsNonRes':self.PU_unc[production]["PRbackground"],'TTJetsWNonResT':self.PU_unc[production]["PRbackground"],'TTJetsResWResT':self.PU_unc[production]["PRbackground"],'TTJetsTNonResT':self.PU_unc[production]["PRbackground"]})
+      card.addSystematic("CMS_PU","lnN",{'%s'%sig:self.PU_unc[production][signaltype]})
       prefiringperiods = ["2016","2017"]
       for year in prefiringperiods:
        card.addSystematic("CMS_L1prefiring"+year+"_"+production,"lnN",{'%s'%sig:1.01,"Wjets":1.01,"Zjets":1.01,'TTJetsW':1.01,'TTJetsTop':1.01,'TTJetsNonRes':1.01,'TTJetsWNonResT':1.01,'TTJetsResWResT':1.01,'TTJetsTNonResT':1.01})
@@ -653,9 +693,46 @@ class DatacardTools():
                                             'TTJetsW':self.lumi_unc[dataset],'TTJetsTop':self.lumi_unc[dataset],'TTJetsNonRes':self.lumi_unc[dataset],'TTJetsWNonResT':self.lumi_unc[dataset],'TTJetsResWResT':self.lumi_unc[dataset],'TTJetsTNonResT':self.lumi_unc[dataset]})   
       else: 
        card.addSystematic("CMS_lumi","lnN",{'%s'%sig:self.lumi_unc[dataset]})
-      
-    
- def AddTaggingSystematics(self,card,signal,p,jsonfile): 
+
+ def AddMultiSigSystematics(self,card,sig,dataset,category,correlate,case,resultsDir="results_Run2/"):
+  isvbf = ''
+  if 'VBF' in sig: isvbf='VBF_'
+
+  if 'VprimeWV' in sig:
+   self.AddOneSigSystematics(card,'%sWprimeWZ'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sZprimeWW'%isvbf,dataset,category,correlate,case,resultsDir)
+  elif 'VprimeVHinc' in sig:
+   self.AddOneSigSystematics(card,'%sWprimeWHinc'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sZprimeZHinc'%isvbf,dataset,category,correlate,case,resultsDir)
+  elif sig == 'Wprime' or sig == 'VBF_Wprime':
+   self.AddOneSigSystematics(card,'%sWprimeWZ'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sWprimeWHinc'%isvbf,dataset,category,correlate,case,resultsDir)
+  elif sig == 'Zprime' or sig == 'VBF_Zprime':
+   self.AddOneSigSystematics(card,'%sZprimeWW'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sZprimeZHinc'%isvbf,dataset,category,correlate,case,resultsDir)
+  elif sig == 'Vprime' or sig == 'VBF_Vprime':
+   self.AddOneSigSystematics(card,'%sWprimeWZ'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sZprimeWW'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sWprimeWHinc'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sZprimeZHinc'%isvbf,dataset,category,correlate,case,resultsDir)
+  elif 'BulkGVV' in sig:
+   self.AddOneSigSystematics(card,'%sBulkGWW'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sBulkGZZ'%isvbf,dataset,category,correlate,case,resultsDir)
+  elif 'RadionVV' in sig:
+   self.AddOneSigSystematics(card,'%sRadionWW'%isvbf,dataset,category,correlate,case,resultsDir)
+   self.AddOneSigSystematics(card,'%sRadionZZ'%isvbf,dataset,category,correlate,case,resultsDir)
+
+
+
+ def AddTauTaggingSystematics(self,card,sig,p,dataset):
+  print "^^^^^^^^^^^^^^^^^^^^^^^     hardcoded tau21 unc!!!!! ^^^^^^^^^^^^^^^^^^^^^^^^^"
+  vtag_unc = {'VV_HPHP':{},'VV_HPLP':{},'VV_LPLP':{}}
+  vtag_unc['VV_HPHP'] = {'2016':'1.232/0.792','2017':'1.269/0.763','1617':'1.269/0.763'}
+  vtag_unc['VV_HPLP'] = {'2016':'0.882/1.12','2017':'0.866/1.136','1617':'0.866/1.136'}
+  vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
+  card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:vtag_unc[p][dataset],"Wjets":vtag_unc[p][dataset],"Zjets":vtag_unc[p][dataset]})
+
+ def AddOneTaggingSystematics(self,card,signal,p,jsonfile,isVVonly=False,doFour=False,dataset="Run2"):
     contrib =["resT","resW","nonresT","resTnonresT","resWnonresT","resTresW"]
     mappdf = {"resT":"TTJetsTop","resW":"TTJetsW","nonresT":"TTJetsNonRes","resTnonresT":"TTJetsTNonResT","resWnonresT":"TTJetsWNonResT","resTresW":"TTJetsResWResT"}
     uncup_t = {}
@@ -687,10 +764,13 @@ class DatacardTools():
      uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+p+"_up"] })
      uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+p+"_down"]})
     unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z),"TTJetsW":str(uncdown_t["TTJetsW"])+"/"+ str(uncup_t["TTJetsW"]),"TTJetsWNonResT":str(uncdown_t["TTJetsWNonResT"])+"/"+ str(uncup_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncdown_t["TTJetsResWResT"])+"/"+ str(uncup_t["TTJetsResWResT"])}
-    if p.find('VV_HPHP') !=-1 or p.find('VH_HPLP') !=-1 or p.find('VV_HPLP') !=-1:
+    if (p.find('VV_HPHP') !=-1 or p.find('VH_HPLP') !=-1 or p.find('VV_HPLP') !=-1) and not isVVonly:
+     print " #################   taking into account the H/V tagging anti-correlation ############## "
      if p.find('VV_HPHP') !=-1: ap = 'VH_HPHP'
      if p.find('VH_HPLP') !=-1: ap = 'VH_LPHP'
      if p.find('VV_HPLP') !=-1: ap = 'VH_HPLP'
+     if doFour == True:
+      if p.find('VV_HPLP') !=-1: ap = 'VH_LPHP'
      if p.find('VBF') !=-1 : ap = 'VBF_'+ap
      uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][ap+"_up"]
      uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][ap+"_down"]
@@ -702,8 +782,9 @@ class DatacardTools():
       uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+ap+"_up"] })
       uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+ap+"_down"]})
      unc = {'%s'%signal: str(uncup_s)+"/"+ str(uncdown_s) ,'Wjets': str(uncup_w)+"/"+ str(uncdown_w),'Zjets': str(uncup_z)+"/"+ str(uncdown_z),"TTJetsW":str(uncup_t["TTJetsW"])+"/"+ str(uncdown_t["TTJetsW"]),"TTJetsWNonResT":str(uncup_t["TTJetsWNonResT"])+"/"+ str(uncdown_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncup_t["TTJetsResWResT"])+"/"+ str(uncdown_t["TTJetsResWResT"])}
+    if self.pseudodata=="qcdvjets": unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z)}
     print unc
-    card.addSystematic("CMS_VV_JJ_DeepJet_Htag_eff","lnN",unc)
+    if not isVVonly: card.addSystematic("CMS_VV_JJ_DeepJet_Htag_eff_"+dataset,"lnN",unc)
     
     uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_up"]
     uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_down"]
@@ -715,9 +796,12 @@ class DatacardTools():
      uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+p+"_up"]} )
      uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+p+"_down"]})
     unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z),"TTJetsW":str(uncdown_t["TTJetsW"])+"/"+ str(uncup_t["TTJetsW"]),"TTJetsWNonResT":str(uncdown_t["TTJetsWNonResT"])+"/"+ str(uncup_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncdown_t["TTJetsResWResT"])+"/"+ str(uncup_t["TTJetsResWResT"])}
-    if p.find('VH_LPHP')  !=-1 or p.find('VV_HPLP') !=-1 :
+    if (p.find('VH_LPHP')  !=-1 or p.find('VV_HPLP') !=-1 ) and not isVVonly:
+     print " #################   taking into account the H/V tagging anti-correlation ############## "
      if p.find('VH_LPHP') !=-1: ap = 'VV_HPHP'
      if p.find('VV_HPLP') !=-1: ap = 'VH_HPLP'
+     if doFour == True:
+      if p.find('VV_HPLP') !=-1: ap = 'VH_LPHP'
      if p.find('VBF') !=-1 : ap = 'VBF_'+ap
      uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][ap+"_up"]
      uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][ap+"_down"]
@@ -729,7 +813,12 @@ class DatacardTools():
       uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+ap+"_up"]} )
       uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+ap+"_down"]})
      unc = {'%s'%signal: str(uncup_s)+"/"+ str(uncdown_s) ,'Wjets': str(uncup_w)+"/"+ str(uncdown_w),'Zjets': str(uncup_z)+"/"+ str(uncdown_z),"TTJetsW":str(uncup_t["TTJetsW"])+"/"+ str(uncdown_t["TTJetsW"]),"TTJetsWNonResT":str(uncup_t["TTJetsWNonResT"])+"/"+ str(uncdown_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncup_t["TTJetsResWResT"])+"/"+ str(uncdown_t["TTJetsResWResT"])}
-    card.addSystematic("CMS_VV_JJ_DeepJet_Vtag_eff","lnN",unc)
+    if self.pseudodata=="qcdvjets": unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z)}
+    if p.find('VV_HPLP')!=-1 and isVVonly==True:
+     print " !!!!!!!! anticorrelate in VV only !!!!!!!!!!!!"
+     unc = {'%s'%signal: str(uncup_s)+"/"+ str(uncdown_s) ,'Wjets': str(uncup_w)+"/"+ str(uncdown_w),'Zjets': str(uncup_z)+"/"+ str(uncdown_z),"TTJetsW":str(uncup_t["TTJetsW"])+"/"+ str(uncdown_t["TTJetsW"]),"TTJetsWNonResT":str(uncup_t["TTJetsWNonResT"])+"/"+ str(uncdown_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncup_t["TTJetsResWResT"])+"/"+ str(uncdown_t["TTJetsResWResT"])}
+    print " VTAG UNC ",unc
+    card.addSystematic("CMS_VV_JJ_DeepJet_Vtag_eff_"+dataset,"lnN",unc)
     
     uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_TOPtag_mistag"][p+"_up"]
     uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_TOPtag_mistag"][p+"_down"]
@@ -741,40 +830,127 @@ class DatacardTools():
      uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"][mappdf[c]+"."+p+"_up"]} )
      uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"][mappdf[c]+"."+p+"_down"]})
     unc = {"TTJetsTop" : str(uncdown_t["TTJetsTop"])+"/"+ str(uncup_t["TTJetsTop"]), "TTJetsTNonResT":str(uncdown_t["TTJetsTNonResT"])+"/"+ str(uncup_t["TTJetsTNonResT"]),"TTJetsResWResT":str(uncdown_t["TTJetsResWResT"])+"/"+ str(uncup_t["TTJetsResWResT"]) }
-    card.addSystematic("CMS_VV_JJ_DeepJet_TOPtag_mistag","lnN",unc)
-     
- def AddResBackgroundSystematics(self,card,category,vbf,extra_uncertainty=[]):
- 
-       card.addSystematic("CMS_VV_JJ_Wjets_norm","lnN",{'Wjets':1.10})
-       card.addSystematic("CMS_VV_JJ_Zjets_norm","lnN",{'Zjets':1.10})
+    if not isVVonly: card.addSystematic("CMS_VV_JJ_DeepJet_TOPtag_mistag_"+dataset,"lnN",unc)
+
+ def AddMultiTaggingSystematics(self,card,sig,p,jsonfile,isVVonly=False,doFour=False,dataset="Run2"):
+  isvbf = ''
+  if 'VBF' in sig: isvbf='VBF_'
+
+  if 'VprimeWV' in sig:
+   newjson = jsonfile[0].replace('VprimeWV','WprimeWZ')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('WprimeWZ','ZprimeWW')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+  elif 'VprimeVH' in sig:
+   newjson = jsonfile[0].replace('VprimeVH','WprimeWHinc')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('WprimeWH','ZprimeZH')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+  elif sig == 'Wprime' or sig == 'VBF_Wprime':
+   newjson = jsonfile[0].replace('Wprime','WprimeWZ')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('WprimeWZ','WprimeWHinc')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+  elif sig == 'Zprime' or sig == 'VBF_Zprime':
+   newjson = jsonfile[0].replace('Zprime','ZprimeWW')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('ZprimeWW','ZprimeZHinc')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+  elif sig == 'Vprime' or sig == 'VBF_Vprime':
+   newjson = jsonfile[0].replace('Vprime','WprimeWZ')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('WprimeWZ','ZprimeWW')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('ZprimeWW','WprimeWHinc')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('WprimeWHinc','ZprimeZHinc')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+  elif 'BulkGVV' in sig:
+   newjson = jsonfile[0].replace('BulkGVV','BulkGWW')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sBulkGWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('BulkGWW','BulkGZZ')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sBulkGZZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+  elif 'RadionVV' in sig:
+   newjson = jsonfile[0].replace('RadionVV','RadionWW')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sRadionWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   newjson = jsonfile[0].replace('RadionWW','RadionZZ')
+   jsonfile[0] = newjson
+   self.AddOneTaggingSystematics(card,'%sRadionZZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+
+ def AddResBackgroundSystematics(self,card,category,vbf,corrvbf,extra_uncertainty=[]):
+
+       if not corrvbf:
+        print " V+jets has 1 norm syst per category! "
+        card.addSystematic("CMS_VV_JJ_Wjets_norm_"+category,"lnN",{'Wjets':1.50})
+        card.addSystematic("CMS_VV_JJ_Zjets_norm_"+category,"lnN",{'Zjets':1.50})
+       else:
+        print " corr VBF for V+jets!!! "
+        if category.find("VBF") != -1:
+         card.addSystematic("CMS_VV_JJ_Wjets_norm_VBF","lnN",{'Wjets':1.50})
+         card.addSystematic("CMS_VV_JJ_Zjets_norm_VBF","lnN",{'Zjets':1.50})
+        if category.find("VBF") != -1 and not vbf: category = category.replace("VBF_","")
+        card.addSystematic("CMS_VV_JJ_Wjets_norm_"+category,"lnN",{'Wjets':1.50})
+        card.addSystematic("CMS_VV_JJ_Zjets_norm_"+category,"lnN",{'Zjets':1.50})
+
        if category.find("VBF") != -1 and not vbf: category = category.replace("VBF_","")
        if self.fitvjetsmjj == True:
         card.addSystematic(extra_uncertainty[0],"param",[0.0,extra_uncertainty[1]])
         card.addSystematic(extra_uncertainty[2],"param",[0.0,extra_uncertainty[3]])
+       elif self.kfactors == True :
+        print "<<<<<<<<         <<<<<<<     using kfactors!!!    >>>>>>>   >>>>>>>>>>>>"
+        card.addSystematic("CMS_VV_JJ_Wjets_Kfactors","param",[0,1.]) #0.333
+        card.addSystematic("CMS_VV_JJ_Zjets_Kfactors","param",[0,1.]) #0.333
        else:
-        card.addSystematic("CMS_VV_JJ_Wjets_PTZ_"+category,"param",[0,0.1]) #0.333
-        card.addSystematic("CMS_VV_JJ_Wjets_OPTZ_"+category,"param",[0,0.1]) #0.333
-        card.addSystematic("CMS_VV_JJ_Zjets_PTZ_"+category,"param",[0,0.1]) #0.333
-        card.addSystematic("CMS_VV_JJ_Zjets_OPTZ_"+category,"param",[0,0.1]) #0.333
+        card.addSystematic("CMS_VV_JJ_Wjets_PTZ_"+category,"param",[0,1.]) #0.333
+        card.addSystematic("CMS_VV_JJ_Wjets_OPTZ_"+category,"param",[0,1.]) #0.333
+        card.addSystematic("CMS_VV_JJ_Zjets_PTZ_"+category,"param",[0,1.]) #0.333
+        card.addSystematic("CMS_VV_JJ_Zjets_OPTZ_"+category,"param",[0,1.]) #0.333
 
 
- def AddNonResBackgroundSystematics(self,card,category,vbf):
+ def AddNonResBackgroundSystematics(self,card,category,vbf,corrvbf):
       print " nonres syst for ",category
-      card.addSystematic("CMS_VV_JJ_nonRes_norm_"+category,"lnN",{'nonRes':1.5})
+      normunc=1.5
+      if not corrvbf:
+       print " QCD has 1 norm syst per category! "
+       card.addSystematic("CMS_VV_JJ_nonRes_norm_"+category,"lnN",{'nonRes':normunc})
+      else:
+       print " corr VBF for V+jets!!! "
+       if category.find("VBF") != -1:
+        card.addSystematic("CMS_VV_JJ_nonRes_norm_VBF","lnN",{'nonRes':normunc})
+       if category.find("VBF") != -1 and not vbf: category = category.replace("VBF_","")
+       card.addSystematic("CMS_VV_JJ_nonRes_norm_"+category,"lnN",{'nonRes':normunc})
+
       if category.find("VBF") != -1 and not vbf: category = category.replace("VBF_","")
       print " now ",category
-      card.addSystematic("CMS_VV_JJ_nonRes_PT_"+category,"param",[0.0,2.])
-      card.addSystematic("CMS_VV_JJ_nonRes_OPT_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_OPT6_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_PT6_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_OPT5_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_PT5_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_OPT4_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_PT4_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_OPT2_"+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_PT2_"+category,"param",[0.0,2.])
-      card.addSystematic("CMS_VV_JJ_nonRes_TurnOn_"+category,"param",[1.,2.])
-      card.addSystematic('CMS_VV_JJ_nonRes_altshape2_'+category,"param",[0.0,2.])
-      card.addSystematic('CMS_VV_JJ_nonRes_altshape_'+category,"param",[0.0,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category,"param",[1.,2.])
-      #card.addSystematic("CMS_VV_JJ_nonRes_PT3_"+category,"param",[1.,2.])
+      shapeunc=2.
+      card.addSystematic("CMS_VV_JJ_nonRes_PT_"+category,"param",[0.0,shapeunc])
+      card.addSystematic("CMS_VV_JJ_nonRes_OPT_"+category,"param",[0.0,shapeunc])
+      card.addSystematic("CMS_VV_JJ_nonRes_TurnOn_"+category,"param",[1.,shapeunc])
+      card.addSystematic('CMS_VV_JJ_nonRes_altshape2_'+category,"param",[0.0,shapeunc])
+      card.addSystematic('CMS_VV_JJ_nonRes_altshape_'+category,"param",[0.0,shapeunc])
+
+      #card.addSystematic("CMS_VV_JJ_nonRes_OPT3_"+category,"param",[1.,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_PT3_"+category,"param",[1.,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_OPT6_"+category,"param",[0.0,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_PT6_"+category,"param",[0.0,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_OPT5_"+category,"param",[0.0,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_PT5_"+category,"param",[0.0,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_OPT4_"+category,"param",[0.0,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_PT4_"+category,"param",[0.0,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_OPT2_"+category,"param",[0.0,shapeunc])
+      #card.addSystematic("CMS_VV_JJ_nonRes_PT2_"+category,"param",[0.0,shapeunc])

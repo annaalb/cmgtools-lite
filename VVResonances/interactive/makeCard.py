@@ -26,19 +26,27 @@ parser.add_option("-j","--jsonname",dest="jsonname",help="write the name of the 
 parser.add_option("--fitvjetsmjj",dest="fitvjetsmjj",default=False,action="store_true",help="True makes fits for mjj of vjets, False uses hists")
 parser.add_option("--fitTTmjj",dest="fitTTmjj",default=False,action="store_true",help="True makes fits for mjj of ttbar, False uses hists")
 parser.add_option("--combo",dest="combo",default=True,help="If True inputs from the 3 years combined will be used")
-parser.add_option("-v","--vbf",dest="vbf",help="do you want to keep VBF uncertainties separated?",action='store_true')
+parser.add_option("--vbf",dest="vbf",help="do you want to keep VBF uncertainties separated?",action='store_true')
 parser.add_option("-m","--merge",dest="merge",help="set to False if you do not want to combine datacards",default=True)
-
+parser.add_option("-i","--inputdir",dest="inputdir",help="input direcory of all the files",default='results_Run2')
+parser.add_option("--vv",dest="vv",help="make VV only (no VHveto) ?",action='store_true')
+parser.add_option("--tau",dest="tau",help="tau21 ?",action='store_true',default=False)
+parser.add_option("--four",dest="four",help="is VH HPLP merged in VV HPLP?",action='store_true')
+parser.add_option("--kfactors",dest="kfactors",help="use combination of kfactors as V+Jets MVV alternative shapes?",action='store_true',default=False)
+parser.add_option("--rescale",dest="rescale",help="use the rescale option if you want to rescale the QCD after having performed a preliminary postfit.",action='store_true')
+parser.add_option("--corrvbf",dest="corrvbf",help="correlate VBF cat with non VBF cat + 1 nuisance for all VBF for QCD and V+jets",action='store_true',default=False)
+parser.add_option("--peryear",dest="peryear",help="divide tagger eff per year",action='store_false',default=True) #this may look counter intuitive, but it is modified to have the chosen option as default for safety
 (options,args) = parser.parse_args()
 
 
 
 cmd='combineCards.py '
 
-#specify how to correlate jes & jer uncertainties
+#specify how to correlate jes & jer norm uncertainties
 # 1 = fully correlated among years, 2 = fully uncerrelated among years, 3 = partial correlation among years (do as in CASE 1 but take half effect as fully correlated and half effect as fully uncorrelated) (but NB json case2 = 2016 unc, case3 = 2017, case4 = 2018)
+# NB: only case 1 is fully implemented, case 0 removes this unc.
 case=1
-
+#print " **************************** jer/jes disabled "
 
 #### to create the preparatory WS for pseudodata with Vjets: pseudodata = "" & doVjets=True 
 pseudodata = options.pseudodata
@@ -56,6 +64,7 @@ print "signals ",signals
 doVjets= True
 rescale = False
 sf_qcd=1.8
+sf_vjets=1.
 
 if outlabel.find("sigonly")!=-1 or outlabel.find("qcdonly")!=-1: doVjets = False
 if outlabel.find("sigonly")!=-1 or outlabel.find("Vjetsonly")!=-1: sf_qcd = 0.00001
@@ -87,16 +96,16 @@ resultsDir = {year:'results_'+year for year in datasets}
 if len(datasets) == 3 and options.combo == True:
   datasets = []
   datasets.append("Run2")
-  resultsDir.update({"Run2" : "results_Run2"})
+  resultsDir.update({"Run2" : options.inputdir})
 if len(datasets) == 2 and options.combo == True:
   datasets = []
   datasets.append("1617")
-  resultsDir.update({"1617" : "results_1617"})
+  resultsDir.update({"1617" : options.inputdir})
 print "datasets ",datasets
 print "result dir ",resultsDir
 
 doCorrelation = True 
-Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,sf_qcd,pseudodata,outlabel,doCorrelation,options.fitvjetsmjj)
+Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,sf_qcd,pseudodata,outlabel,doCorrelation,options.fitvjetsmjj,options.kfactors,sf_vjets)
 
 
 for sig in signals:
@@ -119,10 +128,13 @@ for sig in signals:
       cmd_combo=cmd_combo+" "+cat.replace('_%s'%sig,'')+'=datacard_'+cat+'.txt '
       cardName='datacard_'+cat+'.txt '
       workspaceName='workspace_'+cat+outlabel+'.root'
-
-      if 'WW' in sig or 'ZZ' in sig or 'WH' in sig or 'ZH' in sig or 'WZ' in sig: Tools.AddOneSignal(card,dataset,p,sig,resultsDir[dataset],ncontrib)
-      else: Tools.AddMultipleSignals(card,dataset,p,sig,resultsDir[dataset],ncontrib)
-      
+      oneSignal = True
+      if 'WW' in sig or 'ZZ' in sig or 'WH' in sig or 'ZH' in sig or 'WZ' in sig:
+        Tools.AddOneSignal(card,dataset,p,sig,resultsDir[dataset],ncontrib)
+      else:
+        oneSignal = False
+        Tools.AddMultipleSignals(card,dataset,p,sig,resultsDir[dataset],ncontrib)
+      print " oneSignal ",oneSignal
       ncontrib+=1      
       print "##########################       including W/Z jets in datacard      ######################"
       rootFileNorm = resultsDir[dataset]+'/JJ_%s_WJets_%s.root'%(dataset,p)
@@ -142,25 +154,28 @@ for sig in signals:
         rootFileMVV = resultsDir[dataset]+'/JJ_%s_ZJets_MVV_'%dataset+shape_purity+'.root'
         Tools.AddZResBackground(card,dataset,shape_purity,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
       ncontrib+=1
-        
-      print "##########################       including tt+jets in datacard      ######################"
-      contrib =["resT","resW","nonresT","resTnonresT","resWnonresT","resTresW"]
-      rootFileMVV = {ttcon:resultsDir[dataset]+'/JJ_'+dataset+'_TTJets'+ttcon+'_MVV_'+shape_purity+'.root' for ttcon in contrib}
-      #rootFileMVV = {ttcon:resultsDir[dataset]+'/JJ_'+dataset+'_TTJets'+ttcon+'_MVV_NP.root' for ttcon in contrib}
-      rootFileNorm = {ttcon:resultsDir[dataset]+'/JJ_'+dataset+'_TTJets'+ttcon+'_'+p+'.root' for ttcon in contrib}
-      jsonfileNorm = resultsDir[dataset]+'/'+options.jsonname+'_'+dataset+'_'+p+'.json'
-      if options.fitTTmjj == True:
-        print "load fits"
-        Tools.AddTTBackground3(card,dataset,shape_purity,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib,["CMS_VV_JJ_TTJets_slope",0.5],jsonfileNorm)
+
+      if pseudodata !="qcdvjets":
+        print "##########################       including tt+jets in datacard      ######################"
+        contrib =["resT","resW","nonresT","resTnonresT","resWnonresT","resTresW"]
+        rootFileMVV = {ttcon:resultsDir[dataset]+'/JJ_'+dataset+'_TTJets'+ttcon+'_MVV_'+shape_purity+'.root' for ttcon in contrib}
+        #rootFileMVV = {ttcon:resultsDir[dataset]+'/JJ_'+dataset+'_TTJets'+ttcon+'_MVV_NP.root' for ttcon in contrib}
+        rootFileNorm = {ttcon:resultsDir[dataset]+'/JJ_'+dataset+'_TTJets'+ttcon+'_'+p+'.root' for ttcon in contrib}
+        jsonfileNorm = resultsDir[dataset]+'/'+options.jsonname+'_'+dataset+'_'+p+'.json'
+        if options.fitTTmjj == True:
+          print "load fits"
+          Tools.AddTTBackground3(card,dataset,shape_purity,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib,["CMS_VV_JJ_TTJets_slope",0.5],jsonfileNorm)
+        else:
+          print "load templates"
+          Tools.AddTTBackground4(card,dataset,shape_purity,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib,jsonfileNorm)
+          #rootFileMVV  = resultsDir[dataset]+'/JJ_'+dataset+'_TTJets_MVV_'+p+'.root'
+          #rootFileNorm = resultsDir[dataset]+'/JJ_'+dataset+'_TTJets_'+p+'.root'
+          #Tools.AddTTBackground2(card,dataset,p,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
+          #ncontrib+=1 --> with old implementation
+          ncontrib+=6 #--> with new implementation
+          #ncontrib+=3 #--> with new implementation
       else:
-        print "load templates"
-        Tools.AddTTBackground4(card,dataset,shape_purity,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib,jsonfileNorm)
-      #rootFileMVV  = resultsDir[dataset]+'/JJ_'+dataset+'_TTJets_MVV_'+p+'.root'
-      #rootFileNorm = resultsDir[dataset]+'/JJ_'+dataset+'_TTJets_'+p+'.root'
-      #Tools.AddTTBackground2(card,dataset,p,rootFileMVV,rootFileNorm,resultsDir[dataset],ncontrib)
-      #ncontrib+=1 --> with old implementation
-      ncontrib+=6 #--> with new implementation
-      #ncontrib+=3 #--> with new implementation
+        print "########^^^^^^^^^^^^^^ NOT ADDING TTBAR!!!!! ^^^^^^^^^^^^^########################"
 
       print "##########################       including QCD in datacard      ######################"
       #rootFile3DPDF = resultsDir[dataset]+'/JJ_2016_nonRes_3D_VV_HPLP.root'
@@ -171,7 +186,7 @@ for sig in signals:
       #rootFileNorm = resultsDir[dataset]+"/JJ_%s_nonRes_"%dataset+p+"_altshape2.root"
       print "rootFileNorm ",rootFileNorm
 
-      Tools.AddNonResBackground(card,dataset,shape_purity,rootFile3DPDF,rootFileNorm,ncontrib)
+      Tools.AddNonResBackground(card,dataset,shape_purity,rootFile3DPDF,rootFileNorm,ncontrib,options.rescale,options.inputdir)
       print "##########################       QCD added in datacard      ######################"
 
 
@@ -197,6 +212,11 @@ for sig in signals:
         rootFileData = resultsDir[dataset]+"/JJ_"+dataset+"_PDnoQCD_"+p+".root"
         histName="data"
         scaleData=1.0
+      elif pseudodata=="qcdvjets":
+        print "Using pseudodata with only qcd and V+jets backgrounds"
+        rootFileData = resultsDir[dataset]+"/JJ_"+dataset+"_PDVjets_"+p+".root"
+        histName="data"
+        scaleData=1.0
       elif pseudodata=="ttbar":
         print "Using pseudodata with only tt backgrounds"
         rootFileData = resultsDir[dataset]+"/JJ_"+dataset+"_PDTT_"+p+".root"
@@ -217,19 +237,38 @@ for sig in signals:
 
       print "##########################       data/pseudodata added in datacard      ######################"  
       correlateyields=1
-      Tools.AddSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
+      if oneSignal == True:
+        Tools.AddOneSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
+      else:
+        Tools.AddMultiSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
       if options.fitvjetsmjj == True:
-        Tools.AddResBackgroundSystematics(card,p,options.vbf,["CMS_VV_JJ_WJets_slope",0.2,"CMS_VV_JJ_ZJets_slope",0.2])
+        Tools.AddResBackgroundSystematics(card,p,options.vbf,options.corrvbf,["CMS_VV_JJ_WJets_slope",0.2,"CMS_VV_JJ_ZJets_slope",0.2])
       else:
-        Tools.AddResBackgroundSystematics(card,p,options.vbf)
-      Tools.AddNonResBackgroundSystematics(card,p,options.vbf)
-      Tools.AddTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+dataset+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+dataset+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+dataset+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+dataset+'.json'])
-      if options.fitTTmjj == True:
-        print "load fits syst"
-        Tools.AddTTSystematics4(card,["CMS_VV_JJ_TTJets_slope",0.05],dataset,p)
+        Tools.AddResBackgroundSystematics(card,p,options.vbf,options.corrvbf)
+      Tools.AddNonResBackgroundSystematics(card,p,options.vbf,options.corrvbf)
+      if options.tau==False and options.peryear==False:
+        print " 1 tagger eff per full Run2 "
+        Tools.AddTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+dataset+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+dataset+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+dataset+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+dataset+'.json'],options.vv,options.four,dataset)
+      elif options.peryear == True:
+        years= options.period.split(",")
+        for year in years:
+          print " tagging eff per year!! "
+          if oneSignal == True:
+            Tools.AddOneTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+year+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+year+'.json'],options.vv,options.four,year)
+          else:
+            Tools.AddMultiTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+year+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+year+'.json'],options.vv,options.four,year)
       else:
-        print "load templates syst"
-        Tools.AddTTSystematics5(card,p,options.vbf)
+        print "!!!!!!!!@@@@@@@@                    using tau21!!!    @@@@@@@@@@@@@@@@@@@@@@"
+        Tools.AddTauTaggingSystematics(card,sig,p,dataset)
+      if pseudodata!="qcdvjets":
+        if options.fitTTmjj == True:
+          print "load fits syst"
+          Tools.AddTTSystematics4(card,["CMS_VV_JJ_TTJets_slope",0.05],dataset,p)
+        else:
+          print "load templates syst"
+          Tools.AddTTSystematics5(card,p,options.vbf)
+      else:
+        print "tt syst not added"
       print "##########################       systematics added in datacard      ######################"  
 
 
