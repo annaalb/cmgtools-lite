@@ -1,0 +1,26 @@
+#: table_doi: 10.17182/hepdata.93922.v1/t11
+#: name: Table 11
+#: description: Upper 95% CLs limits on the VBF production cross section of HVT $W'$ in their $WZ$ decays as a function of the resonance mass.
+#: data_file: limits_HVTWZVBF_WZBR.yaml
+#: keyword reactions: VBF HVT WPRIME --> Z0 W --> l l q q + l v q q + v v q q
+#: keyword cmenergies: 13000.0
+#: keyword phrases: VBF | HVT | WZ | llqq | lvqq | vvqq
+#: Limit,Expected$\pm2\sigma$
+#: SQRT(S) [GeV],13000
+#: LUMINOSITY [fb$^{-1}$],139.0
+#Mass [TeV],Cross section upper limit at 95% CL [pb],2 sigma +,2 sigma -
+0.3 1.81 1.57 -0.84
+0.4 0.402 0.348 -0.186
+0.6 0.071 0.0614 -0.0329
+0.7 0.041 0.0355 -0.019
+0.8 0.0241 0.0209 -0.0112
+1 0.0121 0.0124 -0.00548
+1.2 0.00658 0.00729 -0.00285
+1.5 0.00392 0.00417 -0.00173
+1.8 0.00254 0.00264 -0.00108
+2 0.00173 0.00183 -0.000732
+2.4 0.00128 0.0014 -0.000484
+2.6 0.000972 0.00112 -0.000361
+3 0.000816 0.000934 -0.000299
+3.5 0.000607 0.00068 -0.00023
+4 0.000513 0.00054 -0.000238

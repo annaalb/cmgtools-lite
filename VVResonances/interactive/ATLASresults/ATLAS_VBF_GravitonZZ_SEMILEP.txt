@@ -1,0 +1,31 @@
+#: table_doi: 10.17182/hepdata.93922.v1/t23
+#: name: Table 23
+#: description: Upper 95% CLs limits on the VBF production cross section of Gravitons in their $ZZ$ decays as a function of the resonance mass.
+#: data_file: limits_RSGVBF_ZZ.yaml
+#: keyword reactions: VBF GRAVITON --> Z0 Z0 --> l l q q + v v q q
+#: keyword cmenergies: 13000.0
+#: keyword phrases: VBF | Graviton | ZZ | llqq | vvqq
+
+#: Limit,Expected$\pm2\sigma$
+#: SQRT(S) [GeV],13000
+#: LUMINOSITY [fb$^{-1}$],139.0
+#Mass [TeV],Cross section upper limit at 95% CL [pb],2 sigma +,2 sigma -
+0.3 0.494 0.428 -0.229
+0.4 0.212 0.184 -0.0984
+0.5 0.0729 0.0631 -0.0338
+0.6 0.0341 0.0296 -0.0158
+0.7 0.0187 0.0162 -0.00868
+0.8 0.0119 0.0103 -0.00551
+1 0.00551 0.00477 -0.00255
+1.2 0.00282 0.00244 -0.0013
+1.5 0.00179 0.00155 -0.000828
+1.6 0.00127 0.0011 -0.000587
+1.8 0.00101 0.000876 -0.000469
+2 0.000777 0.000672 -0.00036
+2.4 0.000643 0.000556 -0.000298
+2.6 0.000544 0.000471 -0.000252
+3 0.000508 0.00044 -0.000235
+3.5 0.000414 0.000358 -0.000192
+4 0.000349 0.000303 -0.000162
+4.5 0.000308 0.000267 -0.000143
+5 0.000279 0.000241 -0.000129

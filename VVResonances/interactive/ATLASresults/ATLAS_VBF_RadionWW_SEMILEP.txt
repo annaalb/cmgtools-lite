@@ -1,0 +1,31 @@
+#: table_doi: 10.17182/hepdata.93922.v1/t17
+#: name: Table 17
+#: description: Upper 95% CLs limits on the VBF production cross section of Radions in their $WW$ decays as a function of the resonance mass.
+#: data_file: limits_RadVBF_WW.yaml
+#: keyword reactions: VBF RADION --> W W --> l v q q
+#: keyword cmenergies: 13000.0
+#: keyword phrases: VBF | Radion | WW | lvqq
+#: Limit,Expected$\pm2\sigma$
+#: SQRT(S) [GeV],13000
+#: LUMINOSITY [fb$^{-1}$],139.0
+#Mass [TeV],Cross section upper limit at 95% CL [pb],2 sigma +,2 sigma -
+0.3 1.06 0.921 -0.493
+0.4 0.183 0.159 -0.0849
+0.5 0.0726 0.0628 -0.0336
+0.6 0.0287 0.0248 -0.0133
+0.7 0.0174 0.0151 -0.00807
+0.8 0.0117 0.0101 -0.0054
+1 0.00542 0.00469 -0.00251
+1.2 0.00299 0.00258 -0.00138
+1.4 0.00205 0.00178 -0.000951
+1.5 0.00159 0.00137 -0.000734
+1.6 0.00112 0.000969 -0.000518
+1.8 0.000789 0.000683 -0.000366
+2 0.0006 0.000519 -0.000278
+2.4 0.000516 0.000447 -0.000239
+2.6 0.000389 0.000337 -0.00018
+3 0.000315 0.000272 -0.000146
+3.5 0.000215 0.000186 -9.95e-05
+4 0.000178 0.000154 -8.24e-05
+4.5 0.000173 0.00015 -8.03e-05
+5 0.000172 0.000149 -7.99e-05

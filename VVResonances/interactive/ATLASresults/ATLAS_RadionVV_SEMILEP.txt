@@ -1,0 +1,31 @@
+#: table_doi: 10.17182/hepdata.93922.v1/t8
+#: name: Table 8
+#: description: Upper 95% CLs limits on the ggF production cross section of Radions in their $WW+ZZ$ decays as a function of the resonance mass.
+#: data_file: limits_Rad_WWZZ.yaml
+#: keyword reactions: ggF RADION --> W W + Z0 Z0 --> l l q q + l v q q + v v q q
+#: keyword cmenergies: 13000.0
+#: keyword phrases: ggF | Radion | WW | ZZ | llqq | lvqq | vvqq
+#: Limit,Expected$\pm2\sigma$
+#: SQRT(S) [GeV],13000
+#: LUMINOSITY [fb$^{-1}$],139.0
+#Mass [TeV],Cross section upper limit at 95% CL [pb],2 sigma +,2 sigma -
+0.3 3.26 2.83 -1.51
+0.4 0.436 0.378 -0.202
+0.5 0.249 0.215 -0.115
+0.6 0.11 0.0953 -0.051
+0.7 0.0704 0.0609 -0.0326
+0.8 0.0452 0.0391 -0.0209
+1 0.023 0.0199 -0.0107
+1.2 0.0125 0.0108 -0.00579
+1.4 0.0081 0.00701 -0.00375
+1.5 0.00601 0.00521 -0.00279
+1.6 0.00489 0.00424 -0.00227
+1.8 0.00361 0.00312 -0.00167
+2 0.00249 0.00215 -0.00115
+2.4 0.00168 0.00145 -0.000776
+2.6 0.00121 0.00111 -0.000537
+3 0.00103 0.000991 -0.000425
+3.5 0.000686 0.000714 -0.000249
+4 0.000519 0.000556 -0.00017
+4.5 0.000453 0.000484 -0.00014
+5 0.000426 0.00043 -0.000128

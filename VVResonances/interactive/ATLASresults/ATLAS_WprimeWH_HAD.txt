@@ -1,0 +1,27 @@
+#: table_doi: 10.17182/hepdata.94788.v1/t1
+#: name: Table 1
+#: description: Observed and expected 95% CL upper limits on the cross section in the WH channel.
+#: data_file: HVT_WH_Limits.yaml
+#: keyword reactions: P P --> V' --> WH
+#: keyword observables: MJJ
+#: keyword cmenergies: 13000.0
+#: keyword phrases: Cross Section | HVT | Hadronic
+#: Limit,Expected limit $\pm 1\sigma$
+#: SQRT(S) [TeV],13
+#: LUMINOSITY [fb$^{-1}$],139
+#Mass [TeV],Cross section upper limit at 95% CL [pb],1 sigma +,1 sigma -
+1.5 9.5987825e-3 5.059814 -3.201544
+1.6 7.3540678e-3 4.132011 -2.592347
+1.7 5.7063613e-3 3.334425 -2.058282
+1.8 4.8113899e-3 2.850088 -1.741835
+1.9 3.8820643e-3 2.334889 -1.414678
+2.0 3.2981443e-3 2.037246 -1.222575
+2.2 2.4674277e-3 1.574698 -0.9301056
+2.4 1.9172611e-3 1.265877 -0.7376176
+2.6 1.5705603e-3 1.069428 -0.6144101
+2.8 1.2588938e-3 0.8827137 -0.5010609
+3.0 1.1079003e-3 0.7908388 -0.4443541
+3.5 0.7643817e-3 0.5414779 -0.2992707
+4.0 0.5868307e-3 0.4440899 -0.2374608
+4.5 0.501123e-3 0.383011 -0.2041147
+5.0 0.4334395e-3 0.3374085 -0.1791697

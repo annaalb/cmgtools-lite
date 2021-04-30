@@ -1,0 +1,28 @@
+#: table_doi: 10.17182/hepdata.93922.v1/t20
+#: name: Table 20
+#: description: Upper 95% CLs limits on the ggF production cross section of Gravitons in their $WW$ decays as a function of the resonance mass.
+#: data_file: limits_RSG_WW.yaml
+#: keyword reactions: ggF GRAVITON --> W W --> l v q q
+#: keyword cmenergies: 13000.0
+#: keyword phrases: ggF | Graviton | WW | lvqq
+#: Limit,Expected$\pm2\sigma$
+#: SQRT(S) [GeV],13000
+#: LUMINOSITY [fb$^{-1}$],139.0
+#Mass [TeV] Cross section upper limit at 95% CL [pb] 2 sigma + 2 sigma -
+0.3 3.03 2.63 -1.4
+0.4 0.485 0.42 -0.225
+0.6 0.0967 0.0837 -0.0448
+0.7 0.0666 0.0576 -0.0308
+0.8 0.0421 0.0365 -0.0195
+1 0.0193 0.0167 -0.00896
+1.2 0.00912 0.0079 -0.00423
+1.5 0.0049 0.00424 -0.00227
+1.8 0.0028 0.00242 -0.0013
+2 0.00171 0.00148 -0.000793
+2.4 0.00109 0.000944 -0.000505
+2.6 0.000733 0.000634 -0.00034
+3 0.00061 0.000528 -0.000282
+3.5 0.000385 0.000333 -0.000178
+4 0.000283 0.000245 -0.000131
+4.5 0.00024 0.000208 -0.000111
+5 0.000228 0.000198  -0.000106

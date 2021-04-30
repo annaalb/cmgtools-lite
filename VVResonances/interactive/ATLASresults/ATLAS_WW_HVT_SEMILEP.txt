@@ -1,0 +1,31 @@
+#: table_doi: 10.17182/hepdata.93922.v1/t12
+#: name: Table 12
+#: description: Upper 95% CLs limits on the DY production cross section of HVT $Z'$ in their $WW$ decays as a function of the resonance mass.
+#: data_file: limits_HVTWW_WWBR.yaml
+#: keyword reactions: DY HVT WPRIME --> W W --> l v q q
+#: keyword cmenergies: 13000.0
+#: keyword phrases: DY | HVT | WW | lvqq
+#: Limit,Expected$\pm2\sigma$
+#: SQRT(S) [GeV],13000
+#: LUMINOSITY [fb$^{-1}$],139.0
+#Mass [TeV],Cross section upper limit at 95% CL [pb],2 sigma +,2 sigma -
+0.3 2.71 2.34 -1.25
+0.4 0.472 0.408 -0.219
+0.5 0.248 0.214 -0.115
+0.6 0.0934 0.0808 -0.0433
+0.7 0.0606 0.0525 -0.0281
+0.8 0.0372 0.0322 -0.0172
+1 0.0167 0.0145 -0.00774
+1.2 0.00837 0.00725 -0.00388
+1.4 0.00513 0.00444 -0.00238
+1.5 0.00368 0.00319 -0.00171
+1.6 0.00301 0.00261 -0.00139
+1.8 0.00219 0.00189 -0.00101
+2 0.00145 0.00126 -0.000673
+2.4 0.0009 0.000779 -0.000417
+2.6 0.000598 0.000574 -0.000256
+3 0.000507 0.000516 -0.000208
+3.5 0.000329 0.000366 -0.000121
+4 0.000242 0.000277 -7.64e-05
+4.5 0.000199 0.000225 -5.72e-05
+5 0.000175 0.000193 -6.62e-05

@@ -1,0 +1,28 @@
+#: table_doi: 10.17182/hepdata.93922.v1/t22
+#: name: Table 22
+#: description: Upper 95% CLs limits on the ggF production cross section of Gravitons in their $ZZ$ decays as a function of the resonance mass.
+#: data_file: limits_RSG_ZZ.yaml
+#: keyword reactions: ggF GRAVITON --> Z0 Z0 --> l l q q +  v v q q
+#: keyword cmenergies: 13000.0
+#: keyword phrases: ggF | Graviton | ZZ | llqq | vvqq
+#: Limit,Expected$\pm2\sigma$
+#: SQRT(S) [GeV],13000
+#: LUMINOSITY [fb$^{-1}$],139.0
+#Mass [TeV],Cross section upper limit at 95% CL [pb],2 sigma +,2 sigma -
+0.3 1.81 1.57 -0.839
+0.4 0.233 0.201 -0.108
+0.6 0.0417 0.0361 -0.0193
+0.7 0.0249 0.0216 -0.0116
+0.8 0.017 0.0147 -0.00789
+1 0.00913 0.0079 -0.00423
+1.2 0.00487 0.00422 -0.00226
+1.5 0.00276 0.00239 -0.00128
+1.8 0.00169 0.00146 -0.000783
+2 0.00109 0.000945 -0.000506
+2.4 0.000772 0.000669 -0.000358
+2.6 0.000545 0.000472 -0.000253
+3 0.000466 0.000404 -0.000216
+3.5 0.000315 0.000273 -0.000146
+4 0.000242 0.00021 -0.000112
+4.5 0.000211 0.000182 -9.76e-05
+5 0.000201 0.000174 -9.32e-05
