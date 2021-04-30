@@ -29,8 +29,28 @@ class DataCardMaker:
 
 
     def addSystematic(self,name,kind,values,bin="",process="",variables="",addPar = ""):
-        if kind != 'rateParam': self.systematics.append({'name':name,'kind':kind,'values':values })
-	else: self.systematics.append({'name':name,'kind':kind,'bin':bin,'process':process,'values':values,'variables':variables})
+        if kind != 'rateParam' and kind !='param':
+            exist = False
+            for s in self.systematics:
+                if s['name'] == name:
+                    exist = True
+                    current_values = s['values']
+                    for key, value in values.items(): current_values[key] = value
+                    s['values'] = current_values
+                    break
+            if not exist:
+                self.systematics.append({'name':name,'kind':kind,'values':values })
+        elif kind == 'param':
+            exist = False
+            for s in self.systematics:
+                if s['name'] == name:
+                    exist = True
+                    break
+            if not exist:
+                self.systematics.append({'name':name,'kind':kind,'values':values })
+        else:
+            self.systematics.append({'name':name,'kind':kind,'bin':bin,'process':process,'values':values,'variables':variables})
+
 
     def recoverFunctionFromJSON(self,jsonFile,variablename,name,corr,uncstr="",uncsyst=[1,1]):
         #open json
@@ -39,7 +59,7 @@ class DataCardMaker:
         # check if json contains array or not:
         if isinstance(info[variablename],list) == False:
             print " polynomial !!! "
-        # set polynomial with parameters from jsonFile
+            # set polynomial with parameters from jsonFile
             if (name.find('MEAN')==-1 and name.find("SIGMA")==-1) and  (name.find('mean')==-1 and name.find("sigma")==-1) and (name.find('meanH')==-1 and name.find("sigmaH")==-1):
                 self.w.factory("expr::{name}('MH*0+{param}',MH)".format(name=name,param=info[variablename]))
             else:
@@ -84,6 +104,7 @@ class DataCardMaker:
                    print "MVV sigma & mean will be correlated to jet mass"
                    if self.w.function(uncsyst[0]+"expr_corr")== None:
                        self.w.factory("expr::{syst}expr_corr('{syst_str}*{corr_str}',MH,MJ1,MJ2,{syst})".format(syst=uncsyst[0],syst_str=uncstr,corr_str=info['corr_'+variablename.lower()]))
+                   if self.w.function(name) == None:
                        self.w.factory("expr::{name}('{syst_str}*{corr_str}*({spline})',MH,MJ1,MJ2,{syst},{spline})".format(syst=uncsyst[0],syst_str=uncstr,corr_str=info['corr_'+variablename.lower()],name=name,spline=name+"spline"))
                 else:
                    print "MVV sigma & mean will NOT be correlated to jet mass"
@@ -96,7 +117,7 @@ class DataCardMaker:
     def addMVVSignalParametricShape(self,name,variable,jsonFile,scale ={},resolution={},doCorrelation=False):
         self.w.factory("MH[2000]")
         self.w.var("MH").setConstant(1)
-       
+
         scaleStr='0'
         resolutionStr='0'
 
@@ -116,7 +137,7 @@ class DataCardMaker:
         self.w.factory("MJ1[0,13000]")
         self.w.factory("MJ2[0,13000]")
 
-        
+
         #f=open(jsonFile)
         #info=json.load(f)
 
@@ -1014,6 +1035,7 @@ class DataCardMaker:
         pdfList=ROOT.RooArgList(self.w.pdf(pdfName))
         variationList=["Up","Down"]
         if filename.find("TTJets")!=-1: variationList=["nominal","noreweight"]
+        if (filename.find("WJets")!=-1 or filename.find("ZJets")!=-1) and len(systematics)==1: variationList=["noreweight","doublereweight"]
         for systval in systematics:
             splitted=systval.split(':')
             systName=splitted[1]
@@ -1023,7 +1045,8 @@ class DataCardMaker:
 
             for variation in variationList:
                 histostring = histoname+"_"+syst+variation
-                if filename.find("TTJets")!=-1: histostring= histoname.replace("nominal",variation)
+                #if filename.find("TTJets")!=-1: histostring= histoname.replace("nominal",variation)
+                if filename.find("Jets")!=-1 and len(systematics)==1: histostring= histoname.replace("nominal",variation)
                 histo=FR.Get(histostring)
                 histName="_".join([name+"_"+syst+variation+"HIST",tag])
                 roohist = ROOT.RooDataHist(histName,histName,varlist,histo)
