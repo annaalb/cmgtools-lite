@@ -66,7 +66,7 @@ if options.wtd.find("tt")!= -1 :
 if options.wtd.find("data")!= -1 :
     print "####        rebinning  data "
     pseudo = "JJ_"+str(period)+"_data_"+str(purity)+".root"
-    if period == "Run2": pseudo = "JJ_"+str(purity)+".root"
+    if period == "Run2" or period == "1617": pseudo = "JJ_"+str(purity)+".root"
 
     r_file = ROOT.TFile(str(options.indir)+pseudo,"READ")
     data = r_file.Get("data")
@@ -126,7 +126,7 @@ if options.wtd.find("norm")!= -1 :
     nonRes.Write("nonRes")
 
 
-if options.wtd.find("shapes")!=-1 :
+if options.wtd.find("shapes")!=-1  and 'VBF' not in purity:
     print "####        rebinning template shapes "
 
     generators = ["pythia","madgraph","herwig"]
