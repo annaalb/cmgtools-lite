@@ -32,6 +32,8 @@ parser.add_option("-t","--tags",dest="tags",help="list of tags",default='H_tag,V
 parser.add_option("--isSignal",dest="isSignal",action="store_true", help="is signal?")
 parser.add_option("--doPtFit",dest="doPtFit",action="store_true", help="do you want to do pt dependence fit?")
 parser.add_option("-o","--output",dest="output",help="Output",default='ZprimeZH')
+parser.add_option("--vv",dest="vv",help="make VV only (no VHveto) ?",action='store_true')
+parser.add_option("--four",dest="four",help="merge VH HPLP in VV HPLP?",action='store_true')
 (options,args) = parser.parse_args()
 
 def getLegend(x1=0.6,y1=0.6363636,x2=0.85,y2=0.9020979):
@@ -363,6 +365,8 @@ if __name__=="__main__":
     years = options.year.split(",")
     directory = options.directory
     categories=options.categories.split(",")
+    if options.vv == True: categories=["VV_HPHP","VV_HPLP","VBF_VV_HPHP","VBF_VV_HPLP"]
+    if options.four == True: categories=["VH_HPHP","VV_HPHP","VH_LPHP","VV_HPLP","VBF_VH_HPHP","VBF_VV_HPHP","VBF_VH_LPHP","VBF_VV_HPLP"]
     tags=options.tags.split(",")
     sampleTypes = options.samples.split(",")
     total = {}
@@ -484,7 +488,9 @@ if __name__=="__main__":
         print " NOM ",totalnom
         print " PT ",totalpt
         splitstr = options.output
-        file2write=open("SFpt_dependence_"+splitstr+"_"+period+".txt",'w')
+        file2write=None
+        if dofit ==True:
+          file2write = open("SFpt_dependence_"+splitstr+"_"+period+".txt",'w')
         unc_Run2 = {}
         for tag in tags:
             print "tag ",tag
@@ -564,7 +570,8 @@ if __name__=="__main__":
 
         print " unc ",period
         print unc_Run2
-        file2write.close()
+        if dofit ==True:
+          file2write.close()
         print 'CMS_VV_JJ_DeepJet_Htag_eff'
         data[period] = {splitstr+'_'+'CMS_VV_JJ_DeepJet_Htag_eff' : calcfinalUnc(unc_Run2,'H_tag',categories)}
         print 'CMS_VV_JJ_DeepJet_Vtag_eff'
