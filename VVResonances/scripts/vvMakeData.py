@@ -24,7 +24,7 @@ parser.add_option("-f","--factors",dest="factors",type=str,help="factor",default
 parser.add_option("-n","--name",dest="name",help="name",default="histo")
 parser.add_option("--binsMVV",dest="binsMVV",help="use special binning",default="")
 parser.add_option("-t","--triggerweight",dest="triggerW",action="store_true",help="Use trigger weights",default=False)
-
+parser.add_option("--tau",dest="tau",action="store_true",help="use tau21?")
 (options,args) = parser.parse_args()
 #define output dictionary
 
@@ -41,7 +41,6 @@ def getBinning(binsMVV):
 sampleTypes=options.samples.split(',')
 
 dataPlotters=[]
-
 print "args[0] "+str(args[0])
 try: year=str(args[0]).split("/")[-2]
 except: year=options.output.split("_")[1]
@@ -49,9 +48,15 @@ print "year ",year
 print "now working with cuts "
 ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
 print "lumi for year "+year+" = ",ctx.lumi[year]
-luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
-if options.output.find("1617") !=-1 :luminosity = ctx.lumi[year]/ctx.lumi["1617"]
-if options.output.find("Run2") ==-1 or options.output.find("1617") ==-1 or options.name.find("data")!=-1 : luminosity = 1
+luminosity = 1 #ctx.lumi[year]/ctx.lumi["Run2"]
+if options.output.find("1617") !=-1 and options.name.find("data")==-1:
+    luminosity = ctx.lumi[year]/ctx.lumi["1617"]
+    print "1617"
+elif options.output.find("Run2") !=-1 and options.name.find("data")==-1:
+    luminosity = ctx.lumi[year]/ctx.lumi["Run2"]
+    print "ctx.lumi[year]/ctx.lumi['Run2'] "
+else:
+    luminosity = 1
 print " lumi rewight ",luminosity
 
 for filename in os.listdir(args[0]):
@@ -70,7 +75,7 @@ for filename in os.listdir(args[0]):
                 dataPlotters[-1].setupFromFile(args[0]+'/'+fname+'.pck')
                 dataPlotters[-1].addCorrectionFactor('xsec','tree')
                 genweight='genWeight'
-                if (year == "2017" or year == "2018") and fname.find("TT") !=-1:  genweight='genWeight_LO'
+                #if (year == "2017" or year == "2018") and fname.find("TT") !=-1:  genweight='genWeight_LO'
                 dataPlotters[-1].addCorrectionFactor(genweight,'tree')
                 dataPlotters[-1].addCorrectionFactor('puWeight','tree')
                 dataPlotters[-1].addCorrectionFactor(luminosity,'flat')
@@ -85,8 +90,17 @@ for filename in os.listdir(args[0]):
                     dataPlotters[-1].addCorrectionFactor('TopPTWeight','tree')
                 if fname.find("Jets") !=-1 or fname.find("TT")!=-1:
                     print "applying tagging SF"
-                    dataPlotters[-1].addFriend("all","../interactive/migrationunc/"+fname+"_"+year+".root")
-                    dataPlotters[-1].addCorrectionFactor("all.SF",'tree')
+                    if not options.tau:
+                        print "using SF from tree"
+                        dataPlotters[-1].addFriend("all","../interactive/migrationunc/"+fname+"_"+year+".root")
+                        dataPlotters[-1].addCorrectionFactor("all.SF",'tree')
+                    else:
+                        print "applying tau SF"
+                        if "VV_HPHP" in options.output:
+                            SF=ctx.HPSF_vtag[year]
+                        elif "VV_HPLP" in options.output:
+                            SF=ctx.LPSF_vtag[year]
+                            dataPlotters[-1].addCorrectionFactor(SF,'flat')
                 if fname.find("Jets") !=-1:
                     print "applying k factors "
                     dataPlotters[-1].addCorrectionFactor("kfactor",'tree')
