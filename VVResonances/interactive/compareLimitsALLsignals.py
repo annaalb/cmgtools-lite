@@ -118,9 +118,10 @@ if "BulkGZZ" in options.sig:
   ltheory="#sigma_{TH}#times BR(G_{Bulk}#rightarrowZZ) #tilde{k}=0.5"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"G_{Bulk} #rightarrow ZZ) [pb]  "
   titleX = "M_{G_{Bulk}} [TeV]"
+  if "compareB2G18002" not in options.name:
+    plotCMSsemilep = True
   if "VBF" not in options.sig:
     plotB2G18002 = True
-    plotCMSZZsemilep = True
 if "RadionWW" in options.sig:
   ltheory="#sigma_{TH}#times BR(Rad#rightarrowWW)"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Rad #rightarrow WW) [pb]  "
