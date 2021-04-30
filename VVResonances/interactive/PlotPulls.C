@@ -2,7 +2,8 @@ void PlotPulls()
 {
 
   int nfiles = 1;
-  const int nlabels = 78; // number of nuissance parameters
+  TString label="Run2_VBFggDY_newbaseline";
+  const int nlabels = 106; // number of nuissance parameters
   std::string labels[nlabels] = {""};
   // To get the fitDiagnostics.root file run ~ this command  'combine -M FitDiagnostics -m 2000 results_2016/workspace_JJ_BulkGWW_VH_NPHP_control_region_13TeV_2016_newdata.root -v 2 --noErrors --minos none' on the workspace
   TFile* tf = new TFile("fitDiagnostics.root","READ");
@@ -32,7 +33,7 @@ void PlotPulls()
     RooRealVar* param_s = (RooRealVar*)fpf_s.at(k);
     std::string name = param_s->GetName();
     RooRealVar* nuis_p = (RooRealVar*)prefit->find(name.c_str());
-   
+    std:: cout << k << std::endl;
     if( std::string(param_s->GetName()) == "r" ){
 
       std::cout << name << " " << param_s->getVal() << " " << param_s->getError() << " " << (param_s->getVal()-10.0)/param_s->getError() << std::endl;
@@ -52,20 +53,20 @@ void PlotPulls()
     
       //RooRealVar* param_s = (RooRealVar*)fpf_s.at(k);
       RooRealVar*param_b = (RooRealVar*)fpf_b.at(k);   
-      //if(name.find("Wjet") != -1 && (name.find("2016") != -1 || name.find("2017") != -1) ) continue;
 
       std::cout << name << std::endl;
       std::cout << "   * post-fit val: " << param_s->getVal()<< " (S+B) " << param_b->getVal() << " (B) " << std::endl;
       std::cout << "   * post-fit err: " << param_s->getError() << " (S+B) " << param_b->getError() << "(B)" << std::endl;
       std::cout << "   * pre-fit val: " << nuis_p->getVal() << " pre-fit err:" << nuis_p->getError() << std::endl;
-      std::cout << "   * pull: " << (param_s->getVal()-nuis_p->getVal())/nuis_p->getError() << " (S+B) " << (param_b->getVal()-nuis_p->getVal())/nuis_p->getError() << " (B) " << std::endl;
-      std::cout << "   * pull 2: "<< (param_s->getVal()-nuis_p->getVal())/param_s->getError() << " (S+B) " << (param_b->getVal()-nuis_p->getVal())/param_b->getError() << " (B) "  << std::endl; 
+      std::cout << "   * pull vs prefit: " << (param_s->getVal()-nuis_p->getVal())/nuis_p->getError() << " (S+B) " << (param_b->getVal()-nuis_p->getVal())/nuis_p->getError() << " (B) " << std::endl;
+      std::cout << "   * pull vs postfit: "<< (param_s->getVal()-nuis_p->getVal())/param_s->getError() << " (S+B) " << (param_b->getVal()-nuis_p->getVal())/param_b->getError() << " (B) "  << std::endl;
+
 
       double pull_s = (param_s->getVal()-nuis_p->getVal())/nuis_p->getError();
       double pull_b = (param_b->getVal()-nuis_p->getVal())/nuis_p->getError();
       double err_s = param_s->getError()/nuis_p->getError();
       double err_b = param_b->getError()/nuis_p->getError();
-   
+
       np_gr_s->SetPoint(np,pull_s,np+0.5);
       np_gr_s->SetPointError(np,err_s,0.);
       np_gr_b->SetPoint(np,pull_b,np+0.5);
@@ -152,9 +153,10 @@ void PlotPulls()
   np_gr_s->SetMarkerStyle(20);
   np_gr_s->Draw("Psame");
   np_gr_b->Draw("Psame");
-  c1->SaveAs("pulls.C");
-  c1->SaveAs("pulls.png");
-  c1->SaveAs("pulls.pdf");
+  TString name = "pulls_"+label;
+  c1->SaveAs(name+".C");
+  c1->SaveAs(name+".png");
+  c1->SaveAs(name+".pdf");
   
   tf->Close();
 
