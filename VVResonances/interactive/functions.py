@@ -48,7 +48,7 @@ class AllFunctions():
    cmd='vvMakeJSON.py  -o "{jsonFile}" -g {pols} -m {minMX} -M {maxMX} {rootFile}  '.format(jsonFile=jsonFile,rootFile=rootFile,minMX=self.minMX,maxMX=self.maxMX,pols=fixPars["NP"]["pol"])
    os.system(cmd)
 
- def makeSignalYields(self,filename,template,branchingFraction,functype="pol5"):
+ def makeSignalYields(self,filename,template,branchingFraction,functype="pol5",doTau=False):
   
   for c in self.categories:
    if 'VBF' in c: cut = "*".join([self.cuts[c.replace('VBF_','')],self.cuts['common_VBF'],self.cuts['acceptance']])
@@ -57,6 +57,7 @@ class AllFunctions():
    fnc = functype
    cmd='vvMakeSignalYields.py -s {template} -c "{cut}" -o {output} -V "jj_LV_mass" -m {minMVV} -M {maxMVV} -f {fnc} -b {BR} --minMX {minMX} --maxMX {maxMX} {samples} '.format(template=template, cut=cut, output=yieldFile,minMVV=self.minMVV,maxMVV=self.maxMVV,fnc=fnc,BR=branchingFraction,minMX=self.minMX,maxMX=self.maxMX,samples=self.samples)
    print "&&&&&&&&&&&&&&&&&&&&&&&&   command         &&&&&&&&&&&&&&&&&&&&&&&&&&&"
+   if doTau==True: cmd = cmd+" --tau"
    print cmd
    os.system(cmd)
 
@@ -97,9 +98,12 @@ class AllFunctions():
         os.system(cmd)
  
 
- def makeBackgroundShapesMVVKernel(self,name,filename,template,addCut="1",jobName="1DMVV",wait=True,corrFactorW=1,corrFactorZ=1,sendjobs=True):
+ def makeBackgroundShapesMVVKernel(self,name,filename,template,addCut="1",jobName="1DMVV",wait=True,corrFactorW=1,corrFactorZ=1,sendjobs=True,doTau=False,doKfactors=False):
   command="vvMake1DMVVTemplateWithKernels.py"
-  if name.find("TT")!=-1: command='vvMake1DMVVTemplateTTbar.py'
+  if name.find("TT")!=-1 and doTau ==False: command='vvMake1DMVVTemplateTTbar.py'
+  if (name.find("WJets")!=1 or name.find("ZJets")!=1) and doKfactors==True:
+   command = "vvMake1DMVVTemplateVjets.py"
+   print "!!!!!! using k-factor templates implementation!!! "
   print command
 
   pwd = os.getcwd()
@@ -130,8 +134,8 @@ class AllFunctions():
     #if name.find("Jets") == -1: template += ",QCD_HT" #irene because QCD Pt- should go without spike killer!!
     #print " ***************    not doing QCD_HT & QCD_Pt- because not ready yet!! *************** "
     from modules.submitJobs import Make1DMVVTemplateWithKernels,merge1DMVVTemplate
-    jobList, files = Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,self.binsMVV,self.minMVV,self.maxMVV,smp,jobname,wait,self.HCALbinsMVV,"",sendjobs) #irene
-    if wait: merge1DMVVTemplate(jobList,files,jobname,c,self.binsMVV,self.minMVV,self.maxMVV,self.HCALbinsMVV,name,filename)
+    jobList, files = Make1DMVVTemplateWithKernels(rootFile,template,cut,resFile,self.binsMVV,self.minMVV,self.maxMVV,smp,jobname,wait,self.HCALbinsMVV,"",sendjobs,doKfactors) #irene
+    if wait: merge1DMVVTemplate(jobList,files,jobname,c,self.binsMVV,self.minMVV,self.maxMVV,self.HCALbinsMVV,name,filename,doKfactors,doTau)
    else:
     cmd=command+' -H "x" -o "{rootFile}" -s "{template}" -c "{cut}"  -v "jj_gen_partialMass" -b {binsMVV}  -x {minMVV} -X {maxMVV} -r {res} {directory} --corrFactorW {corrFactorW} --corrFactorZ {corrFactorZ} '.format(rootFile=rootFile,template=template,cut=cut,res=resFile,binsMVV=self.binsMVV,minMVV=self.minMVV,maxMVV=self.maxMVV,corrFactorW=corrFactorW,corrFactorZ=corrFactorZ,directory=smp)
     cmd = cmd+self.HCALbinsMVV
@@ -221,6 +225,29 @@ class AllFunctions():
        print "going to execute "+str(cmd)
        os.system(cmd)
 
+   if filename.find("1617") != -1 and makesingle:
+      years = ["2016","2017"]
+      for year in years:
+       print " doing also single year ",year
+       newfilename=filename.replace("1617",year)
+
+
+       inputx=newfilename+"_"+name+"_COND2D_"+c+"_l1.root"
+       inputy=newfilename+"_"+name+"_COND2D_"+c+"_l2.root"
+       inputz=newfilename+"_"+name+"_MVV_"+c+".root"
+
+
+       rootFile=newfilename+"_"+name+"_3D_"+c+".root"
+
+       print "Reading " ,inputx
+       print "Reading " ,inputy
+       print "Reading " ,inputz
+       print "Saving to ",rootFile
+
+       cmd='vvMergeHistosToPDF3D.py -i "{inputx}" -I "{inputy}" -z "{inputz}" -o "{rootFile}"'.format(rootFile=rootFile,inputx=inputx,inputy=inputy,inputz=inputz)
+       print "going to execute "+str(cmd)
+       os.system(cmd)
+
 
 
    #print "Adding trigger shape uncertainties"
@@ -228,7 +255,7 @@ class AllFunctions():
    #   cmd='vvMakeTriggerShapes.py -i "{rootFile}"'.format(rootFile=rootFile)
    #   os.system(cmd)
 
- def makeSF(self,template,isSignal=False):
+ def makeSF(self,template,isSignal=False,isVV=False,isFour=False,useTau=False):
 
   pwd = os.getcwd()
   folders=[]
@@ -264,24 +291,32 @@ class AllFunctions():
        else: sampleType=sampleType+"narrow_"+fname.split('_')[-1]
 
       cmd='vvMakeCategorisation.py -s "{sample}" -d "{directory}" -y "{year}"'.format(sample=sampleType,directory=d,year=d.split('/')[-2])
+      if isVV == True:
+       cmd = cmd+" --vv"
+       if useTau: cmd=cmd+" --tau"
+      elif isFour == True: cmd = cmd+" --four"
       print " going to execute ",cmd
       os.system(cmd)
       #else: print sampleType+" NOT FOUND IN "+filen
 
 
- def makeMigrationUnc(self,template,outname,year,isSignal=False,directory='migrationunc/'):
+ def makeMigrationUnc(self,template,outname,year,isSignal=False,isVV=False,isFour=False,directory='migrationunc/'):
   print "Using files in" , directory
   print " TEMPLATE ",template
   print "making migration uncertainties "
   cmd='vvMakeMigrationUncertainties.py -s "{sample}" -d "{directory}" -y "{year}" -o "{outname}" '.format(sample=template,directory=directory,year=year,outname=outname)
   if isSignal ==True:
    cmd+=' --isSignal {isSignal}'.format(isSignal=isSignal)
+  if isVV==True:
+   cmd+=" --vv "
+  elif isFour==True:
+   cmd+=" --four "
   print " going to execute ",cmd
   os.system(cmd)
 
 
- def makeNormalizations(self,name,filename,template,data=0,addCut='1',jobName="nR",makesingle=False,factors="1",sendjobs=True,wait=True): #,HPSF=1.,LPSF=1.):
- 
+ def makeNormalizations(self,name,filename,template,data=0,addCut='1',jobName="nR",makesingle=False,factors="1",sendjobs=True,doTau=False,wait=True): #,HPSF=1.,LPSF=1.):
+
   pwd = os.getcwd()
   period=filename.split("_")[1]
   folders=[]
@@ -291,7 +326,8 @@ class AllFunctions():
    sam+=pwd +"/"+s
    if s != folders[-1]: sam+=","
   print "Using files in" , sam
-  
+  addoption = ""
+  if doTau == True: addoption = " --tau"
   for c in self.categories:
    jobname = jobName+"_"+period+"_"+c
    rootFile=filename+"_"+name+"_"+c+".root"
@@ -305,7 +341,7 @@ class AllFunctions():
        #if name.find("nonRes")!= -1: template += ",QCD_HT"  #irene because QCD Pt- should go without spike killer!! 
        #print " ***************    not doing QCD_HT &  QCD_Pt- because not ready yet!! *************** "
        from modules.submitJobs import makeData,mergeData
-       jobList, files = makeData(template,cut,rootFile,self.binsMVV,self.binsMJ,self.minMVV,self.maxMVV,self.minMJ,self.maxMJ,factors,name,data,jobname,sam,wait,self.HCALbinsMVV,"",sendjobs) #irene
+       jobList, files = makeData(template,cut,rootFile,self.binsMVV,self.binsMJ,self.minMVV,self.maxMVV,self.minMJ,self.maxMJ,factors,name,data,jobname,sam,wait,self.HCALbinsMVV,addoption,sendjobs) #irene
        wait = True
        if sendjobs == False:
         wait = False
@@ -326,12 +362,30 @@ class AllFunctions():
                  if f.split("/")[-2] == year :
                   newfiles.append(f.replace("'","").replace(" ",""))
                 mergeData(newjoblist, newfiles,jobname,c,rootFile,filename,name,year)
+       if makesingle and period == "1617":
+             print " ########    making norms also for single years ##############"
+             years = ["2016","2017"]
+             for year in years:
+                print " year ",year
+                newjoblist = []
+                newfiles   = []
+                for job in jobList:
+                 if job.split("_")[0].replace("'","").replace(" ","") == year :
+                  print " condition ",job.split('_')[0]," = ",year, " verified "
+                  newjoblist.append(job.replace("'","").replace(" ",""))
+                for f in files:
+                 if f.split("/")[-2] == year :
+                  newfiles.append(f.replace("'","").replace(" ",""))
+                  filename2 = filename.replace("1617",year)
+                  rootFile2 = rootFile.replace("1617",year)
+                mergeData(newjoblist, newfiles,jobname,c,rootFile2,filename2,name,year)
    else:
         if filename.find("gen")!=-1:
             cmd='vvMakeData.py -s "{template}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l1_gen_softDrop_mass,jj_l2_gen_softDrop_mass,jj_gen_partialMass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f {factors} -n "{name}" {samples}'.format(template=template,cut=cut,rootFile=rootFile,BINS=self.binsMVV,bins=self.binsMJ,MINI=self.minMVV,MAXI=self.maxMVV,mini=self.minMJ,maxi=self.maxMJ,factors=factors,name=name,data=data,samples=sam)
         else:
             cmd='vvMakeData.py -s "{template}" -d {data} -c "{cut}"  -o "{rootFile}" -v "jj_l1_softDrop_mass,jj_l2_softDrop_mass,jj_LV_mass" -b "{bins},{bins},{BINS}" -m "{mini},{mini},{MINI}" -M "{maxi},{maxi},{MAXI}" -f "{factors}" -n "{name}" {samples}'.format(template=template,cut=cut,rootFile=rootFile,BINS=self.binsMVV,bins=self.binsMJ,MINI=self.minMVV,MAXI=self.maxMVV,mini=self.minMJ,maxi=self.maxMJ,factors=factors,name=name,data=data,samples=sam)
         cmd=cmd+self.HCALbinsMVV
+        if doTau == True: cmd = cmd+" --tau"
         print "going to execute command "+str(cmd)
         print " "
         os.system(cmd)
