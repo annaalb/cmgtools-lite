@@ -2483,6 +2483,12 @@ def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,pu
 
  modelWjets = ws.pdf('shapeBkg_Wjets_JJ_%s_13TeV_%s'%(cat,year))
  modelZjets = ws.pdf('shapeBkg_Zjets_JJ_%s_13TeV_%s'%(cat,year))
+ print " TT from WS "
+ TTcon = ["Top","W","WNonResT","TNonResT","ResWResT","NonRes"]
+ modelTTJets = {}
+ for t in TTcon:
+     modelTTJets[t]= ws.pdf('shapeBkg_TTJets'+t+'_JJ_%s_13TeV_%s'%(cat,year))
+     print "model "+t+" ok"
 
  MJ1= ws.var("MJ1");
  MJ2= ws.var("MJ2");
@@ -2534,12 +2540,46 @@ def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,pu
 
  hout.Add(hout_zjets)
 
+
+
+ ### TTbar
+ nEventsTT = {}
+ ttjets = {}
+ hout_ttjets = {}
+ for t in TTcon:
+     print "n_exp_binJJ_"+cat+"_13TeV_%s_proc_TTJets%s"%(year,t)
+     o_norm_ttjets = ws.obj("n_exp_binJJ_"+cat+"_13TeV_%s_proc_TTJets%s"%(year,t))
+     hout_ttjets[t] = ROOT.TH3F('TTJets'+t,'TTJets'+t,len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins)
+
+     nEventsTT[t] = o_norm_ttjets.getVal()
+     print "Expected TTJets "+t+" events: ",nEventsTT[t]
+     ttjets[t] = modelTTJets[t].generate(args,int(nEventsTT[t]))
+     if ttjets[t]!=None:
+         #print signal.sumEntries()
+         for i in range(0,int(ttjets[t].sumEntries())):
+             a = ttjets[t].get(i)
+             it = a.createIterator()
+             var = it.Next()
+             x=[]
+             while var:
+                 x.append(var.getVal())
+                 var = it.Next()
+                 #print x
+             hout_ttjets[t].Fill(x[0],x[1],x[2])
+
+     hout.Add(hout_ttjets[t])
+
+
+ '''
  ftt = ROOT.TFile.Open(input_tt,'READ')
  hin_tt = ftt.Get('TTJets')
  hout_tt = ROOT.TH3F('data_tt','data_tt',len(xbins)-1,xbins,len(xbins)-1,xbins,len(zbins)-1,zbins) 
  hout_tt.FillRandom(hin_tt,int(hin_tt.Integral()*lumi))
  hout.Add(hout_tt)
- 
+ '''
+
+
+
  fout.cd()
  hout.Write('data')
  
@@ -2553,7 +2593,11 @@ def makePseudoDataVjetsTT(input,input_tt,kernel,mc,output,lumi,workspace,year,pu
  print "purity   ", purity
  print "Expected W+jets events: ",nEventsW
  print "Expected Z+jets events: ",nEventsZ
- print "Expected TTJets events:",int(hin_tt.Integral()*lumi)
+ tttotal = 0
+ for t in TTcon:
+     tttotal+=nEventsTT[t]
+     print "Expected TTJets "+t+" events:",nEventsTT[t]
+ print "Expected total TTJets events:",tttotal
  print "Expected QCD events: ",nEventsQCD
  print "Writing histograms nonRes and data to file ", output
 
