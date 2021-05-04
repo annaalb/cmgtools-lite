@@ -109,8 +109,8 @@ class DatacardTools():
         card.sumSimple("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")
 
         if not "sigOnly" in self.outlabel:
-           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
            elif 'Zprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
            elif 'Wprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         else:
@@ -669,9 +669,11 @@ class DatacardTools():
       card.addSystematic("CMS_jer_res_j","param",[0.0,0.08])
 
       card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
-      #card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
-      #print " *!*!*!!*!*!*!*!*!*!*!*!*!**!*!*! removed 1 sigma smearing in the jet mass!!!! !*!*!*!*!*!*!**!*!"
-      card.addSystematic("CMS_res_prunedj","param",[0.08,0.16])
+      if self.pseudodata == "True" or self.pseudodata == "PrepPseudo":
+       card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
+       print " *!*!*!!*!*!*!*!*!*!*!*!*!**!*!*! removed 1 sigma smearing in the jet mass!!!! !*!*!*!*!*!*!**!*!"
+      else:
+       card.addSystematic("CMS_res_prunedj","param",[0.08,0.16])
       card.addSystematic("CMS_pdf","lnN",{'%s'%sig:1.01})
 
       production = "ggDY"

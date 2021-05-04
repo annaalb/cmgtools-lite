@@ -43,7 +43,7 @@ parser.add_option("--tau",dest="tau",help="use tau21 ?",action='store_true')
 parser.add_option("--four",dest="four",help="merge VH HPLP in VV HPLP ?",action='store_true')
 parser.add_option("--kfactors",dest="kfactors",help="use combination of kfactors as V+Jets MVV alternative shapes?",action='store_true',default=False)
 parser.add_option("-i","--inputdir",dest="inputdir",help="input direcory of all the files",default='results_Run2')
-parser.add_option("--qcdsf",dest="qcdsf",help="Combine with rescale= True to rescale the QCD in pseudodata by a sf",default=1.)
+parser.add_option("--qcdsf",dest="qcdsf",help="Combine with rescale= True to rescale the QCD in pseudodata by a sf",default=1.8)
 (options,args) = parser.parse_args()
 
 widerMVV=True
@@ -471,7 +471,7 @@ if options.run.find("all")!=-1 or options.run.find("pseudoALL")!=-1:
                               options.inputdir+"/JJ_"+filePeriod+"_TTJets_"+p+".root",
                               options.inputdir+"/save_new_shapes_"+filePeriod+"_pythia_%s_3D.root"%ap,
                               "pythia","JJ_%s_PDALL_%s.root"%(filePeriod,p),ctx.lumi[filePeriod],
-                              options.inputdir+"/workspace_JJ_BulkGWW_"+ap+"_13TeV_"+filePeriod+"_PrepPseudo.root",
+                              options.inputdir+"/workspace_JJ_BulkGWW_"+p+"_13TeV_"+filePeriod+"_PrepPseudo.root",
                               filePeriod,ap,rescale,options.qcdsf)
 
 print " ########## I did everything I could! ###### "
