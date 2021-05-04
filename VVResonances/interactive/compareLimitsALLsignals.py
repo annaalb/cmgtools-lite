@@ -7,12 +7,13 @@ from CMGTools.VVResonances.plotting.tdrstyle import *
 from time import sleep
 from array import array
 import numpy as np
+ROOT.gROOT.SetBatch(True)
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",default='limit_compare.root',help="Limit plot")
 parser.add_option("-n","--name",dest="name",default='comparisons',help="additional name for output file (include compareB2G18002 with signal BGWW to compare this analysis with 16+17 also)")
 parser.add_option("-x","--minX",dest="minX",type=float,help="minimum x",default=1.3)
 parser.add_option("-X","--maxX",dest="maxX",type=float,help="maximum x",default=6.0)
-parser.add_option("-y","--minY",dest="minY",type=float,help="minimum y",default=0.00001)
+parser.add_option("-y","--minY",dest="minY",type=float,help="minimum y",default=0.0001)
 parser.add_option("-Y","--maxY",dest="maxY",type=float,help="maximum y",default=0.1)
 parser.add_option("-b","--blind",dest="blind",type=int,help="Not do observed ",default=1)
 parser.add_option("-l","--log",dest="log",type=int,help="Log plot",default=1)
@@ -23,16 +24,14 @@ parser.add_option("-T","--titleY",dest="titleY",default="#sigma x BR(G_{Bulk} #r
 parser.add_option("-p","--period",dest="period",default='ALL',help="period")
 parser.add_option("-f","--final",dest="final",type=int, default=1,help="Preliminary or not")
 
-plotB2G18002 = False # B2G-18-002 VV CMS all had
+plotB2G18002 = False # B2G-18-002 VV CMS all had - Eur. Phys. J. C 80 (2020) 237
 plotATLASVVsemilep=False # https://www.hepdata.net/record/ins1793572 - Eur.Phys.J.C 80 (2020) 1165, 2020.
 plotATLASVVhad=False  # https://www.hepdata.net/record/91052 - JHEP 09 (2019) 091, 2019.
 plotATLASVHhad = False # https://www.hepdata.net/record/ins1806507 - Phys.Rev.D 102 (2020) 112008, 2020.
-plotCMSsemilep = False # B2G-19-002 pas CMS semi lep Run2
+plotCMSsemilep = False # B2G-19-002 pas CMS semi lep Run2 WV/WH
 plotCMSsemilepZnunu = False # B2G-20-008 CMS Z(nunu)V(qq) semilep Run2
-
-#//////
-plotVH2016=False
-plotVVCMS=False
+plotCMSZHsemilep = False # B2G-19-006 CMS Z(lep) H(had) semilep Run2 http://cms-results.web.cern.ch/cms-results/public-results/publications/B2G-19-006/index.html
+plotCMS2016DIBcombo = False # B2G-18-006 2016 diboson combination https://www.hepdata.net/record/ins1737724 
 
 (options,args) = parser.parse_args()
 #define output dictionary
@@ -103,6 +102,7 @@ if "WprimeWZ"  in options.sig:
   titleX = "M_{"+VBFtype+"W'} [TeV]"
   plotCMSsemilep = True
   plotATLASVVsemilep=True
+  plotCMSsemilepZnunu = True
   if "VBF" not in options.sig:
     plotB2G18002 = True
     plotATLASVVhad=True
@@ -119,8 +119,9 @@ if "BulkGZZ" in options.sig:
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"G_{Bulk} #rightarrow ZZ) [pb]  "
   titleX = "M_{G_{Bulk}} [TeV]"
   if "compareB2G18002" not in options.name:
-    plotCMSsemilep = True
     plotCMSsemilepZnunu = True
+    if "VBF" not in options.sig:
+      plotCMS2016DIBcombo = True
   if "VBF" not in options.sig:
     plotB2G18002 = True
 if "RadionWW" in options.sig:
@@ -134,6 +135,7 @@ if "RadionZZ" in options.sig:
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Rad #rightarrow ZZ) [pb]  "
   titleX = "M_{Rad} [TeV]"
   plotATLASVVsemilep = True
+  plotCMSsemilepZnunu = True
 if "ZprimeWW"  in options.sig:
   ltheory="#sigma_{TH}#times BR(Z'#rightarrowWW) HVT_{"+Model+"}"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Z' #rightarrow WW) [pb]  "
@@ -143,14 +145,22 @@ if "ZprimeWW"  in options.sig:
   if "VBF" not in options.sig:
     plotB2G18002= True
     plotATLASVVhad=True
-if "Vprime"  in options.sig:
+if "VprimeWV"  in options.sig:
+  ltheory="#sigma_{TH}#times BR(V'#rightarrow(WV)) HVT_{"+Model+"}"
+  titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow WV) [pb]  "
+  titleX = "M_{V'} [TeV]"
+if "Vprime"  in options.sig and "WV" not in options.sig:
   ltheory="#sigma_{TH}#times BR(V'#rightarrow(VV+VH)) HVT_{"+Model+"}"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"V' #rightarrow VV+VH) [pb]  "
   titleX = "M_{V'} [TeV]"
+  if "VBF" not in options.sig:
+    plotCMS2016DIBcombo = True
 if "BulkGVV"  in options.sig:
   ltheory="#sigma_{TH}#times BR(G_{Bulk}#rightarrowVV) #tilde{k}=0.5"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"G_{Bulk} #rightarrow VV) [pb]  "
   titleX = "M_{G_{Bulk}} [TeV]"
+  if "VBF" not in options.sig:
+    plotCMS2016DIBcombo = True # NB remember dib combination has both VV & HH
 if "RadionVV"  in options.sig:
   ltheory="#sigma_{TH}#times BR(Rad#rightarrowVV)"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Rad #rightarrow VV) [pb]  "
@@ -160,13 +170,16 @@ if "ZprimeZH"  in options.sig:
   ltheory="#sigma_{TH}#times BR(Z'#rightarrowZH) HVT_{"+Model+"}"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"Z' #rightarrow ZH) [pb]  "
   titleX = "M_{Z'} [TeV]"
+  plotCMSZHsemilep = True
   if "VBF" not in options.sig:
+    plotCMS2016DIBcombo = True
     plotATLASVHhad = True
 if "WprimeWH"  in options.sig:
   ltheory="#sigma_{TH}#times BR(W'#rightarrowWH) HVT_{"+Model+"}"
   titleY ="#sigma x #bf{#it{#Beta}}("+VBFtype+"W' #rightarrow WH) [pb]  "
   titleX = "M_{W'} [TeV]"
   if "VBF" not in options.sig:
+    plotCMS2016DIBcombo = True
     plotCMSsemilep = True
     plotATLASVHhad = True
 title = ["This analysis"]
@@ -216,6 +229,9 @@ if scaleBR:
     if "prime" not in options.sig or "VBF" in options.sig:
       print " rescaling limit !!!!! "
       scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
+      if (options.sig == "VBF_WprimeWZ"or options.sig == "VBF_WprimeWHinc") and m == 1300.:
+        print " Fixing VBF_WprimeWZ that was not rescaled!!!"
+        scaleLimits[str(int(m))] = scaleLimits[str(int(m))]/10.
       if m > 5000. and "prime" not in options.sig: scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
 
 
@@ -226,17 +242,9 @@ else:
     scaleLimits[str(int(m))] = 1.*0.001*0.584 #multiply by H BR
 
 
-
-
-
-
-
-
-
-
-leg = getLegend()
-leg.AddEntry(0,"95% CL expected","")
-leg.AddEntry(0,"upper limits","")
+leg = getLegend(0.3,0.6,0.8,0.9)
+leg.AddEntry(0,"95% CL exp. upper limits","")
+#leg.AddEntry(0,"upper limits","")
 tgraphs = []
 for t,fname in zip(title,files):
         print "*************** fname ",fname
@@ -295,24 +303,26 @@ if plotB2G18002:
   VV18002.SetLineStyle(2);
   VV18002.SetLineWidth(3);
   VV18002.SetMarkerStyle(20);
-  leg.AddEntry(VV18002,"B2G-18-002 (16+17)","L")
+  leg.AddEntry(VV18002,"EPJC 80 (2020) 237 (77fb^{-1})","L") # "B2G-18-002 (16+17)","L")
 
 ### ATLAS VH all had Run2                                                                                                                                                             
 if plotATLASVHhad:
-  VHhadATLAS = ROOT.TGraph("ATLASresults/ATLAS_"+options.sig+"_HAD.txt","%lg %lg")
+  thesignal=options.sig.replace("inc","")
+  VHhadATLAS = ROOT.TGraph("ATLASresults/ATLAS_"+thesignal+"_HAD.txt","%lg %lg")
   VHhadATLAS.SetLineColor(591)
   VHhadATLAS.SetLineStyle(1);
   VHhadATLAS.SetLineWidth(3);
-  leg.AddEntry(VHhadATLAS,"ATLAS hvt had (Run2)","L")
+  leg.AddEntry(VHhadATLAS,"Phys.Rev.D 102 (2020) 112008 (139 fb^{-1})","L")
 
 
 # ATLAS VV (HVT) all had Run2
 if plotATLASVVhad:
-  VVhadATLAS = ROOT.TGraph("ATLASresults/ATLAS_"+options.sig+"_HVT_HAD.txt","%lg %lg")
-  VVhadATLAS.SetLineColor(591)
+  thesignal=options.sig.replace("inc","")
+  VVhadATLAS = ROOT.TGraph("ATLASresults/ATLAS_"+thesignal+"_HVT_HAD.txt","%lg %lg")
+  VVhadATLAS.SetLineColor(880)
   VVhadATLAS.SetLineStyle(1);
   VVhadATLAS.SetLineWidth(3);
-  leg.AddEntry(VVhadATLAS,"ATLAS all had (Run2)","L")
+  leg.AddEntry(VVhadATLAS,"JHEP 09 (2019) 091 (139 fb^{-1})","L")
 
 
 ### ATLAS VV (HVT) semilep Run2                                                                                                                                                      
@@ -321,31 +331,50 @@ if plotATLASVVsemilep:
   VVsemilepATLAS.SetLineColor(591)
   VVsemilepATLAS.SetLineStyle(2);
   VVsemilepATLAS.SetLineWidth(3);
-  leg.AddEntry(VVsemilepATLAS,"ATLAS semilep (Run2)","L")
+  leg.AddEntry(VVsemilepATLAS,"EPJC 80 (2020) 1165 (139 fb^{-1}","L") # ATLAS semilep (Run2)","L")
 
 #### CMS B2G-19-002 semilep Run2
 if plotCMSsemilep:
-  CMS19002semilep = ROOT.TGraph("Limits_B2G-19-002-pas/limit_"+options.sig+"_Run2_B2G_19_002.txt","%lg %lg")
-  CMS19002semilep.SetLineColor(436);
+  thesignal=options.sig.replace("inc","")
+  CMS19002semilep = ROOT.TGraph("Limits_B2G-19-002-pas/limit_"+thesignal+"_Run2_B2G_19_002.txt","%lg %lg")
+  CMS19002semilep.SetLineColor(417);
   CMS19002semilep.SetLineStyle(4);
   CMS19002semilep.SetLineWidth(3);
   CMS19002semilep.SetMarkerStyle(20);
-  leg.AddEntry(CMS19002semilep,"B2G-19-002 semilep (Run2)","L")
+  leg.AddEntry(CMS19002semilep,"CMS-PAS-B2G-19-002 (137 fb^{-1})","L")
 
 
 ##### CMS B2G-20-008 semilep Run2 Z(nunu)V(qq)
 if plotCMSsemilepZnunu:
-  CMSZnunuV20008=ROOT.TGraph("Limits_B2G-20-009-pas/limit_"+options.sig+"_Run2_B2G_20_008.txt","%lg %lg")
+  CMSZnunuV20008=ROOT.TGraph("Limits_B2G-20-008-pas/limit_"+options.sig+"_Run2_B2G_20_008.txt","%lg %lg")
   CMSZnunuV20008.SetTitle("");
-  CMSZnunuV20008.SetLineColor(427);
+  CMSZnunuV20008.SetLineColor(797);
   CMSZnunuV20008.SetLineStyle(5);
   CMSZnunuV20008.SetLineWidth(3);
   CMSZnunuV20008.SetMarkerStyle(20);
-  leg.AddEntry(CMSZnunuV20008,"B2G-20-008 semilep (Run2)","L")
+  leg.AddEntry(CMSZnunuV20008,"CMS-PAS-B2G-20-008 (137 fb^{-1})","L")
 
+##### CMS B2G-19-006 semilep Z(lep)H(had) Run2
+if plotCMSZHsemilep:
+  thesignal=options.sig.replace("inc","")
+  CMSZlepH19006=ROOT.TGraph("Limits_B2G-19-006/limit_"+thesignal+"_Run2_B2G_19_006.txt","%lg %lg")
+  CMSZlepH19006.SetTitle("");
+  CMSZlepH19006.SetLineColor(404);
+  CMSZlepH19006.SetLineStyle(4);
+  CMSZlepH19006.SetLineWidth(3);
+  CMSZlepH19006.SetMarkerStyle(20);
+  leg.AddEntry(CMSZlepH19006,"CMS-B2G-19-006 (137 fb^{-1})","L")
 
-
-
+#### CMS 2016 DIB combination
+if plotCMS2016DIBcombo:
+  thesignal=options.sig.replace("inc","")
+  CMSdib2016combo=ROOT.TGraph("Limits_DIB_combo2016/limit_"+thesignal+"_2016_B2G_18_006.txt","%lg %lg")
+  CMSdib2016combo.SetTitle("");
+  CMSdib2016combo.SetLineColor(616);
+  CMSdib2016combo.SetLineStyle(6);
+  CMSdib2016combo.SetLineWidth(3);
+  CMSdib2016combo.SetMarkerStyle(20);
+  leg.AddEntry(CMSdib2016combo,"Phys.Lett.B 798 (2019) 134952 (36 fb^{-1})","L")
 
 
 #plotting information
@@ -367,12 +396,12 @@ c.SetLeftMargin( L/W )
 c.SetRightMargin( R/W )
 c.SetTopMargin( T/H )
 c.SetBottomMargin( B/H )
-c.SetTickx(0)
-c.SetTicky(0)
+#c.SetTickx(0)
+#c.SetTicky(0)
 c.GetWindowHeight()
 c.GetWindowWidth()
 #c.SetLogy()
-c.SetGrid()
+#c.SetGrid()
 #c.SetLogy()
 	
 frame=c.DrawFrame(options.minX,options.minY,options.maxX,options.maxY)
@@ -406,7 +435,8 @@ if plotATLASVVsemilep: VVsemilepATLAS.Draw("Lsame")
 if plotATLASVHhad: VHhadATLAS.Draw("Lsame")
 if plotCMSsemilep: CMS19002semilep.Draw("Lsame")
 if plotCMSsemilepZnunu: CMSZnunuV20008.Draw("Lsame")
-
+if plotCMSZHsemilep: CMSZlepH19006.Draw("Lsame")
+if plotCMS2016DIBcombo: CMSdib2016combo.Draw("Lsame")
 
 for i,g in enumerate(tgraphs):
 	g.SetLineStyle(tline[i])
@@ -414,7 +444,10 @@ for i,g in enumerate(tgraphs):
         g.SetMarkerStyle(markers[i])
         g.SetMarkerColor(cols[i])
 	g.SetLineWidth(3)
-	g.Draw("Lsame")
+        if g.GetN() ==1:
+          g.Draw("LPsame")
+        else:
+          g.Draw("Lsame")
 
 c.SetLogy(options.log)
 #c.Draw()
