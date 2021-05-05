@@ -104,8 +104,10 @@ class AllFunctions():
    command='vvMake1DMVVTemplateTTbar.py'
    if doFitTempl ==True : command ='vvMake1DMVVfitTemplateTTbar.py'
   if (name.find("WJets")!=1 or name.find("ZJets")!=1) and doKfactors==True:
-   command = "vvMake1DMVVTemplateVjets.py"
    print "!!!!!! using k-factor templates implementation!!! "
+   command = "vvMake1DMVVTemplateVjets.py"
+  if (name.find("WJets")!=1 or name.find("ZJets")!=1) and doFitTempl==True:
+   command = "vvMake1DMVVfitTemplateVjets.py"
   print command
 
   pwd = os.getcwd()
@@ -124,6 +126,11 @@ class AllFunctions():
    
    if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],self.cuts[c.replace('VBF_','')],addCut,self.cuts['acceptanceGEN'],self.cuts['looseacceptanceMJ']])
    else: cut='*'.join([self.cuts['common_VV'],self.cuts[c],addCut,self.cuts['acceptanceGEN'],self.cuts['looseacceptanceMJ']])
+   if name.find("TT")!=-1 or ((name.find("WJets")!=1 or name.find("ZJets")!=1) and doFitTempl==True):
+    print " ****** using acceptance selection for fits!!! ********"
+    if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],self.cuts[c.replace('VBF_','')],addCut,self.cuts['acceptance']])
+    else: cut='*'.join([self.cuts['common_VV'],self.cuts[c],addCut,self.cuts['acceptance']])
+
    folders=[]
    folders= self.samples.split(',')
    smp= ""
