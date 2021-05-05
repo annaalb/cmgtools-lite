@@ -33,6 +33,7 @@ parser.add_option("--trigg",action="store_true",dest="trigg",help="add trigger w
 parser.add_option("--run",dest="run",help="decide which parts of the code should be run right now possible optoins are: all : run everything, sigmvv: run signal mvv fit sigmj: run signal mj fit, signorm: run signal norm, vjets: run vjets, tt: run ttbar , qcdtemplates: run qcd templates, qcdkernel: run qcd kernel, qcdnorm: run qcd merge and norm, detector: run detector fit , data : run the data or pseudodata scripts ",default="all")
 parser.add_option("--signal",dest="signal",default="BGWW",help="which signal do you want to run? options are BGWW, BGZZ, WprimeWZ, ZprimeWW, ZprimeZH, RWW, RZZ and VBF combination")
 parser.add_option("--fitsmjj",dest="fitsmjj",default=False,action="store_true",help="True makes fits for mjj of vjets/tt, False uses hists")
+parser.add_option("--fittempl",dest="fittempl",default=False,action="store_true",help="True derives templates for mjj of vjets/tt starting from a fit function in stead of smoothening, False uses default templates")
 parser.add_option("--single",dest="single",default=False,help="set to True to merge kernels also for single years when processing full run2 data")
 parser.add_option("--sendjobs",dest="sendjobs",default=True,help="make job list without submitting them (useful to only merge jobs if something was not finished")
 parser.add_option("-c",dest="category",default="VH_HPHP,VH_HPLP,VH_LPHP,VV_HPHP,VV_HPLP",help="chose the category, e.g. NP or VV_HPHP")
@@ -353,9 +354,9 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
         else :
             print " did you run Detector response  for this period? otherwise the kernels steps will not work!"
             print "first kernel W"
-            f.makeBackgroundShapesMVVKernel("WJets","JJ_"+filePeriod,WresTemplate,ctx.cuts['nonres'],"1DW",wait,1.,1.,options.sendjobs,options.tau,options.kfactors)
+            f.makeBackgroundShapesMVVKernel("WJets","JJ_"+filePeriod,WresTemplate,ctx.cuts['nonres'],"1DW",wait,1.,1.,options.sendjobs,options.fittempl,options.tau,options.kfactors)
             print "then kernel Z"
-            f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+filePeriod,ZresTemplate,ctx.cuts['nonres'],"1DZ",wait,1.,1.,options.sendjobs,options.tau,options.kfactors)
+            f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+filePeriod,ZresTemplate,ctx.cuts['nonres'],"1DZ",wait,1.,1.,options.sendjobs,options.fittempl,options.tau,options.kfactors)
     if options.run.find("all")!=-1 or options.run.find("SF")!=-1 or options.run.find("All")!=-1:
         print "then SF W"
         f.makeSF(WresTemplate,False,options.vv,options.four,options.tau)
@@ -399,7 +400,7 @@ if options.run.find("all")!=-1 or options.run.find("tt")!=-1:
             if options.fitsmjj == True:
                 f.makeMinorBkgShapesMVV("TTJets"+con,"JJ_"+filePeriod,TTemplate,ctx.cuts[con],con)
             else:
-                f.makeBackgroundShapesMVVKernel("TTJets"+con,"JJ_"+filePeriod,TTemplate,ctx.cuts[con],"1DTT"+con,wait,1.,1.,options.sendjobs)
+                f.makeBackgroundShapesMVVKernel("TTJets"+con,"JJ_"+filePeriod,TTemplate,ctx.cuts[con],"1DTT"+con,wait,1.,1.,options.sendjobs,options.fittempl)
         if options.run.find("all")!=-1 or options.run.find("norm")!=-1 or options.run.find("ALL")!=-1:
             print " ***************************         "+con+"      ******************************"
             print "make norm, DID YOU MAKE SF?"
