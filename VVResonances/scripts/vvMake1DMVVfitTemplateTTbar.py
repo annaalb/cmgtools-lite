@@ -133,7 +133,7 @@ def histoMaker(h,binning,name):
     h_smooth = ROOT.TH1F(name,name,options.binsx,array('f',binning))
     for b in range(1,options.binsx+1):
         h_smooth.SetBinContent(b,expo.Eval(h.GetBinCenter(b)))
-        h_smooth.SetBinError(b,hint.GetBinError(b)
+        h_smooth.SetBinError(b,hint.GetBinError(b))
 
     return h_smooth,hint
   
