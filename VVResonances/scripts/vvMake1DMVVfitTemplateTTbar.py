@@ -124,15 +124,16 @@ def histoMaker(h,binning,name):
 
     h.Fit(expo,"MR","",xmin,xmax)
     h.Fit(expo,"MR","",xmin,xmax)
-    h_smooth = ROOT.TH1F(name,name,options.binsx,array('f',binning))
-    for b in range(1,options.binsx+1):
-        h_smooth.SetBinContent(b,expo.Eval(h.GetBinCenter(b)))
-        
     hint = ROOT.TH1F("hint","hint",options.binsx,xmin,xmax)
     ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(hint)
     hint.SetStats(ROOT.kFALSE);
     hint.SetFillColor(2);
     hint.SetFillStyle(3001)
+
+    h_smooth = ROOT.TH1F(name,name,options.binsx,array('f',binning))
+    for b in range(1,options.binsx+1):
+        h_smooth.SetBinContent(b,expo.Eval(h.GetBinCenter(b)))
+        h_smooth.SetBinError(b,hint.GetBinError(b)
 
     return h_smooth,hint
   
