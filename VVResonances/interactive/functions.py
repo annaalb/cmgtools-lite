@@ -103,10 +103,10 @@ class AllFunctions():
   if name.find("TT")!=-1 and doTau ==False:
    command='vvMake1DMVVTemplateTTbar.py'
    if doFitTempl ==True : command ='vvMake1DMVVfitTemplateTTbar.py'
-  if (name.find("WJets")!=1 or name.find("ZJets")!=1) and doKfactors==True:
+  if (name.find("WJets")!=-1 or name.find("ZJets")!=-1) and doKfactors==True:
    print "!!!!!! using k-factor templates implementation!!! "
    command = "vvMake1DMVVTemplateVjets.py"
-  if (name.find("WJets")!=1 or name.find("ZJets")!=1) and doFitTempl==True:
+  if (name.find("WJets")!=-1 or name.find("ZJets")!=-1) and if doFitTempl==True:
    command = "vvMake1DMVVfitTemplateVjets.py"
   print command
 
