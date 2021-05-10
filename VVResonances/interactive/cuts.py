@@ -295,7 +295,7 @@ class cuts():
                 #print "ortoghonal VV + VH"
                 catsAll = {}
                 if options.find('VV')==-1 and options.find('4')==-1:
-                    print " ---------- using default VV+VH 5 categories definition "
+                    if run2 == True: print " ---------- using default VV+VH 5 categories definition "
                     #scheme 2: improves VV HPHP (VH_HPHP -> VV_HPHP -> VH_LPHP,VH_HPLP -> VV_HPLP)
                     #at least one H tag HP (+ one V/H tag HP)
                     catsAll['VH_HPHP'] = '('+'&&'.join([self.catVtag['HP1'],self.catHtag['HP2']])+')'

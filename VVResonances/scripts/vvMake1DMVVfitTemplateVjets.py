@@ -86,6 +86,10 @@ def histoMaker(h,binning,name):
     expo.SetParLimits(2,1.,20.)
     expo.SetParLimits(1,20.,40.)
 
+    #for 16+17 VH HPHP
+    #expo=ROOT.TF1("expo","exp(-x/([0]+[1]*x))",xmin,xmax)
+    #expo.SetParameters(16.,0.1)
+
     h.Fit(expo,"MR","",xmin,xmax)
     h.Fit(expo,"MR","",xmin,xmax)
     hint = ROOT.TH1F("hint","hint",options.binsx,xmin,xmax)

@@ -118,9 +118,12 @@ def histoMaker(h,binning,name):
 
     expo=ROOT.TF1("expo","[0]*(1-x/13000.)^[1]/(x/13000)^[2]",xmin,xmax)
     expo.SetParameters(0,30.,2.)
-    #expo.SetParameters(0,16.,2.)                                                                                                                                              
     expo.SetParLimits(2,1.,20.)
-    expo.SetParLimits(1,20.,40.)
+    expo.SetParLimits(1,20.,40.) #comment for TT resT VH LPHP  16+17
+
+    # for TT resT VH LPHP  16+17
+    #expo.SetParameters(0,30.,0.)
+    #expo.SetParLimits(2,0.,0.)
 
     h.Fit(expo,"MR","",xmin,xmax)
     h.Fit(expo,"MR","",xmin,xmax)
