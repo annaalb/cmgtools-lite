@@ -126,7 +126,7 @@ class AllFunctions():
    
    if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],self.cuts[c.replace('VBF_','')],addCut,self.cuts['acceptanceGEN'],self.cuts['looseacceptanceMJ']])
    else: cut='*'.join([self.cuts['common_VV'],self.cuts[c],addCut,self.cuts['acceptanceGEN'],self.cuts['looseacceptanceMJ']])
-   if name.find("TT")!=-1 or ((name.find("WJets")!=1 or name.find("ZJets")!=1) and doFitTempl==True):
+   if (name.find("TT")!=-1 or name.find("WJets")!=-1 or name.find("ZJets")!=-1) and doFitTempl==True:
     print " ****** using acceptance selection for fits!!! ********"
     if 'VBF' in c: cut='*'.join([self.cuts['common_VBF'],self.cuts[c.replace('VBF_','')],addCut,self.cuts['acceptance']])
     else: cut='*'.join([self.cuts['common_VV'],self.cuts[c],addCut,self.cuts['acceptance']])
