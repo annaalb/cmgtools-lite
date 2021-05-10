@@ -93,6 +93,7 @@ JER_unc = ctx.JER_uncertainties
 datasets= options.period.split(",")
 resultsDir = {year:'results_'+year for year in datasets}
 
+if len(datasets) == 1 : lumitot=lumi[options.period]
 if len(datasets) == 3 and options.combo == True:
   datasets = []
   datasets.append("Run2")
