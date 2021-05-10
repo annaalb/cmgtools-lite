@@ -145,7 +145,9 @@ For this step the script `run_transferKernel.sh` can be used. Inside the script 
  jet mass shapes: `python makeInputs.py -p 2016 --run "vjetsfits" --batch False`
  
  dijet mass templates:  `python makeInputs.py -p "2016,2017,2018"  --run "vjetskernel"`
- 
+
+ NB: To produce MVV templates starting from a fit function instead of using the smoothening procedure use `--fittempl` when running the makeInputs.py.
+
  Templates based on k-factors can be obtained with `python makeInputs.py -p "2016,2017,2018"  --run "vjetskernel" --kfactors`
  
  Also fits can be used instead of templates with  `python makeInputs.py -p "2016,2017,2018"  --run "vjetskernel" --fitsmjj`
@@ -155,6 +157,8 @@ For this step the script `run_transferKernel.sh` can be used. Inside the script 
  jet mass shapes: `python makeInputs.py -p 2016 --run "ttfits" --batch False`
  
  dijet mass templates: `python makeInputs.py -p "2016,2017,2018"  --run "tttemplates"`
+ 
+ NB: To produce MVV templates starting from a fit function instead of using the smoothening procedure use `--fittempl` when running the makeInputs.py.
  
  * signals (signals are listed above)
  
