@@ -229,9 +229,8 @@ if scaleBR:
     if "prime" not in options.sig or "VBF" in options.sig:
       print " rescaling limit !!!!! "
       scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
-      if (options.sig == "VBF_WprimeWZ"or options.sig == "VBF_WprimeWHinc") and m == 1300.:
-        print " Fixing VBF_WprimeWZ that was not rescaled!!!"
-        scaleLimits[str(int(m))] = scaleLimits[str(int(m))]/10.
+      if m == 5000. and (options.sig == "VBF_RadionWW" or options.sig == "VBF_RadionZZ"):
+        scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
       if m > 5000. and "prime" not in options.sig: scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
 
 

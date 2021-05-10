@@ -181,19 +181,16 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
      func3 = w.function(signal3+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
      func4 = w.function(signal4+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
     scaleLimits[str(int(m))] = scaleLimits[str(int(m))]+ROOT.TMath.Exp(func3.getVal(argset))+ROOT.TMath.Exp(func4.getVal(argset))
-   if options.sig == 'VBF_Vprime':
-    print " fixing VBF Vprime !!!!! WV had factor 10 extra, VH didn't!!! "
-    scaleLimits[str(int(m))] = scaleLimits[str(int(m))] = ROOT.TMath.Exp(func1.getVal(argset))*10+ROOT.TMath.Exp(func2.getVal(argset))*10 + ROOT.TMath.Exp(func3.getVal(argset))+ROOT.TMath.Exp(func4.getVal(argset))
   else:
    func = w.function(options.sig+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
    scaleLimits[str(int(m))] = ROOT.TMath.Exp(func.getVal(argset))
 
-  if ("prime" not in options.sig or "VBF" in options.sig) and options.sig != 'VBF_Vprime' :
+  if ("prime" not in options.sig or "VBF" in options.sig):
    if options.debug:   print " rescaling limit !!!!! "
    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
-   if options.sig == "VBF_WprimeWHinc":
-    if options.debug:    print " Fixing VBF_WprimeWHinc that was not rescaled!!!"
-    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]/10.
+   if m == 5000. and (options.sig == "VBF_RadionWW" or options.sig == "VBF_RadionZZ"):
+    if options.debug:    print "extra rescaling for high mx "
+    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
    if m > 5000. and "prime" not in options.sig:
     if options.debug:    print "extra rescaling for high mx "
     scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
