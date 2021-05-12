@@ -20,7 +20,7 @@ parser.add_option("-l","--log",dest="log",type=int,help="Log plot",default=1)
 parser.add_option("-s","--signal",dest="sig",type=str,help="Signal sample",default='BulkGWW')
 parser.add_option("-t","--titleX",dest="titleX",default='M_{X} (GeV)',help="title of x axis")
 parser.add_option("-T","--titleY",dest="titleY",default="#sigma x BR(G_{Bulk} #rightarrow WW) (pb)  ",help="title of y axis")
-
+parser.add_option("--limitname",dest="limitname",default="newbaseline")
 parser.add_option("-p","--period",dest="period",default='ALL',help="period")
 parser.add_option("-f","--final",dest="final",type=int, default=1,help="Preliminary or not")
 
@@ -37,7 +37,7 @@ plotCMS2016DIBcombo = False # B2G-18-006 2016 diboson combination https://www.he
 #define output dictionary
 
 scaleBR = True
-
+limitname=options.limitname
 setTDRStyle()
 
 def getLegend(x1=0.50650010112,y1=0.523362,x2=0.8790202143,y2=0.8279833):
@@ -183,11 +183,11 @@ if "WprimeWH"  in options.sig:
     plotCMSsemilep = True
     plotATLASVHhad = True
 title = ["This analysis"]
-files = ["Limits_"+options.sig+"_13TeV_Run2_data_ggDYVBF_VVVH_partial_newbaseline.root"]
+files = ["Limits_"+options.sig+"_13TeV_Run2_data_ggDYVBF_VVVH_partial_"+limitname+".root"]
 
 if options.name.find("compareB2G18002") !=-1:
   title = ["This analysis (78 fb^{-1})","This analysis (138 fb^{-1})"]
-  files = ["Limits_"+options.sig+"_13TeV_1617_data_ggDYVBF_VVVH_partial_newbaseline.root","Limits_"+options.sig+"_13TeV_Run2_data_ggDYVBF_VVVH_partial_newbaseline.root"]
+  files = ["Limits_"+options.sig+"_13TeV_1617_data_ggDYVBF_VVVH_partial_"+limitname+".root","Limits_"+options.sig+"_13TeV_Run2_data_ggDYVBF_VVVH_partial_"+limitname+".root"]
 
 
 scaleLimits = {}
@@ -229,9 +229,9 @@ if scaleBR:
     if "prime" not in options.sig or "VBF" in options.sig:
       print " rescaling limit !!!!! "
       scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
-      if m == 5000. and (options.sig == "VBF_RadionWW" or options.sig == "VBF_RadionZZ"):
+      if (m >= 4000. and "VBF" in options.sig) or m>5000.:
+        print "extra rescaling for high mx "
         scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
-      if m > 5000. and "prime" not in options.sig: scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
 
 
 else:
