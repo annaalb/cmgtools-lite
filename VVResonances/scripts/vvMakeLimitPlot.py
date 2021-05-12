@@ -185,13 +185,10 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
    func = w.function(options.sig+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
    scaleLimits[str(int(m))] = ROOT.TMath.Exp(func.getVal(argset))
 
-  if ("prime" not in options.sig or "VBF" in options.sig):
+  if "prime" not in options.sig or "VBF" in options.sig:
    if options.debug:   print " rescaling limit !!!!! "
    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
-   if m == 5000. and (options.sig == "VBF_RadionWW" or options.sig == "VBF_RadionZZ"):
-    if options.debug:    print "extra rescaling for high mx "
-    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
-   if m > 5000. and "prime" not in options.sig:
+   if (m >= 4000. and "VBF" in options.sig) or m>5000.:
     if options.debug:    print "extra rescaling for high mx "
     scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
 
