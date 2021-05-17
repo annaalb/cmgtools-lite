@@ -240,10 +240,11 @@ for sig in signals:
 
       print "##########################       data/pseudodata added in datacard      ######################"  
       correlateyields=1
+      pt_dependence_rescaling = 1.5
       if oneSignal == True:
-        Tools.AddOneSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
+        Tools.AddOneSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset],pt_dependence_rescaling)
       else:
-        Tools.AddMultiSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
+        Tools.AddMultiSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset],pt_dependence_rescaling)
       if options.fitvjetsmjj == True:
         Tools.AddResBackgroundSystematics(card,p,options.vbf,options.corrvbf,["CMS_VV_JJ_WJets_slope",0.2,"CMS_VV_JJ_ZJets_slope",0.2])
       else:

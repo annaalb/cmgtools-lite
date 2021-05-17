@@ -2104,6 +2104,58 @@ class DataCardMaker:
         self.contributions.append({'name':name,'pdf':pdfName,'ID':ID,'yield':1.0})
 
 
+    def addParametricYieldNoTagger(self,name,ID,jsonFile,jsonFileCS,sigmaStr,BRStr,constant):
+        print 'I will only assume the BRs from HVT and float the cross section'
+        ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
+        from array import array
+        #first load cross section
+        fCS=open(jsonFileCS)
+        info=json.load(fCS)
+        xArr=[]
+        yArr=[]
+        yErrArr=[]
+
+        sigmaStr = sigmaStr.split(",")
+        for m in sorted(map(float,info.keys())):
+            xArr.append(float(m))
+            #I know this is stupid 
+	    value = 0
+	    for i,s in enumerate(sigmaStr):
+	     value+=float(info[str(int(m))][sigmaStr[i]])*float(info[str(int(m))][BRStr])
+            yArr.append(math.log(value))
+	    #print m,value,math.log(value)
+
+        pdfSigma="_".join([name,self.tag,"sigma"])
+        spline=ROOT.RooSpline1D(pdfSigma,pdfSigma,self.w.var("MH"),len(xArr),array('d',xArr),array('d',yArr))
+        getattr(self.w,'import')(spline,ROOT.RooFit.RenameVariable(pdfSigma,pdfSigma))
+
+        f=open(jsonFile)
+        info=json.load(f)      
+        pdfName="_".join([name,self.tag])
+        pdfNorm="_".join([name,self.tag,"norm"])
+
+        #self.w.factory(uncertaintyName+'[0,-1,1]')
+
+        if isinstance(info['yield'],list) == False:
+            self.w.factory("expr::{name}('({param})*{lumi}*(TMath::Exp({sigma}))*({constant})',MH,{lumi},{sigma})".format(name=pdfNorm,param=info['yield'],lumi=self.physics+"_"+self.period+"_lumi",sigma=pdfSigma,constant=constant))
+        else:
+            l = info['yield']
+            xArr =[]
+            yArr =[]
+            for i in range(0,len(l)):
+                xArr.append(l[i][0])
+                yArr.append(l[i][1])
+            spline=ROOT.RooSpline1D(pdfNorm+'spline',pdfNorm+'spline',self.w.var("MH"),len(xArr),array("d",xArr),array("d",yArr))    
+            getattr(self.w,'import')(spline,ROOT.RooFit.RenameVariable(pdfNorm+'spline',pdfNorm+'spline'))
+            self.w.factory("expr::{name}('{lumi}*(TMath::Exp({sigma}))*({constant})',MH,{lumi},{sigma})".format(name=pdfNorm+'expr',lumi=self.physics+"_"+self.period+"_lumi",sigma=pdfSigma))
+            prd = ROOT.RooProduct(pdfNorm,pdfNorm,ROOT.RooArgList(self.w.function(pdfNorm+'spline'),self.w.function(pdfNorm+'expr')))
+            getattr(self.w,'import')(prd,ROOT.RooFit.RenameVariable(pdfNorm,pdfNorm))
+           
+        f.close()
+        #self.addSystematic(uncertaintyName,"param",[0,uncertaintyValue])
+        self.contributions.append({'name':name,'pdf':pdfName,'ID':ID,'yield':1.0})
+
+
     def addMultiParametricYieldHVTBR(self,name,ID,jsonFile,jsonFileCS,sigmaStr,BRStr,constant,uncertaintyName,uncertaintyFormula,uncertaintyValue,uncertaintyName1,uncertaintyFormula1,uncertaintyValue1,uncertaintyName2,uncertaintyFormula2,uncertaintyValue2):
         print 'I will only assume the BRs from HVT and float the cross section'
         ROOT.gSystem.Load("libHiggsAnalysisCombinedLimit")
