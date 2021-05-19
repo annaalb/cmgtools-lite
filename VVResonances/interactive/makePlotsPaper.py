@@ -10,10 +10,15 @@ from tools import PostFitTools
 ROOT.gErrorIgnoreLevel = ROOT.kWarning
 ROOT.gROOT.ProcessLine(".x tdrstyle.cc");
 
+
+#python makePlotsPaper.py -i postfit_pseudodata_BulkGWW__newbaseline_newfittemplTT_correlateTT_rescaleTagging_taggerPTtest2true_factor5_Run2 -p "z" -n "PullsPaper" -I postfit_pseudodata_ZprimeZHinc__newbaseline_newfittemplTT_correlateTT_rescaleTagging_taggerPTtest2true_Run2
+
+
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",help="Output folder name",default='')
 parser.add_option("-n","--name",dest="name",help="ouptut name",default='PostfitPaper')
 parser.add_option("-i","--input",dest="input",help="Input directory",default='postfit_data_blindSR__Run2/')
+parser.add_option("-I","--secondinput",dest="secondinput",help="Input directory of the second file",default='postfit_data_blindSR__Run2/')
 parser.add_option("-x","--xrange",dest="xrange",help="set range for x bins in projection",default="0,-1")
 parser.add_option("-y","--yrange",dest="yrange",help="set range for y bins in projection",default="0,-1")
 parser.add_option("-z","--zrange",dest="zrange",help="set range for z bins in projection",default="0,-1")
@@ -103,13 +108,13 @@ def get_canvas(cname):
     if options.name.find("2018")!=-1: period = "2018"
     if options.name.find("16+17")!=-1: period = "16+17"
     if options.name.find("2016")!=-1: period = "2016"
-    if period =="2016":  CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
-    if period =="2017":  CMS_lumi.lumi_13TeV = "41.5 fb^{-1}"
-    if period =="2018":  CMS_lumi.lumi_13TeV = "59.7 fb^{-1}"
-    if period =="16+17":  CMS_lumi.lumi_13TeV = "77.6 fb^{-1}"
-    if period =="Run2":  CMS_lumi.lumi_13TeV = "137.2 fb^{-1}"
+    if period =="2016":  CMS_lumi.lumi_13TeV = "36 fb^{-1}"
+    if period =="2017":  CMS_lumi.lumi_13TeV = "43 fb^{-1}"
+    if period =="2018":  CMS_lumi.lumi_13TeV = "60 fb^{-1}"
+    if period =="16+17":  CMS_lumi.lumi_13TeV = "78 fb^{-1}"
+    if period =="Run2":  CMS_lumi.lumi_13TeV = "138 fb^{-1}"
     CMS_lumi.writeExtraText = 1
-    CMS_lumi.lumi_sqrtS = "13 TeV (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)                                                  
+    CMS_lumi.lumi_sqrtS = "13 TeV (Run2)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
     CMS_lumi.extraText = options.prelim
 
 
@@ -142,7 +147,7 @@ def get_canvas(cname):
     
     return canvas
 
-def get_pad(name):
+def get_pad(name,ymin=0.3,ymax=1.):
     
     #change the CMS_lumi variables (see CMS_lumi.py)                                                                                                                                 
     CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
@@ -152,19 +157,20 @@ def get_pad(name):
     if options.name.find("2018")!=-1: period = "2018"
     if options.name.find("16+17")!=-1: period = "16+17"
     if options.name.find("2016")!=-1: period = "2016"
-    if period =="2016":  CMS_lumi.lumi_13TeV = "35.9 fb^{-1}"
-    if period =="2017":  CMS_lumi.lumi_13TeV = "41.5 fb^{-1}"
-    if period =="2018":  CMS_lumi.lumi_13TeV = "59.7 fb^{-1}"
-    if period =="16+17":  CMS_lumi.lumi_13TeV = "77.6 fb^{-1}"
-    if period =="Run2":  CMS_lumi.lumi_13TeV = "137.2 fb^{-1}"
+    if period =="2016":  CMS_lumi.lumi_13TeV = "36 fb^{-1}"
+    if period =="2017":  CMS_lumi.lumi_13TeV = "43 fb^{-1}"
+    if period =="2018":  CMS_lumi.lumi_13TeV = "60 fb^{-1}"
+    if period =="16+17":  CMS_lumi.lumi_13TeV = "78 fb^{-1}"
+    if period =="Run2":  CMS_lumi.lumi_13TeV = "138 fb^{-1}"
     CMS_lumi.writeExtraText = 1
-    CMS_lumi.lumi_sqrtS = "13 TeV (2016+2017)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)                                                  
+    CMS_lumi.lumi_sqrtS = "13 TeV (Run2)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
     CMS_lumi.extraText = options.prelim
     
     CMS_lumi.lumiText = "(13 TeV)"
     iPos = 0
-    if( iPos==0 ): CMS_lumi.relPosX = 0.014
     CMS_lumi.relPosX=0.05
+    if( iPos==0 ): CMS_lumi.relPosX = 0.014
+
     H_ref = 600
     W_ref = 600
     W = W_ref
@@ -173,7 +179,7 @@ def get_pad(name):
     iPeriod = 0
     iPeriod = 4
     
-    pad = ROOT.TPad(name, name, 0, 0.3, 1, 1.0)
+    pad = ROOT.TPad(name, name, 0, ymin, 1, ymax)
     pad.SetFillColor(0)
     pad.SetBorderMode(0)
     pad.SetFrameFillStyle(0)
@@ -187,20 +193,34 @@ def get_pad(name):
     return pad
 
 
-
-
-
+def PrepareSignal(hist,scaling=1.):
+    print hist.Integral()
+    hist.Scale(1./scaling)
+    print hist.Integral()
+    return hist
 
 def GetHist(infile,histname):
     print " file opened "
     hist = infile.Get(histname)
     print " hist ",hist
-    hist.SetDirectory(0)
+    if histname != "syst_band":    hist.SetDirectory(0)
     return hist
 
-
-
-
+def MakeSignalPulls(S,data,scaling=1.):
+    print " bins ",S.GetNbinsX()
+    final = ROOT.TH1F()
+    S.Copy(final)
+    for i in range(1,S.GetNbinsX()+1):
+        if data.GetBinContent(i) == 0: continue
+        print " ***** bin ",i
+        s = S.GetBinContent(i)
+        print " s ",s
+        err_data = ROOT.TMath.Sqrt(data.GetBinContent(i))
+        print " err_data ",err_data
+        pull = s / err_data
+        print " pull ",pull
+        final.SetBinContent(i,pull*scaling)
+    return final
 
 def Plot(categories,histos,axis,signal1=None,signal2=None):
     print histos
@@ -449,6 +469,302 @@ def Plot(categories,histos,axis,signal1=None,signal2=None):
     c.SaveAs(outputname+".root")
 
 
+def SetupLegend(signal,mass,scaling):
+    VBFtype = ''
+    if 'VBF' in signal: VBFtype='VBF '
+    if "WprimeWZ"  in signal:
+        titleY =VBFtype+"W' (%i TeV) #rightarrow WZ (#times %i)"%(mass/1000.,scaling)
+    if "BulkGWW" in signal:
+        titleY =VBFtype+"G_{Bulk} (%i TeV) #rightarrow WW (#times %i)"%(mass/1000.,scaling)
+    if "BulkGZZ" in signal:
+        titleY =VBFtype+"G_{Bulk} (%i TeV) #rightarrow ZZ (#times %i)"%(mass/1000.,scaling)
+    if "RadionWW" in signal:
+        titleY =VBFtype+"Rad (%i TeV) #rightarrow WW (#times %i)"%(mass/1000.,scaling)
+    if "RadionZZ" in signal:
+        titleY =VBFtype+"Rad (%i TeV) #rightarrow ZZ (#times %i)"%(mass/1000.,scaling)
+    if "ZprimeWW"  in signal:
+        titleY =VBFtype+"Z' (%i TeV) #rightarrow WW (#times %i)"%(mass/1000.,scaling)
+    if "ZprimeZH"  in signal:
+        titleY =VBFtype+"Z' (%i TeV) #rightarrow ZH (#times %i)"%(mass/1000.,scaling)
+    if "WprimeWH"  in signal:
+        titleY =VBFtype+"W' (%i TeV) #rightarrow WH (#times %i)"%(mass/1000.,scaling)
+    return titleY
+
+
+
+def PlotPulls(categories,histos,axis,data,signal1=None,signal2=None,scaling1=1,scaling2=1,mass1=2000.,mass2=2000.):
+    print histos
+    extra1 = ''
+    extra2 = ''
+    htitle = ''
+    xtitle = ''
+    ymin = 0
+    ymax = 0
+    xrange = options.xrange
+    yrange = options.yrange
+    zrange = options.zrange
+    if options.xrange == '0,-1': xrange = '55,215'
+    if options.yrange == '0,-1': yrange = '55,215'
+    if options.zrange == '0,-1': zrange = '1246,7600'
+    xlow = xrange.split(',')[0]
+    xhigh = xrange.split(',')[1]
+    ylow = yrange.split(',')[0]
+    yhigh = yrange.split(',')[1]
+    if options.blind == True:
+        if len(xrange.split(',')) == 4:
+            xlow2 = xrange.split(',')[2]
+            xhigh2 = xrange.split(',')[3]
+        if len(yrange.split(',')) == 4:
+            ylow2 = yrange.split(',')[2]
+            yhigh2 = yrange.split(',')[3]
+
+    if axis=='z':
+        print "make Z projection"
+        htitle = "Z-Proj. x : "+options.xrange+" y : "+options.yrange
+        hhtitle = options.channel
+        xtitle = "Dijet invariant mass [GeV]"
+        ymin = -3
+        ymax = 3
+        extra1 = xrange.split(',')[0]+' < m_{jet1} < '+ xrange.split(',')[1]+' GeV'
+        if options.blind == True and len(xrange.split(',')) == 4:
+            extra1 = 'Blind '+xhigh+' < m_{jet1} < '+xlow2+' GeV'        #xlow+' < m_{jet1} < '+xhigh+' & '+xlow2+' < m_{jet1} < '+xhigh2+' GeV'
+            extra2 = yrange.split(',')[0]+' < m_{jet2} < '+ yrange.split(',')[1]+' GeV'
+        if options.blind == True and len(yrange.split(',')) == 4:
+            extra2 = 'Blind '+yhigh+' < m_{jet2} < '+ylow2+' GeV'  #extra2 = ylow+' < m_{jet2} < '+yhigh+' & '+ylow2+' < m_{jet2} < '+yhigh2+' GeV'
+    elif axis=='x':
+        print "make X projection"
+        htitle = "X-Proj. y : "+options.yrange+" z : "+options.zrange
+        hhtitle = options.channel
+        xtitle = " m_{jet1} [GeV]"
+        ymin = 0.02
+        ymax = histos[categories[0]]["Data"].GetMaximum()*2#max(hdata.GetMaximum()*1.3,maxY*1.3)
+        extra1 = yrange.split(',')[0]+' < m_{jet2} < '+ yrange.split(',')[1]+' GeV'
+        if options.blind == True and len(yrange.split(',')) == 4:
+            extra1 = 'Blind '+yhigh+' < m_{jet2} < '+ylow2+' GeV'  #extra1 = ylow+' < m_{jet2} < '+yhigh+' & '+ylow2+' < m_{jet2} < '+yhigh2+' GeV'
+            extra2 = zrange.split(',')[0]+' < m_{jj} < '+ zrange.split(',')[1]+' GeV'
+    elif axis=='y':
+        print "make Y projection"
+        htitle = "Y-Proj. x : "+options.xrange+" z : "+options.zrange
+        hhtitle = options.channel
+        xtitle = " m_{jet2} [GeV]"
+        ymin = 0.02
+        ymax = histos[categories[0]]["Data"].GetMaximum()*2#max(hdata.GetMaximum()*1.3,maxY*1.3)
+        extra1 = xrange.split(',')[0]+' < m_{jet1} < '+ xrange.split(',')[1]+' GeV'
+        if options.blind == True and len(xrange.split(',')) == 4:
+            extra1 = 'Blind '+xhigh+' < m_{jet1} < '+xlow2+' GeV'  #extra1 = xlow+' < m_{jet1} < '+xhigh+' & '+xlow2+' < m_{jet1} < '+xhigh2+' GeV'
+            extra2 = zrange.split(',')[0]+' < m_{jj} < '+ zrange.split(',')[1]+' GeV'
+
+    c = get_canvas('c')
+    c.SetBottomMargin(0.1)
+
+    ymin_pad0 = 0.81
+    bottom_margin = 0.35
+    usualstep = ymin_pad0/len(categories)
+    print " usualstep ",usualstep
+    laststep = usualstep+usualstep*bottom_margin
+    print " laststep ",laststep
+    ymin_pad0 = ymin_pad0+bottom_margin*usualstep
+    print " ymin_pad0 ",ymin_pad0
+    leg = ROOT.TLegend(0.38,ymin_pad0+0.09,0.99,0.99)
+    leg.SetTextSize(0.038)
+    leg.SetNColumns(2)
+    leg.SetMargin(0.12)
+    leg.SetColumnSeparation(0.05)
+    legsig = ROOT.TLegend(0.35,ymin_pad0+0.001,0.6,ymin_pad0+0.08)
+    legsig.SetTextSize(0.038)
+
+    pad0 =  get_pad("legend",ymin_pad0,1.)
+    pad0.SetLeftMargin(0.01)
+    pad0.SetRightMargin(0.01)
+    pad0.Draw()
+    pads ={}
+    i=0
+    for cat in categories:
+        step = usualstep
+        print " step ",step
+
+        print " ymin_pad0-step*(i+1) ",ymin_pad0-step*(i+1)
+        ymin_pads = ymin_pad0-step*(i+1)
+        if i == len(categories)-1: ymin_pads = ymin_pad0-laststep*(i+1)
+        print " ymin_pads ",ymin_pads
+        if i ==len(categories)-1: ymin_pads = 0
+        pads[cat] = ROOT.TPad(cat,cat,0.05,ymin_pads,1,ymin_pad0-step*i)
+        pads[cat].SetFillColor(0)
+        pads[cat].SetBorderMode(0)
+        pads[cat].SetFrameFillStyle(0)
+        pads[cat].SetFrameBorderMode(0)
+        pads[cat].SetTickx()
+        pads[cat].SetTicky()
+
+        pads[cat].SetBottomMargin(0.01)
+        if i == len(categories)-1: pads[cat].SetBottomMargin(bottom_margin)
+        pads[cat].SetTopMargin(0.)
+        pads[cat].SetLeftMargin(0.1)
+        pads[cat].SetRightMargin(0.01)
+
+
+
+        pads[cat].Draw()
+        i+=1
+
+    pad0.cd()
+    histos[categories[0]]["syst_band"].SetLineColor(ROOT.kGray+1)
+    histos[categories[0]]["syst_band"].SetFillColor(ROOT.kGray+1)
+    histos[categories[0]]["syst_band"].SetLineWidth(2)
+    histos[categories[0]]["syst_band"].SetLineStyle(1)
+    histos[categories[0]]["pulls_stat"].SetMarkerColor(ROOT.kBlack)
+    histos[categories[0]]["pulls_stat"].SetMarkerStyle(20)
+    histos[categories[0]]["pulls_stat"].SetLineColor(ROOT.kBlack)
+    histos[categories[0]]["pulls_stat"].SetLineWidth(2)
+    histos[categories[0]]["pulls_stat"].SetLineStyle(1)
+    leg.AddEntry(histos[categories[0]]["syst_band"],"\pm \sigma_{syst}/\sigma_{stat}","f")
+    leg.AddEntry(histos[categories[0]]["pulls_stat"],"(Data-Prediction)/\sigma_{stat}","ep")
+    leg.SetLineColor(0)
+    legsig.SetLineColor(0)
+
+    i=0
+    leg2 = {}
+    line = {}
+    h_signal1 = {}
+    h_signal2 = {}
+    for cat in categories:
+            print  "cat ",cat
+            print " leg ",ymin_pad0-step*(i+1)+0.05, ymin_pad0-step*(i)-0.05
+            leg2[cat] = ROOT.TLegend(0.6,0.05,0.88,0.13)
+            leg2[cat].SetTextSize(0.3)
+
+            pads[cat].cd()
+
+            histos[cat]["syst_band"].GetXaxis().SetRangeUser(1246.,7600.)
+            histos[cat]["syst_band"].GetYaxis().SetNdivisions(3)
+            histos[cat]["syst_band"].SetMinimum(ymin)
+            histos[cat]["syst_band"].SetMaximum(ymax)
+            histos[cat]["syst_band"].SetTitle(hhtitle)
+            #histos[cat][sample].SetLineColor(colors[cat])
+            #histos[cat][sample].SetMarkerColor(colors[cat])
+            #histos[cat][sample].SetMarkerStyle(markers[cat])
+            histos[cat]["syst_band"].SetLineColor(ROOT.kOrange)
+            histos[cat]["syst_band"].SetFillColor(ROOT.kOrange)
+            histos[cat]["syst_band"].SetLineWidth(2)
+            histos[cat]["syst_band"].SetLineStyle(1)
+            histos[cat]["pulls_stat"].SetMarkerColor(ROOT.kBlack)
+            histos[cat]["pulls_stat"].SetMarkerStyle(20)
+            histos[cat]["pulls_stat"].SetLineColor(ROOT.kBlack)
+            histos[cat]["pulls_stat"].SetLineWidth(2)
+            histos[cat]["pulls_stat"].SetLineStyle(1)
+
+
+            histos[cat]["syst_band"].Draw("a2same")
+            histos[cat]["pulls_stat"].SetMarkerSize(0.7)
+            histos[cat]["pulls_stat"].Draw('sameEP0')
+
+            histos[cat]["syst_band"].GetXaxis().SetTitle(xtitle)
+            histos[cat]["syst_band"].GetYaxis().SetTitleOffset(1.5)
+            binwidth = histos[cat]["syst_band"].GetXaxis().GetBinWidth(10)
+            if axis == "z": binwidth = 100
+            histos[cat]["syst_band"].GetYaxis().SetTitle(cat.replace("VBF_","").replace("_"," "))
+            histos[cat]["syst_band"].GetYaxis().SetTitleFont(43)
+            histos[cat]["syst_band"].GetYaxis().SetTitleSize(20)
+            histos[cat]["syst_band"].GetYaxis().CenterTitle()
+            histos[cat]["syst_band"].GetYaxis().SetLabelFont(43)
+            histos[cat]["syst_band"].GetYaxis().SetLabelSize(20)
+            histos[cat]["syst_band"].GetYaxis().SetTitleOffset(1.)
+            if i == len(categories)-1:
+                histos[cat]["syst_band"].GetXaxis().SetTitleFont(43)
+                histos[cat]["syst_band"].GetXaxis().SetTitleSize(20)
+                histos[cat]["syst_band"].GetXaxis().SetTitleOffset(4.)
+                histos[cat]["syst_band"].GetXaxis().SetLabelFont(43)
+                histos[cat]["syst_band"].GetXaxis().SetLabelSize(20)
+
+            if signal1!= None:
+                h_signal1[cat] = MakeSignalPulls(histos[cat][signal1],histos[cat][data],scaling1)
+
+                print "print do hsignal1 ", h_signal1[cat].Integral()
+                h_signal1[cat].GetXaxis().SetRangeUser(1200.,7700.)
+                h_signal1[cat].SetLineColor(ROOT.kGreen+1)
+                h_signal1[cat].SetLineStyle(1)
+                h_signal1[cat].SetLineWidth(2)
+
+                h_signal1[cat].Draw("histsame")
+
+            if signal2!= None:
+                h_signal2[cat] = MakeSignalPulls(histos[cat][signal2],histos[cat][data],scaling2)
+                print "print do hsignal2 ", h_signal2[cat].Integral()
+                h_signal2[cat].SetLineColor(ROOT.kViolet)
+                h_signal2[cat].GetXaxis().SetRangeUser(1200.,7700.)
+                h_signal2[cat].SetLineStyle(2)
+                h_signal2[cat].SetLineWidth(2)
+
+                h_signal2[cat].Draw("HISTsame")
+
+            #still in the category loop
+            print " drawing line in cat ",cat
+            line[cat] = ROOT.TLine(1246,0,7600,0)
+            line[cat].SetLineColor(ROOT.kBlack)
+            line[cat].SetLineWidth(2)
+            line[cat].Draw("same")
+            leg2[cat].AddEntry(histos[cat]["syst_band"],cat.replace("_"," "),"")
+            #leg2[cat].Draw("same")
+            print " done i ",i
+            i+=1
+
+    #errors[0].Draw("E2same")
+    print "projection "+extra1+"  "+extra2+" \n"
+
+
+    pt3 = ROOT.TPaveText(0.18,0.55,0.39,0.68,"NDC")
+    pt3.SetTextFont(42)
+    pt3.SetTextSize(0.04)
+    pt3.SetTextAlign(12)
+    pt3.SetFillColor(0)
+    pt3.SetBorderSize(0)
+    pt3.SetFillStyle(0)
+    #pt3.AddText(extra1)
+    #pt3.AddText(extra2)
+    #pt3.Draw()
+
+    #CMS_lumi.CMS_lumi(c, 4, 10)
+    CMS_lumi.relPosX = 0.13
+    c.SetLeftMargin(0.01)
+    c.SetRightMargin(0.01)
+    lumiSpecialX = -1.
+    lumiSpecialY = -1.
+    CMS_lumi.CMS_lumi(c, 4,0,lumiSpecialX,lumiSpecialY)
+    
+
+    c.Update()
+    c.Modified()
+    c.Update()
+    c.cd()
+    extralabel = ROOT.TText(.04,(ymin_pad0)/2.,"Pulls");
+    extralabel.SetTextAlign(22);
+    extralabel.SetTextFont(43);
+    extralabel.SetTextSize(25);
+    extralabel.SetTextAngle(90);
+    extralabel.Draw("same");
+
+
+    leg.Draw("same")
+    if signal1 != None: legsig.AddEntry(h_signal1[categories[0]],SetupLegend(signal1,mass1,scaling1),"l") #"G_{bulk} (%i TeV) #rightarrow WW (#times %i)"%(mass1/1000.,scaling1) ,"l")
+    if signal2 != None: legsig.AddEntry(h_signal2[categories[0]],SetupLegend(signal2,mass2,scaling2),"l") #"Z' (%i TeV) #rightarrow ZH (#times %i)"%(mass2/1000.,scaling2) ,"l")
+    legsig.Draw("same")
+    c.SetSelected(c)
+    label = "ggDYcat"
+    if "VBF" in categories[0]: label="VBFcat"
+    if signal1 != None: label+="WithSig"+signal1
+    if signal2 != None: label+="WithSig"+signal2
+    if options.prelim==0:
+        outputname= options.output+options.name+label+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')
+        print "save plot as ", outputname+".pdf"
+    else:
+        outputname= options.output+options.name+label+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+"_prelim"
+        print "save plot as ",   outputname+".pdf"
+    c.SaveAs(outputname+".png")
+    c.SaveAs(outputname+".pdf")
+    c.SaveAs(outputname+".C")
+    c.SaveAs(outputname+".root")
+
+
 
 
 
@@ -458,9 +774,10 @@ markers={"VV_HPHP":20,"VH_HPHP":20,"VBF_VV_HPHP":24,"VBF_VH_HPHP":24,"VV_HPLP":2
 linestyles={"VV_HPHP":1,"VH_HPHP":1,"VBF_VV_HPHP":2,"VBF_VH_HPHP":2,"VV_HPLP":3,"VH_HPLP":3,"VBF_VV_HPLP":4,"VBF_VH_HPLP":4,"VH_LPHP":5,"VBF_VH_LPHP":6}
 categories_VV=["VV_HPHP","VBF_VV_HPHP","VV_HPLP","VBF_VV_HPLP"]
 categories_VH=["VH_HPHP","VBF_VH_HPHP","VH_HPLP","VBF_VH_HPLP","VH_LPHP","VBF_VH_LPHP"]
+categories_VBF=["VBF_VH_HPHP","VBF_VV_HPHP","VBF_VH_LPHP","VBF_VH_HPLP","VBF_VV_HPLP"]
+categories_ggDY=["VH_HPHP","VV_HPHP","VH_LPHP","VH_HPLP","VV_HPLP"]
 categories_all=["VV_HPHP","VBF_VV_HPHP","VV_HPLP","VBF_VV_HPLP","VH_HPHP","VBF_VH_HPHP","VH_HPLP","VBF_VH_HPLP","VH_LPHP","VBF_VH_LPHP"]
-histnames=["Data","BackgroundFit"]
-
+categories_test=["VV_HPHP"]
 
 if __name__ == '__main__':
 
@@ -477,6 +794,9 @@ if __name__ == '__main__':
             print "Error:  unknown proj ",p
             sys.exit()
 
+        '''
+        # plots of mjj for different categories
+        histnames=["Data","BackgroundFit"]
         hists={}
         for c in categories_all:
             hists[c]={}
@@ -493,3 +813,83 @@ if __name__ == '__main__':
             r_file.Close()
         Plot(categories_VV,hists,p)                
         Plot(categories_VH,hists,p)
+        '''
+
+        data = "Simulation"
+        # non VBF signal and categories
+        signal1 = "BulkGWW"
+        prescaling1 = 5.
+        signal2 = "ZprimeZHinc"
+        prescaling2 = 1.
+        pullsnames=[signal1,signal2,"pulls_stat","syst_band",data]
+
+        pulls={}
+        for c in categories_ggDY:
+        #for c in categories_test:
+            pulls[c]={}
+            print " getting hists for category ",c
+
+            filename=options.input+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
+            r_file = ROOT.TFile.Open(filename,"READ")
+
+            filename2=options.secondinput.replace("ZprimeZHinc",signal2)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"             
+            r_file2 = ROOT.TFile.Open(filename2,"READ")
+
+            print " filename ",filename
+            for histname in pullsnames:
+                file_to_use = r_file
+                if histname == signal2: file_to_use = r_file2
+                print
+                pulls[c][histname]= GetHist(file_to_use,histname)
+                print " pulls[c][histname] ",pulls[c][histname]
+                if histname == signal1:
+                    pulls[c][signal1] = PrepareSignal(pulls[c][signal1],prescaling1)
+                if histname == signal2:
+                    pulls[c][signal2] = PrepareSignal(pulls[c][signal2],prescaling2)
+
+            r_file.Close()
+        #PlotPulls(categories_test,pulls,p,signal1) 
+
+    
+        scaling1 = 50.
+        scaling2 = 10.
+        PlotPulls(categories_ggDY,pulls,p,data,signal1,signal2,scaling1,scaling2)
+
+        
+        # VBF signal and categories
+        signal1 = "VBF_BulkGWW"
+        prescaling1 = 5.
+        signal2 = "VBF_ZprimeZHinc"
+        prescaling2 = 1.
+        pullsnames=[signal1,signal2,"pulls_stat","syst_band",data]
+
+        pulls={}
+        for c in categories_VBF:
+        #for c in categories_test:
+            pulls[c]={}
+            print " getting hists for category ",c
+
+            filename=options.input.replace("BulkGWW",signal1)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
+            r_file = ROOT.TFile.Open(filename,"READ")
+
+            filename2=options.secondinput.replace("ZprimeZHinc",signal2)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
+            r_file2 = ROOT.TFile.Open(filename2,"READ")
+
+            print " filename ",filename
+            for histname in pullsnames:
+                file_to_use = r_file
+                if histname == signal2: file_to_use = r_file2
+                print
+                pulls[c][histname]= GetHist(file_to_use,histname)
+                print " pulls[c][histname] ",pulls[c][histname]
+                if histname == signal1:
+                    print " signal1 VBF"
+                    pulls[c][signal1] = PrepareSignal(pulls[c][signal1],prescaling1)
+                if histname == signal2:
+                    pulls[c][signal2] = PrepareSignal(pulls[c][signal2],prescaling2)
+
+            r_file.Close()
+        scaling1 = 10000000.
+        scaling2 = 10.
+        PlotPulls(categories_VBF,pulls,p,data,signal1,signal2,scaling1,scaling2)
+
