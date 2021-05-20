@@ -13,6 +13,8 @@ ROOT.gROOT.ProcessLine(".x tdrstyle.cc");
 
 #python makePlotsPaper.py -i postfit_pseudodata_BulkGWW__newbaseline_newfittemplTT_correlateTT_rescaleTagging_taggerPTtest2true_factor5_Run2 -p "z" -n "PullsPaper" -I postfit_pseudodata_ZprimeZHinc__newbaseline_newfittemplTT_correlateTT_rescaleTagging_taggerPTtest2true_Run2
 
+# NB: For now only 2 signals (+VBF counterpart) implemented.
+# NB: Before running this plotting script, one should run and store in different directories both prefit (needed for signal) and posftis!
 
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",help="Output folder name",default='')
@@ -207,18 +209,13 @@ def GetHist(infile,histname):
     return hist
 
 def MakeSignalPulls(S,data,scaling=1.):
-    print " bins ",S.GetNbinsX()
     final = ROOT.TH1F()
     S.Copy(final)
     for i in range(1,S.GetNbinsX()+1):
         if data.GetBinContent(i) == 0: continue
-        print " ***** bin ",i
         s = S.GetBinContent(i)
-        print " s ",s
         err_data = ROOT.TMath.Sqrt(data.GetBinContent(i))
-        print " err_data ",err_data
         pull = s / err_data
-        print " pull ",pull
         final.SetBinContent(i,pull*scaling)
     return final
 
@@ -555,22 +552,21 @@ def PlotPulls(categories,histos,axis,data,signal1=None,signal2=None,scaling1=1,s
             extra2 = zrange.split(',')[0]+' < m_{jj} < '+ zrange.split(',')[1]+' GeV'
 
     c = get_canvas('c')
-    c.SetBottomMargin(0.1)
+    c.SetBottomMargin(0.)
 
-    ymin_pad0 = 0.81
+    # Lots of math to have all pulls with the same height of the y-axis, taking into account that the last pad will need be larger to accomodate x-axis labels & title
+    cat_usual = len(categories)-1.
+    ymin_pad0 = 0.81 #total lenght of the pull parts = cat_usual*usualstep + laststep
     bottom_margin = 0.35
-    usualstep = ymin_pad0/len(categories)
-    print " usualstep ",usualstep
-    laststep = usualstep+usualstep*bottom_margin
-    print " laststep ",laststep
-    ymin_pad0 = ymin_pad0+bottom_margin*usualstep
-    print " ymin_pad0 ",ymin_pad0
-    leg = ROOT.TLegend(0.38,ymin_pad0+0.09,0.99,0.99)
+    usualstep = ymin_pad0*(1.-bottom_margin)/(cat_usual-cat_usual*bottom_margin+1.)
+    # laststep = usualstep+ bottom_margin*laststep
+    laststep = usualstep/(1.-bottom_margin)
+    leg = ROOT.TLegend(0.38,ymin_pad0+0.11,0.99,0.99)
     leg.SetTextSize(0.038)
     leg.SetNColumns(2)
     leg.SetMargin(0.12)
     leg.SetColumnSeparation(0.05)
-    legsig = ROOT.TLegend(0.35,ymin_pad0+0.001,0.6,ymin_pad0+0.08)
+    legsig = ROOT.TLegend(0.38,ymin_pad0+0.001,0.6,ymin_pad0+0.10)
     legsig.SetTextSize(0.038)
 
     pad0 =  get_pad("legend",ymin_pad0,1.)
@@ -581,14 +577,10 @@ def PlotPulls(categories,histos,axis,data,signal1=None,signal2=None,scaling1=1,s
     i=0
     for cat in categories:
         step = usualstep
-        print " step ",step
-
-        print " ymin_pad0-step*(i+1) ",ymin_pad0-step*(i+1)
         ymin_pads = ymin_pad0-step*(i+1)
-        if i == len(categories)-1: ymin_pads = ymin_pad0-laststep*(i+1)
-        print " ymin_pads ",ymin_pads
+        if i == len(categories)-1: ymin_pads = ymin_pad0-step*(len(categories)-2)-laststep
         if i ==len(categories)-1: ymin_pads = 0
-        pads[cat] = ROOT.TPad(cat,cat,0.05,ymin_pads,1,ymin_pad0-step*i)
+        pads[cat] = ROOT.TPad(cat,cat,0.01,ymin_pads,1,ymin_pad0-step*i)
         pads[cat].SetFillColor(0)
         pads[cat].SetBorderMode(0)
         pads[cat].SetFrameFillStyle(0)
@@ -736,11 +728,11 @@ def PlotPulls(categories,histos,axis,data,signal1=None,signal2=None,scaling1=1,s
     c.Modified()
     c.Update()
     c.cd()
-    extralabel = ROOT.TText(.04,(ymin_pad0)/2.,"Pulls");
+    extralabel = ROOT.TText(.06,ymin_pad0+0.04,"Pulls");
     extralabel.SetTextAlign(22);
     extralabel.SetTextFont(43);
     extralabel.SetTextSize(25);
-    extralabel.SetTextAngle(90);
+    #extralabel.SetTextAngle(90);
     extralabel.Draw("same");
 
 
@@ -832,12 +824,16 @@ if __name__ == '__main__':
             filename=options.input+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
             r_file = ROOT.TFile.Open(filename,"READ")
 
-            filename2=options.secondinput.replace("ZprimeZHinc",signal2)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"             
+            filename1=options.input.replace("postfit","prefit")+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
+            r_file1 = ROOT.TFile.Open(filename1,"READ")
+
+            filename2=options.secondinput.replace("ZprimeZHinc",signal2).replace("postfit","prefit")+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
             r_file2 = ROOT.TFile.Open(filename2,"READ")
 
             print " filename ",filename
             for histname in pullsnames:
                 file_to_use = r_file
+                if histname == signal1: file_to_use = r_file1
                 if histname == signal2: file_to_use = r_file2
                 print
                 pulls[c][histname]= GetHist(file_to_use,histname)
@@ -851,8 +847,8 @@ if __name__ == '__main__':
         #PlotPulls(categories_test,pulls,p,signal1) 
 
     
-        scaling1 = 50.
-        scaling2 = 10.
+        scaling1 = 10.
+        scaling2 = 1.
         PlotPulls(categories_ggDY,pulls,p,data,signal1,signal2,scaling1,scaling2)
 
         
@@ -872,12 +868,16 @@ if __name__ == '__main__':
             filename=options.input.replace("BulkGWW",signal1)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
             r_file = ROOT.TFile.Open(filename,"READ")
 
-            filename2=options.secondinput.replace("ZprimeZHinc",signal2)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
+            filename1=options.input.replace("postfit","prefit").replace("BulkGWW",signal1)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
+            r_file1 = ROOT.TFile.Open(filename1,"READ")
+
+            filename2=options.secondinput.replace("postfit","prefit").replace("ZprimeZHinc",signal2)+"/Histos"+c+"_"+htitle.replace(' ','_').replace('.','_').replace(':','_').replace(',','_')+".root"
             r_file2 = ROOT.TFile.Open(filename2,"READ")
 
             print " filename ",filename
             for histname in pullsnames:
                 file_to_use = r_file
+                if histname == signal1: file_to_use = r_file1
                 if histname == signal2: file_to_use = r_file2
                 print
                 pulls[c][histname]= GetHist(file_to_use,histname)
@@ -889,7 +889,7 @@ if __name__ == '__main__':
                     pulls[c][signal2] = PrepareSignal(pulls[c][signal2],prescaling2)
 
             r_file.Close()
-        scaling1 = 10000000.
-        scaling2 = 10.
+        scaling1 = 100.
+        scaling2 = 100.
         PlotPulls(categories_VBF,pulls,p,data,signal1,signal2,scaling1,scaling2)
 
