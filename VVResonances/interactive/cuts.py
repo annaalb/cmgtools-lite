@@ -88,6 +88,7 @@ class cuts():
     PU_uncertainties = 1.
     JES_uncertainties = 1.
     JER_uncertainties = 1.
+    PDF_uncertainties = 1.
     tt_smooth = {}
 
     cuts={}
@@ -163,6 +164,8 @@ class cuts():
             self.PU_uncertainties = data["PU_unc"]
             self.JES_uncertainties = data["JES_unc"]
             self.JER_uncertainties = data["JER_unc"]
+            self.PDF_uncertainties = data["PDFUnc_lowhighmass_fitexp"]
+            print " PDF_uncertainties ",self.PDF_uncertainties
             self.tt_smooth = data["tt_smoothening"]
             #print " lumi run2 ",self.lumi["Run2"]
             for year in years:

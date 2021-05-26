@@ -88,6 +88,24 @@
     "JER_unc":{"ggDY":{"Wjets":0.9997,"Zjets":0.9999,"TTjets":0.999},
 	       "VBF":{"Wjets":1.11,"Zjets":1.10,"TTjets":1.06}},
 
+    "PDFUnc_lowhighmass_fitexp":{
+	"WprimeToWZToWhadZhad_narrow": {"VV_HPHP": "(exp(0.00073528361357*MH+-6.83331602906))"},
+	"WprimeToWhToWhadhinc_narrow": {"VH_HPHP": "(exp(0.000718378496603*MH+-6.99060559812))"},
+	"RadionToZZ_narrow": {"VV_HPHP": "(exp(0.00033168097414*MH+-4.95708254507))","VH_HPHP": "(exp(0.000444682225896*MH+-5.49219795424))"},
+	"ZprimeToWW_narrow": {"VV_HPHP": "(exp(0.000652859841138*MH+-6.30421347507))"},
+	"RadionToWW_narrow": {"VV_HPHP": "(exp(0.000366284618069*MH+-4.97470483699))"},
+	"ZprimeToZhToZhadhinc_narrow": {"VH_HPHP": "(exp(0.000723120935387*MH+-7.30189263146))"},
+	"BulkGravToWW_narrow": {"VV_HPHP": "(exp(0.000353515754155*MH+-4.65952083884))"},
+	"BulkGravToZZToZhadZhad_narrow": {"VV_HPHP": "(exp(0.00042209769017*MH+-5.53879285153))","VH_HPHP": "(exp(0.000364967447213*MH+-5.08499986366))"},
+	"VBF_WprimeToWZ_narrow": {"VV_HPHP": "(exp(0.000352730759821*MH+-5.19515811923))"},
+	"VBF_RadionToWW_narrow": {"VV_HPHP": "(exp(0.000509179686215*MH+-5.80481094488))"},
+	"VBF_ZprimeToZhToZhadhinc_narrow": {"VH_HPHP": "(exp(0.00037394845517*MH+-4.91832911153))"},
+	"VBF_RadionToZZ_narrow": {"VV_HPHP": "(exp(0.000369377274643*MH+-5.00984105328))","VH_HPHP": "(exp(0.000397415405403*MH+-5.53341184188))"},
+	"VBF_WprimeToWhToWhadhinc_narrow": {"VH_HPHP": "(exp(0.000324226305396*MH+-4.94798870598))"},
+	"VBF_BulkGravToWW_narrow": {"VV_HPHP": "(exp(0.000426287014544*MH+-5.83111193338))"},
+	"VBF_BulkGravToZZ_narrow": {"VV_HPHP": "(exp(0.000317343542783*MH+-4.69633035027))","VH_HPHP": "(exp(0.000373835893127*MH+-5.35943045635))"},
+	"VBF_ZprimeToWW_narrow": {"VV_HPHP": "(exp(0.000342619631417*MH+-4.95525799244))"}},
+
     "tagging_variables_and_wp" : {
    "varl1Wtag": "jj_l1_MassDecorrelatedDeepBoosted_WvsQCD",
    "varl2Wtag": "jj_l2_MassDecorrelatedDeepBoosted_WvsQCD",
@@ -182,7 +200,7 @@
     "ZprimeWW":{"NP":{"fixPars":"n:14","pol":"mean:spline,sigma:spline,alpha:spline,n:spline,alpha2:spline,n2:spline"}},
     "WprimeWZ":{"NP":{"fixPars":"n:2.6,alpha:1.4","pol":"mean:spline,sigma:spline,alpha:spline,n:spline,alpha2:spline,n2:spline"}}, 
     "WprimeWH":{"NP":{"fixPars":"n:7.0,alphaH:0.7","pol":"mean:spline,sigma:spline,alpha:spline,n:spline,alpha2:spline,n2:spline,meanH:spline,sigmaH:spline,alphaH:spline,nH:spline,alpha2H:spline,n2H:spline"}},
-    "WprimeWHinc":{"NP":{"fixPars":"n:7.0,alphaH:0.7","pol":"mean:spline,sigma:spline,alpha:spline,n:spline,alpha2:spline,n2:spline,meanH:spline,sigmaH:spline,alphaH:spline,nH:spline,alpha2H:spline,n2H:spline"}}},
+    "WprimeWHinc":{"NP":{"fixPars":"alpha:1.,alpha2:2.,n:7,alphaH:0.7","pol":"mean:spline,sigma:spline,alpha:spline,n:spline,alpha2:spline,n2:spline,meanH:spline,sigmaH:spline,alphaH:spline,nH:spline,alpha2H:spline,n2H:spline"}}},
     
     "fixParsSigMVV"  : {
                "ZprimeZH":{"fixPars":"ALPHA2:2.42,N1:126.5,N2:50", "pol":"MEAN:spline,SIGMA:spline,N1:spline,ALPHA1:spline,N2:spline,ALPHA2:spline,corr_mean:pol1,corr_sigma:pol1"},
