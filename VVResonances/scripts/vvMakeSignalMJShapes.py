@@ -84,6 +84,9 @@ for key, val in samples.items():
 complete_mass = defaultdict(dict)
 for mass in flipped.keys():
     print mass
+    if options.sample == "WprimeToWhToWhadhinc_" and mass == 1400.0 and options.output.find("Vjet") != -1:
+        print " skipping WprimeWH at 1.4 TeV when doing the Vjet because for no clear reason its sigma explodes! "
+        continue
     i= 0
     for folder in folders:
         try:
