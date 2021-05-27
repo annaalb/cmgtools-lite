@@ -109,8 +109,8 @@ class DatacardTools():
         card.sumSimple("%s"%sig,"%s_c1"%sig,"%s_c2"%sig,"0.5")
 
         if not "sigOnly" in self.outlabel:
-           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
-           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           if 'Zprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Zprime_cH1","BRZh",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
+           elif 'Wprime' in sig and 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTC.json","Wprime_cH1","BRWh",10000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
            elif 'Zprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX0(pb)","BRZh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
            elif 'Wprime' in sig and not 'VBF' in sig: card.addParametricYieldHVTBR("%s"%sig,ncontrib,resultsDir+"/JJ_%s_%s_"%(sig,dataset)+category+"_yield.json","../scripts/theoryXsec/HVTB.json","CX+(pb),CX-(pb)","BRWh",1000.,'CMS_tagger_PtDependence',self.tagger_pt_dependence["signal"],1.0)
         else:
@@ -331,9 +331,10 @@ class DatacardTools():
       card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_'+mappdf[contrib[i]]+'_TOPPTZ_'+category],False,0)
     else:
      for i in range(0,len(contrib)):
-      card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_TTJets_TOPPTZ_'+category],False,0) 
-      #if contrib[i] == "nonresT": card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_'+mappdf[contrib[i]]+'_TOPPTZ_'+category],False,0)
-      #else : card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_TTJetsPR_TOPPTZ_'+category],False,0)
+      card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_TTJets_TOPPTZ'],False,0)
+      #card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_TTJets_TOPPTZ_'+category],False,0)
+      #if contrib[i] == "nonresT": card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_'+mappdf[contrib[i]]+'_TOPPTZ'],False,0)
+      #else : card.addHistoShapeFromFile("TTJets"+contrib[i]+"_mjj",["MJJ"],rootFileMVV[contrib[i]],"histo_nominal",['TOPPT:CMS_VV_JJ_TTJetsPR_TOPPTZ'],False,0)
 
     '''
     for i in range(0,len(contrib)):
@@ -608,10 +609,11 @@ class DatacardTools():
 
     if self.pseudodata.find("ttbar")==-1:
         card.addSystematic("CMS_VV_JJ_TTJets_norm","lnN",{mappdf[ttcon]:1.06 for ttcon in contrib})
-        card.addSystematic("CMS_VV_JJ_TTJets_TOPPTZ_"+category,"param",[0,1.])
+        card.addSystematic("CMS_VV_JJ_TTJets_TOPPTZ","param",[0,1.])
+        #card.addSystematic("CMS_VV_JJ_TTJets_TOPPTZ_"+category,"param",[0,1.])
         # try to separate non res from partially res
-        #card.addSystematic("CMS_VV_JJ_TTJetsNonRes_TOPPTZ_"+category,"param",[0,1.])
-        #card.addSystematic("CMS_VV_JJ_TTJetsPR_TOPPTZ_"+category,"param",[0,1.])
+        #card.addSystematic("CMS_VV_JJ_TTJetsNonRes_TOPPTZ","param",[0,1.])
+        #card.addSystematic("CMS_VV_JJ_TTJetsPR_TOPPTZ","param",[0,1.])
         #card.addSystematic("CMS_VV_JJ_TTJetsNonRes_norm_"+category,"lnN",{"TTJetsNonRes":1.06})
         #card.addSystematic("CMS_VV_JJ_TTJetsPR_norm","lnN",{mappdf[ttcon]:1.06 for ttcon in contribPR}) 
     else:
@@ -669,9 +671,11 @@ class DatacardTools():
       card.addSystematic("CMS_jer_res_j","param",[0.0,0.08])
 
       card.addSystematic("CMS_scale_prunedj","param",[0.0,0.02])
-      #card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
-      #print " *!*!*!!*!*!*!*!*!*!*!*!*!**!*!*! removed 1 sigma smearing in the jet mass!!!! !*!*!*!*!*!*!**!*!"
-      card.addSystematic("CMS_res_prunedj","param",[0.08,0.16])
+      if self.pseudodata == "True" or self.pseudodata == "PrepPseudo":
+       card.addSystematic("CMS_res_prunedj","param",[0.0,0.08])
+       print " *!*!*!!*!*!*!*!*!*!*!*!*!**!*!*! removed 1 sigma smearing in the jet mass!!!! !*!*!*!*!*!*!**!*!"
+      else:
+       card.addSystematic("CMS_res_prunedj","param",[0.08,0.16])
       card.addSystematic("CMS_pdf","lnN",{'%s'%sig:1.01})
 
       production = "ggDY"
@@ -732,7 +736,8 @@ class DatacardTools():
   vtag_unc['VV_LPLP'] = {'2016':'1.063','2017':'1.043'}
   card.addSystematic("CMS_VV_JJ_tau21_eff","lnN",{'%s'%sig:vtag_unc[p][dataset],"Wjets":vtag_unc[p][dataset],"Zjets":vtag_unc[p][dataset]})
 
- def AddOneTaggingSystematics(self,card,signal,p,jsonfile,isVVonly=False,doFour=False,dataset="Run2"):
+
+ def AddOneTaggingSystematics(self,card,signal,p,jsonfile,isVVonly=False,doFour=False,dataset="Run2",lumiweight=1.):
     contrib =["resT","resW","nonresT","resTnonresT","resWnonresT","resTresW"]
     mappdf = {"resT":"TTJetsTop","resW":"TTJetsW","nonresT":"TTJetsNonRes","resTnonresT":"TTJetsTNonResT","resWnonresT":"TTJetsWNonResT","resTresW":"TTJetsResWResT"}
     uncup_t = {}
@@ -754,15 +759,15 @@ class DatacardTools():
     if signal.find('BulkGZZ')!=-1 : sig = "BulkGravToZZ"
     if signal.find('VBF')!=-1 : sig = "VBF_"+sig
 
-    uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][p+"_up"]
-    uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][p+"_down"]
-    uncup_w   = data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+p+"_up"]
-    uncdown_w = data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+p+"_down"]
-    uncup_z   = data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+p+"_up"]
-    uncdown_z = data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+p+"_down"]
+    uncup_s   = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][p+"_up"])*lumiweight,2)
+    uncdown_s = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][p+"_down"])*lumiweight,2)
+    uncup_w   = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+p+"_up"])*lumiweight,2)
+    uncdown_w = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+p+"_down"])*lumiweight,2)
+    uncup_z   = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+p+"_up"])*lumiweight,2)
+    uncdown_z = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+p+"_down"])*lumiweight,2)
     for c in contrib:
-     uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+p+"_up"] })
-     uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+p+"_down"]})
+     uncup_t.update( {mappdf[c] :round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+p+"_up"])*lumiweight,2) })
+     uncdown_t.update({mappdf[c] : round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+p+"_down"])*lumiweight,2)})
     unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z),"TTJetsW":str(uncdown_t["TTJetsW"])+"/"+ str(uncup_t["TTJetsW"]),"TTJetsWNonResT":str(uncdown_t["TTJetsWNonResT"])+"/"+ str(uncup_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncdown_t["TTJetsResWResT"])+"/"+ str(uncup_t["TTJetsResWResT"])}
     if (p.find('VV_HPHP') !=-1 or p.find('VH_HPLP') !=-1 or p.find('VV_HPLP') !=-1) and not isVVonly:
      print " #################   taking into account the H/V tagging anti-correlation ############## "
@@ -772,29 +777,29 @@ class DatacardTools():
      if doFour == True:
       if p.find('VV_HPLP') !=-1: ap = 'VH_LPHP'
      if p.find('VBF') !=-1 : ap = 'VBF_'+ap
-     uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][ap+"_up"]
-     uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][ap+"_down"]
-     uncup_w   = data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+ap+"_up"]
-     uncdown_w = data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+ap+"_down"]
-     uncup_z   = data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+ap+"_up"]
-     uncdown_z = data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+ap+"_down"]
+     uncup_s   = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][ap+"_up"])*lumiweight,2)
+     uncdown_s = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Htag_eff"][ap+"_down"])*lumiweight,2)
+     uncup_w   = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+ap+"_up"])*lumiweight,2)
+     uncdown_w = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Htag_eff"]["WJets."+ap+"_down"])*lumiweight,2)
+     uncup_z   = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+ap+"_up"])*lumiweight,2)
+     uncdown_z = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Htag_eff"]["ZJets."+ap+"_down"])*lumiweight,2)
      for c in contrib:
-      uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+ap+"_up"] })
-      uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+ap+"_down"]})
+      uncup_t.update( {mappdf[c] :round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+ap+"_up"])*lumiweight,2) })
+      uncdown_t.update({mappdf[c] : round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Htag_eff"][mappdf[c]+"."+ap+"_down"])*lumiweight,2)})
      unc = {'%s'%signal: str(uncup_s)+"/"+ str(uncdown_s) ,'Wjets': str(uncup_w)+"/"+ str(uncdown_w),'Zjets': str(uncup_z)+"/"+ str(uncdown_z),"TTJetsW":str(uncup_t["TTJetsW"])+"/"+ str(uncdown_t["TTJetsW"]),"TTJetsWNonResT":str(uncup_t["TTJetsWNonResT"])+"/"+ str(uncdown_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncup_t["TTJetsResWResT"])+"/"+ str(uncdown_t["TTJetsResWResT"])}
     if self.pseudodata=="qcdvjets": unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z)}
     print unc
     if not isVVonly: card.addSystematic("CMS_VV_JJ_DeepJet_Htag_eff_"+dataset,"lnN",unc)
     
-    uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_up"]
-    uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_down"]
-    uncup_w   = data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["WJets."+p+"_up"]
-    uncdown_w = data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["WJets."+p+"_down"]
-    uncup_z   = data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["ZJets."+p+"_up"]
-    uncdown_z = data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["ZJets."+p+"_down"]
+    uncup_s   = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_up"])*lumiweight,2)
+    uncdown_s = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][p+"_down"])*lumiweight,2)
+    uncup_w   = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["WJets."+p+"_up"])*lumiweight,2)
+    uncdown_w = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["WJets."+p+"_down"])*lumiweight,2)
+    uncup_z   = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["ZJets."+p+"_up"])*lumiweight,2)
+    uncdown_z = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]["ZJets."+p+"_down"])*lumiweight,2)
     for c in contrib:     
-     uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+p+"_up"]} )
-     uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+p+"_down"]})
+     uncup_t.update( {mappdf[c] :round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+p+"_up"])*lumiweight,2)} )
+     uncdown_t.update({mappdf[c] : round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+p+"_down"])*lumiweight,2)})
     unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z),"TTJetsW":str(uncdown_t["TTJetsW"])+"/"+ str(uncup_t["TTJetsW"]),"TTJetsWNonResT":str(uncdown_t["TTJetsWNonResT"])+"/"+ str(uncup_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncdown_t["TTJetsResWResT"])+"/"+ str(uncup_t["TTJetsResWResT"])}
     if (p.find('VH_LPHP')  !=-1 or p.find('VV_HPLP') !=-1 ) and not isVVonly:
      print " #################   taking into account the H/V tagging anti-correlation ############## "
@@ -803,15 +808,15 @@ class DatacardTools():
      if doFour == True:
       if p.find('VV_HPLP') !=-1: ap = 'VH_LPHP'
      if p.find('VBF') !=-1 : ap = 'VBF_'+ap
-     uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][ap+"_up"]
-     uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][ap+"_down"]
-     uncup_w   = data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['WJets.'+ap+"_up"]
-     uncdown_w = data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['WJets.'+ap+"_down"]
-     uncup_z   = data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['ZJets.'+ap+"_up"]
-     uncdown_z = data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['ZJets.'+ap+"_down"]
+     uncup_s   = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][ap+"_up"])*lumiweight,2)
+     uncdown_s = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_Vtag_eff"][ap+"_down"])*lumiweight,2)
+     uncup_w   = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['WJets.'+ap+"_up"])*lumiweight,2)
+     uncdown_w = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['WJets.'+ap+"_down"])*lumiweight,2)
+     uncup_z   = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['ZJets.'+ap+"_up"])*lumiweight,2)
+     uncdown_z = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_Vtag_eff"]['ZJets.'+ap+"_down"])*lumiweight,2)
      for c in contrib:     
-      uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+ap+"_up"]} )
-      uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+ap+"_down"]})
+      uncup_t.update( {mappdf[c] :round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+ap+"_up"])*lumiweight,2)} )
+      uncdown_t.update({mappdf[c] : round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_Vtag_eff"][mappdf[c]+"."+ap+"_down"])*lumiweight,2)})
      unc = {'%s'%signal: str(uncup_s)+"/"+ str(uncdown_s) ,'Wjets': str(uncup_w)+"/"+ str(uncdown_w),'Zjets': str(uncup_z)+"/"+ str(uncdown_z),"TTJetsW":str(uncup_t["TTJetsW"])+"/"+ str(uncdown_t["TTJetsW"]),"TTJetsWNonResT":str(uncup_t["TTJetsWNonResT"])+"/"+ str(uncdown_t["TTJetsWNonResT"]),"TTJetsResWResT": str(uncup_t["TTJetsResWResT"])+"/"+ str(uncdown_t["TTJetsResWResT"])}
     if self.pseudodata=="qcdvjets": unc = {'%s'%signal: str(uncdown_s)+"/"+ str(uncup_s) ,'Wjets': str(uncdown_w)+"/"+ str(uncup_w),'Zjets': str(uncdown_z)+"/"+ str(uncup_z)}
     if p.find('VV_HPLP')!=-1 and isVVonly==True:
@@ -820,77 +825,77 @@ class DatacardTools():
     print " VTAG UNC ",unc
     card.addSystematic("CMS_VV_JJ_DeepJet_Vtag_eff_"+dataset,"lnN",unc)
     
-    uncup_s   = data_sig[signal+"_CMS_VV_JJ_DeepJet_TOPtag_mistag"][p+"_up"]
-    uncdown_s = data_sig[signal+"_CMS_VV_JJ_DeepJet_TOPtag_mistag"][p+"_down"]
-    uncup_w   = data_w["WJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["WJets."+p+"_up"]
-    uncdown_w = data_w["WJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["WJets."+p+"_down"]
-    uncup_z   = data_z["ZJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["ZJets."+p+"_up"]
-    uncdown_z = data_z["ZJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["ZJets."+p+"_down"]
+    uncup_s   = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_TOPtag_mistag"][p+"_up"])*lumiweight,2)
+    uncdown_s = round(1.-(1.-data_sig[signal+"_CMS_VV_JJ_DeepJet_TOPtag_mistag"][p+"_down"])*lumiweight,2)
+    uncup_w   = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["WJets."+p+"_up"])*lumiweight,2)
+    uncdown_w = round(1.-(1.-data_w["WJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["WJets."+p+"_down"])*lumiweight,2)
+    uncup_z   = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["ZJets."+p+"_up"])*lumiweight,2)
+    uncdown_z = round(1.-(1.-data_z["ZJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"]["ZJets."+p+"_down"])*lumiweight,2)
     for c in contrib:
-     uncup_t.update( {mappdf[c] :data_t["TTJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"][mappdf[c]+"."+p+"_up"]} )
-     uncdown_t.update({mappdf[c] : data_t["TTJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"][mappdf[c]+"."+p+"_down"]})
+     uncup_t.update( {mappdf[c] :round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"][mappdf[c]+"."+p+"_up"])*lumiweight,2)} )
+     uncdown_t.update({mappdf[c] : round(1.-(1.-data_t["TTJets_CMS_VV_JJ_DeepJet_TOPtag_mistag"][mappdf[c]+"."+p+"_down"])*lumiweight,2)})
     unc = {"TTJetsTop" : str(uncdown_t["TTJetsTop"])+"/"+ str(uncup_t["TTJetsTop"]), "TTJetsTNonResT":str(uncdown_t["TTJetsTNonResT"])+"/"+ str(uncup_t["TTJetsTNonResT"]),"TTJetsResWResT":str(uncdown_t["TTJetsResWResT"])+"/"+ str(uncup_t["TTJetsResWResT"]) }
     if not isVVonly: card.addSystematic("CMS_VV_JJ_DeepJet_TOPtag_mistag_"+dataset,"lnN",unc)
 
- def AddMultiTaggingSystematics(self,card,sig,p,jsonfile,isVVonly=False,doFour=False,dataset="Run2"):
+ def AddMultiTaggingSystematics(self,card,sig,p,jsonfile,isVVonly=False,doFour=False,dataset="Run2",lumiweight=1.):
   isvbf = ''
   if 'VBF' in sig: isvbf='VBF_'
 
   if 'VprimeWV' in sig:
    newjson = jsonfile[0].replace('VprimeWV','WprimeWZ')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('WprimeWZ','ZprimeWW')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
   elif 'VprimeVH' in sig:
    newjson = jsonfile[0].replace('VprimeVH','WprimeWHinc')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('WprimeWH','ZprimeZH')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
   elif sig == 'Wprime' or sig == 'VBF_Wprime':
    newjson = jsonfile[0].replace('Wprime','WprimeWZ')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('WprimeWZ','WprimeWHinc')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
   elif sig == 'Zprime' or sig == 'VBF_Zprime':
    newjson = jsonfile[0].replace('Zprime','ZprimeWW')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('ZprimeWW','ZprimeZHinc')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
   elif sig == 'Vprime' or sig == 'VBF_Vprime':
    newjson = jsonfile[0].replace('Vprime','WprimeWZ')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sWprimeWZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('WprimeWZ','ZprimeWW')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sZprimeWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('ZprimeWW','WprimeWHinc')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sWprimeWHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('WprimeWHinc','ZprimeZHinc')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sZprimeZHinc'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
   elif 'BulkGVV' in sig:
    newjson = jsonfile[0].replace('BulkGVV','BulkGWW')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sBulkGWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sBulkGWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('BulkGWW','BulkGZZ')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sBulkGZZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sBulkGZZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
   elif 'RadionVV' in sig:
    newjson = jsonfile[0].replace('RadionVV','RadionWW')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sRadionWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sRadionWW'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
    newjson = jsonfile[0].replace('RadionWW','RadionZZ')
    jsonfile[0] = newjson
-   self.AddOneTaggingSystematics(card,'%sRadionZZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset)
+   self.AddOneTaggingSystematics(card,'%sRadionZZ'%isvbf,p,jsonfile,isVVonly,doFour,dataset,lumiweight)
 
  def AddResBackgroundSystematics(self,card,category,vbf,corrvbf,extra_uncertainty=[]):
 

@@ -549,11 +549,11 @@ class Postfitplotter():
         histos[0].SetTitle("category  "+self.options.channel)
         histos[0].Draw("samehist")
         if len(histos)>1:
-            if self.options.addTop: histos[3].Draw("histsame") 
+            if self.options.addTop: histos[3].Draw("histsame")
             histos[1].SetLineStyle(7)
             histos[2].SetLineStyle(6)
-            histos[1].Draw("histsame") 
-            histos[2].Draw("histsame")
+            if "ttbar" not in self.options.output: histos[1].Draw("histsame")
+            if "ttbar" not in self.options.output: histos[2].Draw("histsame")
         drawBox = False
         if self.options.blind == True and axis!='z' and ( xrange == '55,215' or yrange == '55,215') :
             drawBox = True
@@ -574,11 +574,11 @@ class Postfitplotter():
             leg.AddEntry(hdata,"Simulation","ep")
             hdata.Write("Simulation")
         #leg.AddEntry(histos[0],"Signal+background fit","l")
-        leg.AddEntry(histos[0],"Background fit","l")
+        if "ttbar" not in self.options.output: leg.AddEntry(histos[0],"Background fit","l")
         histos[0].Write("BackgroundFit")
         if errors!=None:
             leg.AddEntry(errors[0],"#pm 1#sigma unc.","f")
-        if len(histos)>1:    
+        if len(histos)>1 and "ttbar" not in self.options.output:
             leg.AddEntry(histos[1],"W+jets","l")  ; print "Wjets ", histos[1].Integral(); nevents["Wjets"] = histos[1].Integral()
             histos[1].Write("Wjets")
             leg.AddEntry(histos[2],"Z+jets","l")  ; print "Zjets ", histos[2].Integral(); nevents["Zjets"] = histos[2].Integral()

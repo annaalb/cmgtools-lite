@@ -1034,7 +1034,7 @@ class DataCardMaker:
         coeffList=ROOT.RooArgList()
         pdfList=ROOT.RooArgList(self.w.pdf(pdfName))
         variationList=["Up","Down"]
-        if filename.find("TTJets")!=-1: variationList=["nominal","noreweight"]
+        if filename.find("TTJets")!=-1 and len(systematics)==1: variationList=["nominal","noreweight"]
         if (filename.find("WJets")!=-1 or filename.find("ZJets")!=-1) and len(systematics)==1: variationList=["noreweight","doublereweight"]
         for systval in systematics:
             splitted=systval.split(':')

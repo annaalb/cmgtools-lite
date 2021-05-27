@@ -93,14 +93,17 @@ JER_unc = ctx.JER_uncertainties
 datasets= options.period.split(",")
 resultsDir = {year:'results_'+year for year in datasets}
 
+if len(datasets) == 1 : lumitot=lumi[options.period]
 if len(datasets) == 3 and options.combo == True:
   datasets = []
   datasets.append("Run2")
   resultsDir.update({"Run2" : options.inputdir})
+  lumitot=lumi["Run2"]
 if len(datasets) == 2 and options.combo == True:
   datasets = []
   datasets.append("1617")
   resultsDir.update({"1617" : options.inputdir})
+  lumitot=lumi["1617"]
 print "datasets ",datasets
 print "result dir ",resultsDir
 
@@ -254,9 +257,9 @@ for sig in signals:
         for year in years:
           print " tagging eff per year!! "
           if oneSignal == True:
-            Tools.AddOneTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+year+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+year+'.json'],options.vv,options.four,year)
+            Tools.AddOneTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+year+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+year+'.json'],options.vv,options.four,year,lumi[year]/lumitot)
           else:
-            Tools.AddMultiTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+year+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+year+'.json'],options.vv,options.four,year)
+            Tools.AddMultiTaggingSystematics(card,sig,p,[resultsDir[dataset]+'/migrationunc_'+sig+'_'+year+'.json',resultsDir[dataset]+'/migrationunc_WJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_ZJets_'+year+'.json',resultsDir[dataset]+'/migrationunc_TTJets_'+year+'.json'],options.vv,options.four,year,lumi[year]/lumitot)
       else:
         print "!!!!!!!!@@@@@@@@                    using tau21!!!    @@@@@@@@@@@@@@@@@@@@@@"
         Tools.AddTauTaggingSystematics(card,sig,p,dataset)

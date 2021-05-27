@@ -9,7 +9,7 @@ from CMGTools.VVResonances.plotting.CMS_lumi import *
 from CMGTools.VVResonances.plotting.tdrstyle import *
 from array import array
 import numpy as np
-
+ROOT.gROOT.SetBatch(True)
 parser = optparse.OptionParser()
 parser.add_option("-o","--output",dest="output",default='limitPlot',help="Limit plot")
 parser.add_option("-s","--signal",dest="sig",type=str,help="Signal sample",default='BulkGWW')
@@ -29,7 +29,7 @@ parser.add_option("-p","--period",dest="period",default='2016',help="period")
 parser.add_option("-f","--final",dest="final",type=int, default=1,help="Preliminary or not")
 parser.add_option("--hvt","--hvt",dest="hvt",type=int, default=0,help="do HVT (1) or do BulkG (2), (0) for single signal")
 parser.add_option("--HVTworkspace","--HVTworkspace",dest="HVTworkspace",default="workspace_JJ_VprimeWV_13TeV.root",help="HVT workspace with spline interpolation")
-
+parser.add_option("--debug",dest="debug",action='store_true',default=False)
 parser.add_option("--theoryUnc",dest="theoryUnc",action='store_true',default=False)
 
 (options,args) = parser.parse_args()
@@ -88,6 +88,9 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
  if oneSignal == False:
   filenameTHWp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal1+".root"
   filenameTHZp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal2+".root"
+  filenameTHWHp = None
+  filenameTHZHp = None
+
   if options.sig == 'Vprime' or options.sig == 'VBF_Vprime':
    filenameTHWHp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal3+".root"
    filenameTHZHp = "$CMSSW_BASE/src/CMGTools/VVResonances/scripts/theoryXsec/"+signal4+".root"
@@ -105,10 +108,11 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
     filenameTHZHp = filenameTHZHp.replace("theoryXsec/","theoryXsec/"+VBFstring)
     filenameTHZHp = filenameTHZHp.replace("_VBF_","_")
 
-  print "filenameTHWp ",filenameTHWp
-  print "filenameTHZp ",filenameTHZp
-  print "filenameTHWHp ",filenameTHWHp
-  print "filenameTHZHp ",filenameTHZHp
+  if options.debug:
+   print "filenameTHWp ",filenameTHWp
+   print "filenameTHZp ",filenameTHZp
+   print "filenameTHWHp ",filenameTHWHp
+   print "filenameTHZHp ",filenameTHZHp
      
   thFileWp       = ROOT.TFile.Open(filenameTHWp,'READ')
   thFileZp       = ROOT.TFile.Open(filenameTHZp,'READ')
@@ -181,10 +185,15 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
    func = w.function(options.sig+'_JJ_VV_HPHP_13TeV_'+year+'_sigma')
    scaleLimits[str(int(m))] = ROOT.TMath.Exp(func.getVal(argset))
 
-  if "prime" not in options.sig or "VBF" in options.sig:
-   print " rescaling limit !!!!! "
+  if ("prime" not in options.sig or "VBF" in options.sig):
+   if options.debug:   print " rescaling limit !!!!! "
    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
-   if m > 5000. and "prime" not in options.sig: scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
+   if m == 5000. and (options.sig == "VBF_RadionWW" or options.sig == "VBF_RadionZZ"):
+    if options.debug:    print "extra rescaling for high mx "
+    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
+   if m > 5000. and "prime" not in options.sig:
+    if options.debug:    print "extra rescaling for high mx "
+    scaleLimits[str(int(m))] = scaleLimits[str(int(m))]*10
 
  if oneSignal == False:
   print " initializing theory for more than 1 signal!"
@@ -285,7 +294,6 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
 
 
    spline_zp=ROOT.RooSpline1D(signal2+"_sigma",signal2+"_sigma",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zp))
-   print " initialized spline_zp "
    spline_wp=ROOT.RooSpline1D(signal1+"_sigma",signal1+"_sigma",MH,len(spline_x_wp),array('d',spline_x_wp),array('d',spline_y_wp))
    if options.theoryUnc:
     spline_zpUP=ROOT.RooSpline1D(signal2+"_sigmaUP",signal2+"_sigmaUP",MH,len(spline_x_zp),array('d',spline_x_zp),array('d',spline_y_zpUP))
@@ -365,7 +373,6 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
     xw = ROOT.Double(0.)
     yw = ROOT.Double(0.)
     gtheoryWp.GetPoint(i,xw,yw)
-    print " xw ",xw
     MassXsec.append(xw)
     xwUp = ROOT.Double(0.)
     ywUp = ROOT.Double(0.)
@@ -457,7 +464,7 @@ if options.hvt>=0: #the = is only needed to get the right xsec sf for the single
      shade_y.append( tot+math.sqrt(uncUp_zp*uncUp_zp+uncUp_wp*uncUp_wp + uncUp_zhp*uncUp_zhp+uncUp_whp*uncUp_whp) )
 
 
-    print " tot ",tot
+    if options.debug: print " tot ",tot
     xsecTot.append(tot)
 
    if options.theoryUnc:
@@ -502,7 +509,7 @@ for event in limit:
     
     if not (mhTeV in data.keys()):
         data[mhTeV]={}
-    print "mhTeV ",mhTeV
+    if options.debug:    print "mhTeV ",mhTeV
     lim = event.limit*scaleLimits[str(int(event.mh))]
     if event.quantileExpected<0:            
         data[mhTeV]['obs']=lim
@@ -511,9 +518,10 @@ for event in limit:
     if event.quantileExpected>0.15 and event.quantileExpected<0.17:            
         data[mhTeV]['-1sigma']=lim
     if event.quantileExpected>0.49 and event.quantileExpected<0.51:            
-        print "event.limit ",event.limit
-        print "scaleLimits[str(int(mhTeV))] ",scaleLimits[str(int(event.mh))]
-        print "lim ",lim
+        if options.debug:
+         print "event.limit ",event.limit
+         print "scaleLimits[str(int(mhTeV))] ",scaleLimits[str(int(event.mh))]
+         print "lim ",lim
         data[mhTeV]['exp']=lim
     if event.quantileExpected>0.83 and event.quantileExpected<0.85:            
         data[mhTeV]['+1sigma']=lim
@@ -759,15 +767,19 @@ line_plus1.Draw("Lsame")
 line_plus2.Draw("Lsame")
 line_minus1.Draw("Lsame")
 line_minus2.Draw("Lsame")
-mean.Draw("Lsame")
-print " mean should be there"
+if len(data) ==1:
+ mean.SetMarkerStyle(20)
+ mean.Draw("LPsame")
+else:
+ mean.Draw("Lsame")
+if options.debug: print " mean should be there"
 gtheory.Draw("Lsame")
 if options.theoryUnc: gtheorySHADE.Draw("Fsame")
 
 c.SetLogy(options.log)
 c.Draw()
 
-print " I have c "
+if options.debug: print " I have c "
 
 leg  = ROOT.TLegend(0.4,0.6602591,0.9446734,0.9011917)
 leg2 = ROOT.TLegend(0.4,0.6602591,0.9446734,0.9011917)
@@ -803,13 +815,13 @@ leg.AddEntry(band68, "Expected #pm 1 std. deviation", "f")
 leg.AddEntry(band95 , "Expected #pm 2 std. deviation", "f")
 leg.AddEntry(gtheory, ltheory, "L")
 
-print " now you have the band legend"
+if options.debug: print " now you have the band legend"
 if not options.blind: leg2.AddEntry(bandObs, " ", "")
 leg2.AddEntry(mean, " ", "L")
 leg2.AddEntry(mean, " ", "L")
 leg2.AddEntry(gtheory, " ", "")
       
-print " now you have the legend "
+if options.debug: print " now you have the legend "
 
 if options.final:
     cmslabel_final(c,options.period,11)
@@ -821,7 +833,6 @@ leg2.Draw()
 c.Update()
 c.RedrawAxis()
 
-print " now I have a new axis"
 if options.blind==0:
     bandObs.Draw("PLsame")
 
