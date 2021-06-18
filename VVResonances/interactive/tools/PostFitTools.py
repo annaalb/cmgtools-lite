@@ -153,7 +153,7 @@ class Postfitplotter():
         
 
     def addPullPlot(self,hdata,hpostfit,nBins,error_band):
-        #print "make pull plots: (data-fit)/sigma_data"
+        #print "make pull plots: (data-fit)/sigma_data & sigma_fit"
         N = hdata.GetNbinsX()
         gpost = ROOT.TGraphErrors(0)
         gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
@@ -210,7 +210,64 @@ class Postfitplotter():
         #gpre.SetHistogram(gt);
         #gpost.SetHistogram(gt);       
         return [gt] 
-    
+
+
+    def addStatPullPlot(self,hdata,hpostfit,nBins):
+        #print "make pull plots: (data-fit)/sigma_data"
+        N = hdata.GetNbinsX()
+        gpost = ROOT.TGraphErrors(0)
+        gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
+        for i in range(1,N+1):
+            m = hdata.GetXaxis().GetBinCenter(i)
+            if hdata.GetBinContent(i) == 0:
+                continue
+            ypostfit = (hdata.GetBinContent(i) - hpostfit.GetBinContent(i))/hdata.GetBinError(i)
+            gpost.SetPoint(i-1,m,ypostfit)
+            gt.SetBinContent(i,ypostfit)
+            gt.SetBinError(i,1)
+            #print "bin",i,"x",m,"data",hdata.GetBinContent(i),"post fit",hpostfit.GetBinContent(i),"err data",hdata.GetBinErrorUp(i),"err fit",error_band.GetBinError(i),"pull postfit",ypostfit
+            #print "bin",i,"x",m,"data",hdata.GetBinContent(i),"post fit",hpostfit.GetBinContent(i),"err data",hdata.GetBinErrorUp(i),"err fit",error_band.GetErrorYhigh(i-1),"pull postfit",ypostfit
+
+        gpost.SetLineColor(self.colors[1])
+        gpost.SetMarkerColor(self.colors[1])
+        gpost.SetFillColor(ROOT.kBlack)
+        gpost.SetMarkerSize(1)
+        gpost.SetMarkerStyle(20)
+        gt.SetFillColor(ROOT.kBlack)
+        gt.SetLineColor(ROOT.kBlack)
+
+        #gt = ROOT.TH1F("gt","gt",hdata.GetNbinsX(),hdata.GetXaxis().GetXmin(),hdata.GetXaxis().GetXmax())
+        #gt = ROOT.TH1F("gt","gt",len(nBins)-1,nBins)
+        gt.SetTitle("")
+        #gt.SetMinimum(0.5);
+        #gt.SetMaximum(1.5);
+        gt.SetMinimum(-3.5);
+        #gt.SetMaximum(3.5);
+        gt.SetDirectory(0);
+        gt.SetStats(0);
+        gt.SetLineStyle(0);
+        gt.SetMarkerStyle(20);
+        gt.GetXaxis().SetTitle(hpostfit.GetXaxis().GetTitle());
+        gt.GetXaxis().SetLabelFont(42);
+        gt.GetXaxis().SetLabelOffset(0.02);
+        gt.GetXaxis().SetLabelSize(0.17);
+        gt.GetXaxis().SetTitleSize(0.15);
+        gt.GetXaxis().SetTitleOffset(1.2);
+        gt.GetXaxis().SetTitleFont(42);
+        gt.GetYaxis().SetTitle("#frac{Data-fit}{#sigma}");
+        gt.GetYaxis().CenterTitle(True);
+        gt.GetYaxis().SetNdivisions(205);
+        gt.GetYaxis().SetLabelFont(42);
+        gt.GetYaxis().SetLabelOffset(0.007);
+        gt.GetYaxis().SetLabelSize(0.15);
+        gt.GetYaxis().SetTitleSize(0.15);
+        gt.GetYaxis().SetTitleOffset(0.4);
+        gt.GetYaxis().SetTitleFont(42);
+        gt.GetXaxis().SetNdivisions(505)
+        #gpre.SetHistogram(gt);
+        #gpost.SetHistogram(gt);
+        return [gt]
+
     def addRatioPlot(self,hdata,hpostfit,nBins,error_band):
         #print "make pull plots: (data-fit)/sigma_data"
         N = hdata.GetNbinsX()
@@ -528,6 +585,7 @@ class Postfitplotter():
         
         if hsig!= None: # and (self.options.name.find('sigonly')!=-1  and doFit==0):
             print "print do hsignal ", hsig.Integral()
+            hsig.Write(self.signalName)
             if hsig.Integral()!=0.:   
                 hsig.Scale(scaling/normsig.getVal())
         #        print "sig integral ",hsig.Integral()
@@ -539,7 +597,6 @@ class Postfitplotter():
             #hsig.SetTitle("category  "+self.options.channel)
             hsig.Draw("HISTsame")
             #leg.AddEntry(hsig,"Signal pdf","F")
-            hsig.Write(self.signalName)
         #errors[0].Draw("E5same")
         if errors!=None:
             if axis=="z":
@@ -578,6 +635,24 @@ class Postfitplotter():
         histos[0].Write("BackgroundFit")
         if errors!=None:
             leg.AddEntry(errors[0],"#pm 1#sigma unc.","f")
+            errors[0].Write("syst_unc")
+            #to have the syst errors centered aroung zero (to be able to plot a nice pulls band) & rescaled by the stats unc.
+            syst_band = ROOT.TGraphAsymmErrors()
+            syst_band.Copy(errors[0])
+            for i in range(0,errors[0].GetN()):
+                X = ROOT.Double()
+                Y = ROOT.Double()
+                errors[0].GetPoint(i,X,Y)
+                syst_band.SetPoint(i,X,0)
+                if hdata.GetBinContent(i+1) ==0: continue
+                Y = errors[0].GetErrorYhigh(i)
+                X = hdata.GetBinWidth(i+1)/2
+                syst_band.SetPointEYhigh(i,Y/hdata.GetBinError(i+1))
+                syst_band.SetPointEXhigh(i,X)
+                Y = errors[0].GetErrorYlow(i)
+                syst_band.SetPointEYlow(i,Y/hdata.GetBinError(i+1))
+                syst_band.SetPointEXlow(i,X)
+            syst_band.Write("syst_band")
         if len(histos)>1 and "ttbar" not in self.options.output:
             leg.AddEntry(histos[1],"W+jets","l")  ; print "Wjets ", histos[1].Integral(); nevents["Wjets"] = histos[1].Integral()
             histos[1].Write("Wjets")
@@ -600,7 +675,7 @@ class Postfitplotter():
                 if self.options.addTop: leg.AddEntry(histos[9],"res T + res W","l") ; print "resW resT ", histos[9].Integral(); nevents["resTresW"] = histos[9].Integral()
                 histos[9].Write("TTbar_resTresW")
         
-        outfile.Close()
+
         text = "G_{bulk} (%.1f TeV) #rightarrow WW (#times %i)"%(self.options.signalMass/1000.,scaling)
         if (self.options.signalMass%1000.)==0:
             text = "G_{bulk} (%i TeV) #rightarrow WW (#times %i)"%(self.options.signalMass/1000.,scaling) 
@@ -700,8 +775,11 @@ class Postfitplotter():
         if self.options.name.find('sigonly')!=-1: graphs = self.addPullPlot(hdata,hsig,nBins,errors[0])
         else:
             graphs = self.addPullPlot(hdata,histos[0],nBins,errors[0])
+            statgraphs = self.addStatPullPlot(hdata,histos[0],nBins)
         # graphs = addRatioPlot(hdata,histos[0],nBins,errors[0])
         graphs[0].Draw("HIST")
+        graphs[0].Write("pulls_syst_stat")
+        statgraphs[0].Write("pulls_stat")
         if self.options.blind == True and axis != 'z' and drawBox == True:
             box = ROOT.TBox(65,graphs[0].GetMinimum(),140,graphs[0].GetMaximum())
             box.SetFillColor(0)
@@ -709,7 +787,7 @@ class Postfitplotter():
 
         pad2.Modified()
         pad2.Update()
-        
+        outfile.Close()
         c.cd()
         c.Update()
         c.Modified()

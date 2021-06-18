@@ -217,7 +217,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     gr_tot.SetMarkerStyle(signalmarker[s])
     gr_tot.SetMinimum(0.)
     gr_tot.SetMaximum(0.5)
-    gr_tot.GetXaxis().SetLimits(1000.,8500.)
+    gr_tot.GetXaxis().SetLimits(1000.,6000.)
     gr_tot.SetTitle("")
     datatot.append(gr_tot)
 
@@ -269,7 +269,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     gr_tot_ggDY.SetMarkerStyle(signalmarker[s])
     gr_tot_ggDY.SetMinimum(0.5)
     gr_tot_ggDY.SetMaximum(1.5)
-    gr_tot_ggDY.GetXaxis().SetLimits(1000.,8500.)
+    gr_tot_ggDY.GetXaxis().SetLimits(1000.,6000.)
     gr_tot_ggDY.SetTitle("")
     datatot_ggDY.append(gr_tot_ggDY)
 
@@ -322,7 +322,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
     gr_tot_VBF.SetMarkerStyle(signalmarker[s])
     gr_tot_VBF.SetMinimum(0.)
     gr_tot_VBF.SetMaximum(0.5)
-    gr_tot_VBF.GetXaxis().SetLimits(1000.,8500.)
+    gr_tot_VBF.GetXaxis().SetLimits(1000.,6000.)
     gr_tot_VBF.SetTitle("")
     datatot_VBF.append(gr_tot_VBF)
 
@@ -378,7 +378,7 @@ def doSignalEff(directory,signals,titles,categories,ymaxrange=[0.3,0.5,0.05,0.05
           gr_tot_cat.SetMaximum(0.5)
           if cat == "VH_HPHP": gr_tot_cat.SetMaximum(1.)
           if "VBF" in cat: gr_tot_cat.SetMaximum(0.4)
-          gr_tot_cat.GetXaxis().SetLimits(1000.,8500.)
+          gr_tot_cat.GetXaxis().SetLimits(1000.,6000.)
           gr_tot_cat.SetTitle("")
           datatot_cat.append(gr_tot_cat)
 
@@ -492,7 +492,7 @@ def doJetMass(leg,signals,titles,categories):
            gHP.Draw("Psame")
            fits[i].Draw("Csame")
            fitsHjet[i].Draw("Csame")
-       datas[0].GetXaxis().SetRangeUser(1126, 6500.)
+       datas[0].GetXaxis().SetRangeUser(1126, 6000.)
        l.Draw("same")
        l2.Draw("same")
        if prelim.find("prelim")!=-1:

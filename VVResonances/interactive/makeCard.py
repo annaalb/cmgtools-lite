@@ -88,6 +88,7 @@ vtag_pt_dependence = ctx.tagger_pt_dependence
 PU_unc = ctx.PU_uncertainties
 JES_unc = ctx.JES_uncertainties
 JER_unc = ctx.JER_uncertainties
+PDF_unc = ctx.PDF_uncertainties
 
 
 datasets= options.period.split(",")
@@ -108,7 +109,7 @@ print "datasets ",datasets
 print "result dir ",resultsDir
 
 doCorrelation = True 
-Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,sf_qcd,pseudodata,outlabel,doCorrelation,options.fitvjetsmjj,options.kfactors,sf_vjets)
+Tools = DatacardTools(scales,scalesHiggs,vtag_pt_dependence,PU_unc,JES_unc,JER_unc,lumi_unc,PDF_unc,sf_qcd,pseudodata,outlabel,doCorrelation,options.fitvjetsmjj,options.kfactors,sf_vjets)
 
 
 for sig in signals:
@@ -240,10 +241,11 @@ for sig in signals:
 
       print "##########################       data/pseudodata added in datacard      ######################"  
       correlateyields=1
+      pt_dependence_rescaling = 1.5
       if oneSignal == True:
-        Tools.AddOneSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
+        Tools.AddOneSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset],pt_dependence_rescaling)
       else:
-        Tools.AddMultiSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset])
+        Tools.AddMultiSigSystematics(card,sig,dataset,p,correlateyields,str(case),resultsDir[dataset],pt_dependence_rescaling)
       if options.fitvjetsmjj == True:
         Tools.AddResBackgroundSystematics(card,p,options.vbf,options.corrvbf,["CMS_VV_JJ_WJets_slope",0.2,"CMS_VV_JJ_ZJets_slope",0.2])
       else:
