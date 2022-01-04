@@ -6,11 +6,11 @@ class cuts():
     lumi = {}
     lumi_unc = {}
     yeartag = ""
-    HPSF_vtag = {}                                
-    LPSF_vtag = {}                                
+    HPSF_vtag = {}
+    LPSF_vtag = {}
     NPSF_vtag = {}
-    HPSF_htag = {}                                
-    LPSF_htag = {}                                
+    HPSF_htag = {}
+    LPSF_htag = {}
     HPSF_toptag = {}
     LPSF_toptag = {}
 
@@ -29,37 +29,37 @@ class cuts():
 
     W_LPmassscale = 1.
     W_HPmassscale = 1.
-                  
+
     H_LPmassscale = 1.
     H_HPmassscale = 1.
-                                                  
-    minMJ = 0.                                    
-    maxMJ = 0.                                    
-    binsMJ = 0.                                   
-  
+
+    minMJ = 0.
+    maxMJ = 0.
+    binsMJ = 0.
+
     minMVV = 0.0
     maxMVV = 0.0
     binsMVV = 0.
-    
+
     minMX = 0.
     maxMX = 0.
-    
+
     minGenMJ = 1.
     maxGenMJ = 1.
     minGenMVV = 1.
     maxGenMVV = 1.
 
     HCALbinsMVV  = ""#" --binsMVV "
-    HCALbinsMVVSignal= ""# 
-    
+    HCALbinsMVVSignal= ""#
+
     fixParsSig = {}
     fixParsSigMVV ={}
     catVtag = {}
     catHtag = {}
-    
+
     varl1Wtag = ""
     varl1Htag = ""
-    
+
     WPHPl1Wtag = ""
     WPLPl1Wtag = ""
     WPNPl1Wtag = ""
@@ -70,15 +70,15 @@ class cuts():
     WPNPl1Htag = ""
     WPNPl1Htag = ""
     WPNPLPl1Htag = ""
-    
+
     varl2Wtag = ""
     varl2Htag = ""
-    
+
     WPHPl2Wtag = ""
     WPLPl2Wtag = ""
     WPNPl2Wtag = ""
     WPNPLPl2Wtag = ""
-    
+
     WPHPl2Htag = ""
     WPLPl2Htag = ""
     WPNPl2Htag = ""
@@ -92,29 +92,29 @@ class cuts():
     tt_smooth = {}
 
     cuts={}
-    
-    
+
+
     def __init__(self,jsonfile,period,options,widerMVV=False):
         print " options ",options
         with open(jsonfile) as json_file:
-                     
-            
+
+
             data = json.load(json_file)
             ##### load binning and cut offs
             self.minMJ = data["ranges_and_binning"]["minMJ"]
             #print 'self.minMJ ', self.minMJ
             self.maxMJ = data["ranges_and_binning"]["maxMJ"]
             self.binsMJ = data["ranges_and_binning"]["binsMJ"]
-            
+
             self.minMVV = data["ranges_and_binning"]["minMVV"]
             self.maxMVV = data["ranges_and_binning"]["maxMVV"]
             self.binsMVV = data["ranges_and_binning"]["binsMVV"]
-            
+
             self.minGenMJ = data["ranges_and_binning"]["minGenMJ"]
             self.maxGenMJ = data["ranges_and_binning"]["maxGenMJ"]
             self.minGenMVV = data["ranges_and_binning"]["minGenMVV"]
             self.maxGenMVV = data["ranges_and_binning"]["maxGenMVV"]
-            
+
             self.minMX = data["ranges_and_binning"]["minMX"]
             self.maxMX = data["ranges_and_binning"]["maxMX"]
             if widerMVV==True:
@@ -125,7 +125,7 @@ class cuts():
             if period.find(",")!=-1:
                 years = period.split(',')
                 run2=True
-            else: 
+            else:
                 years.append(period)
                 run2=False
 
@@ -137,13 +137,13 @@ class cuts():
                 self.WPNPl1Wtag = data["tagging_variables_and_wp"]["l1Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_NP_Wtag"+self.yeartag])
                 self.WPHPl1Htag = data["tagging_variables_and_wp"]["l1Htag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_HP_Htag"+self.yeartag])
                 self.WPLPl1Htag = data["tagging_variables_and_wp"]["l1Htag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_LP_Htag"+self.yeartag])
-                    
+
                 self.WPHPl2Wtag = data["tagging_variables_and_wp"]["l2Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_HP_Wtag"+self.yeartag])
                 self.WPLPl2Wtag = data["tagging_variables_and_wp"]["l2Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_LP_Wtag"+self.yeartag])
                 self.WPNPl2Wtag = data["tagging_variables_and_wp"]["l2Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_NP_Wtag"+self.yeartag])
                 self.WPHPl2Htag = data["tagging_variables_and_wp"]["l2Htag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_HP_Htag"+self.yeartag])
                 self.WPLPl2Htag = data["tagging_variables_and_wp"]["l2Htag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_LP_Htag"+self.yeartag])
-                 
+
 
 
                 self.W_HPmassscale = data["W_HPmassscale"+self.yeartag]
@@ -202,7 +202,7 @@ class cuts():
                 self.lumi[year] =  data["lumi"+self.yeartag]
                 #print "self.lumi[year]  ",self.lumi[year]
                 self.lumi_unc[year] = data["unc_lumi"+self.yeartag]
-                
+
 
                 self.varl1Wtag = data["tagging_variables_and_wp"]["varl1Wtag"]
                 self.varl1Htag = data["tagging_variables_and_wp"]["varl1Htag"]
@@ -216,7 +216,7 @@ class cuts():
                     self.WPNPl1Wtag = data["tagging_variables_and_wp"]["l1Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_NP_Wtag"+self.yeartag])
                     self.WPHPl1Htag = data["tagging_variables_and_wp"]["l1Htag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_HP_Htag"+self.yeartag])
                     self.WPLPl1Htag = data["tagging_variables_and_wp"]["l1Htag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_LP_Htag"+self.yeartag])
-   
+
                     self.WPHPl2Wtag = data["tagging_variables_and_wp"]["l2Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_HP_Wtag"+self.yeartag])
                     self.WPLPl2Wtag = data["tagging_variables_and_wp"]["l2Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_LP_Wtag"+self.yeartag])
                     self.WPNPl2Wtag = data["tagging_variables_and_wp"]["l2Wtag"+self.yeartag].replace("XX", data["tagging_variables_and_wp"]["WP_NP_Wtag"+self.yeartag])
@@ -231,7 +231,7 @@ class cuts():
 
                 self.catVtag['HP1'] =  '('+ self.varl1Wtag +'>'+ self.WPHPl1Wtag +')'
                 self.catVtag['HP2'] =  '('+ self.varl2Wtag +'>'+ self.WPHPl2Wtag +')'
-                self.catVtag['LP1'] = '(('+ self.varl1Wtag +'<'+ self.WPHPl1Wtag +')&&('+ self.varl1Wtag +'>'+ self.WPLPl1Wtag +'))' 
+                self.catVtag['LP1'] = '(('+ self.varl1Wtag +'<'+ self.WPHPl1Wtag +')&&('+ self.varl1Wtag +'>'+ self.WPLPl1Wtag +'))'
                 self.catVtag['LP2'] = '(('+ self.varl2Wtag +'<'+ self.WPHPl2Wtag +')&&('+ self.varl2Wtag +'>'+ self.WPLPl2Wtag +'))'
                 self.catVtag['NP1'] =  '('+ self.varl1Wtag +'<'+ self.WPNPl1Wtag +')'
                 self.catVtag['NP2'] =  '('+ self.varl2Wtag +'<'+ self.WPNPl2Wtag +')'
@@ -239,18 +239,18 @@ class cuts():
                     print " --------     Tagging WPs for tau21 -----------"
                     self.catVtag['HP1'] =  '('+ self.varl1Wtag +'<'+ self.WPHPl1Wtag +')'
                     self.catVtag['HP2'] =  '('+ self.varl2Wtag +'<'+ self.WPHPl2Wtag +')'
-                    self.catVtag['LP1'] = '(('+ self.varl1Wtag +'>'+ self.WPHPl1Wtag +')&&('+ self.varl1Wtag +'<'+ self.WPLPl1Wtag +'))' 
+                    self.catVtag['LP1'] = '(('+ self.varl1Wtag +'>'+ self.WPHPl1Wtag +')&&('+ self.varl1Wtag +'<'+ self.WPLPl1Wtag +'))'
                     self.catVtag['LP2'] = '(('+ self.varl2Wtag +'>'+ self.WPHPl2Wtag +')&&('+ self.varl2Wtag +'<'+ self.WPLPl2Wtag +'))'
                     self.catVtag['NP1'] =  '('+ self.varl1Wtag +'>'+ self.WPNPl1Wtag +')'
                     self.catVtag['NP2'] =  '('+ self.varl2Wtag +'>'+ self.WPNPl2Wtag +')'
 
-            
-                self.catHtag['HP1'] =  '('+ self.varl1Htag +'>'+ self.WPHPl1Htag +')' 
-                self.catHtag['HP2'] =  '('+ self.varl2Htag +'>'+ self.WPHPl2Htag +')' 
-                self.catHtag['LP1'] = '(('+ self.varl1Htag +'<'+ self.WPHPl1Htag +')&&('+ self.varl1Htag +'>'+ self.WPLPl1Htag +'))' 
+
+                self.catHtag['HP1'] =  '('+ self.varl1Htag +'>'+ self.WPHPl1Htag +')'
+                self.catHtag['HP2'] =  '('+ self.varl2Htag +'>'+ self.WPHPl2Htag +')'
+                self.catHtag['LP1'] = '(('+ self.varl1Htag +'<'+ self.WPHPl1Htag +')&&('+ self.varl1Htag +'>'+ self.WPLPl1Htag +'))'
                 self.catHtag['LP2'] = '(('+ self.varl2Htag +'<'+ self.WPHPl2Htag +')&&('+ self.varl2Htag +'>'+ self.WPLPl2Htag +'))'
-                self.catHtag['NP1'] =  '('+ self.varl1Htag +'<'+ self.WPLPl1Htag +')' 
-                self.catHtag['NP2'] =  '('+ self.varl2Htag +'<'+ self.WPLPl2Htag +')' 
+                self.catHtag['NP1'] =  '('+ self.varl1Htag +'<'+ self.WPLPl1Htag +')'
+                self.catHtag['NP2'] =  '('+ self.varl2Htag +'<'+ self.WPLPl2Htag +')'
 
 
             #print " tagging cuts ",self.WPHPl1Wtag
@@ -261,7 +261,7 @@ class cuts():
                 self.cuts[sel] = self.cuts[sel].replace("maxMJ",str(self.maxMJ))
                 self.cuts[sel] = self.cuts[sel].replace("minMVV",str(self.minMVV))
                 self.cuts[sel] = self.cuts[sel].replace("maxMVV",str(self.maxMVV))
-                
+
                 self.cuts[sel] = self.cuts[sel].replace("minGenMJ",str(self.minGenMJ))
                 self.cuts[sel] = self.cuts[sel].replace("maxGenMJ",str(self.maxGenMJ))
                 self.cuts[sel] = self.cuts[sel].replace("minGenMVV",str(self.minGenMVV))
@@ -275,13 +275,13 @@ class cuts():
                     if b < self.minMVV: continue
                     dijetbins.append(b)
 
-                self.HCALbinsMVV = " --binsMVV " 
+                self.HCALbinsMVV = " --binsMVV "
                 self.HCALbinsMVV += ','.join(str(e) for e in dijetbins)
 
                 self.minMVV = float(dijetbins[0])
                 self.maxMVV = float(dijetbins[-1])
                 self.binsMVV= len(dijetbins)-1
-                
+
                 dijetbins = []
                 for b in alldijetbins:
                     if b > self.maxMX: continue
@@ -408,20 +408,19 @@ if __name__ == "__main__":
     print c.LPSF_vtag['2016']
     print c.minMJ
     print c.catVtag['LP1']
-    print " tagging cuts ",self.WPHPl1Wtag 
+    print " tagging cuts ",self.WPHPl1Wtag
     print "lumi ",c.lumi["lumi16"]
     print c.fixParsSig["ZprimeWW"]['NP']
     print c.minMX
     print c.tt_smooth
     #print c.catHtag['LP1']
     #print c.maxMX
-    #print c.HCALbinsMVV 
-    #print c.HCALbinsMVVSignal 
-    
+    #print c.HCALbinsMVV
+    #print c.HCALbinsMVVSignal
+
     #print c.cuts["VV_HPHP"]
-    
+
     #selections = ["common","common_VV","common_VBF","NP","res","nonres","resTT","acceptance","acceptanceMJ","acceptanceMVV","acceptanceGEN","looseacceptanceMJ"]
-    
+
     #for sel in selections:
         #print c. cuts[sel]
-    

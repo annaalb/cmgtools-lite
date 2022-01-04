@@ -6,9 +6,9 @@ import argparse
 ## import cuts of the analysis from separate file
 
 # python makeInputs.py -p 2016 --run "detector" --batch False
-# python makeInputs.py -p 2016 --run "signorm" --signal "ZprimeWW" --batch False 
-# python makeInputs.py -p 2016 --run "tt" --batch False 
-# python makeInputs.py -p 2016 --run "vjets" --batch False   
+# python makeInputs.py -p 2016 --run "signorm" --signal "ZprimeWW" --batch False
+# python makeInputs.py -p 2016 --run "tt" --batch False
+# python makeInputs.py -p 2016 --run "vjets" --batch False
 # python makeInputs.py -p "2016,2017,2018"  --run "vjetsAll"
 # python makeInputs.py -p "2016,2017,2018"  --run "vjetsfits"
 # python makeInputs.py -p "2016,2017,2018"  --run "vjetskernel"
@@ -63,15 +63,15 @@ else:
     ctx  = cuts.cuts(jsonfile,options.period,options.sorting+"dijetbins",widerMVV)
 if options.binning==False: ctx  = cuts.cuts(jsonfile,int(options.period),options.sorting,widerMVV)
 
-basedir="./"
+basedir=""
 #basedir="deepAK8V2/"
-print "options.period  ",options.period  
+print "options.period  ",options.period
 period = options.period
 samples=""
 filePeriod=period
 rescale=True #for pseudodata: set to True if you want to rescale QCD
-if options.period.find(",")!=-1: 
-    period = options.period.split(',') 
+if options.period.find(",")!=-1:
+    period = options.period.split(',')
     filePeriod="Run2"
     if "2018" not in options.period: filePeriod = "1617"
     for year in period:
@@ -87,17 +87,17 @@ print "sample ",samples
 sorting = options.sorting
 
 submitToBatch = options.batch #Set to true if you want to submit kernels + makeData to batch!
-runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done! 
+runParallel   = True #Set to true if you want to run all kernels in parallel! This will exit this script and you will have to run mergeKernelJobs when your jobs are done!
 
 dijetBinning = options.binning
 useTriggerWeights = options.trigg
 
 
-    
+
 addOption = ""
-if useTriggerWeights: 
+if useTriggerWeights:
     addOption = "-t"
-    
+
 #all categories
 categories=options.category.split(",")
 
@@ -168,7 +168,7 @@ if options.tau:
 print " WresTemplate ",WresTemplate
 
 #do not change the order here, add at the end instead
-parameters = [ctx.cuts,ctx.minMVV,ctx.maxMVV,ctx.minMX,ctx.maxMX,ctx.binsMVV,ctx.HCALbinsMVV,samples,categories,ctx.minMJ,ctx.maxMJ,ctx.binsMJ,ctx.lumi,submitToBatch]   
+parameters = [ctx.cuts,ctx.minMVV,ctx.maxMVV,ctx.minMX,ctx.maxMX,ctx.binsMVV,ctx.HCALbinsMVV,samples,categories,ctx.minMJ,ctx.maxMJ,ctx.binsMJ,ctx.lumi,submitToBatch]
 f = AllFunctions(parameters)
 
 
@@ -269,7 +269,7 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
     if options.run.find("all")!=-1 or options.run.find("mj")!=-1:
         print "mj fit for signal "
         if sorting == "random":
-            if signal_inuse.find("H")!=-1: 
+            if signal_inuse.find("H")!=-1:
                 f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random', fixParsSig[signal_inuse.replace('VBF_','')],"jj_random_mergedVTruth==1")
                 if signal_inuse.find("inc")==-1:
                     f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')],"jj_random_mergedHbbTruth==1")
@@ -277,9 +277,9 @@ if options.run.find("all")!=-1 or options.run.find("sig")!=-1:
                     f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')],"jj_random_mergedHbbTruth==1||jj_random_mergedHccTruth==1||jj_random_mergedHggTruth==1||jj_random_mergedHVVTruth_4q==1||jj_random_mergedHVVTruth_lept==1")
 
             else:
-                f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')]) 
+                f.makeSignalShapesMJ("JJ_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'random',fixParsSig[signal_inuse.replace('VBF_','')])
         else:
-            if signal_inuse.find("H")!=-1: 
+            if signal_inuse.find("H")!=-1:
                 f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'l1',fixParsSig[signal_inuse.replace('VBF_','')],"jj_l1_mergedVTruth==1")
                 f.makeSignalShapesMJ("JJ_Vjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'l2',fixParsSig[signal_inuse.replace('VBF_','')],"jj_l2_mergedVTruth==1")
                 f.makeSignalShapesMJ("JJ_Hjet_"+str(signal_inuse)+"_"+filePeriod,signaltemplate_inuse,'l1',fixParsSig[signal_inuse.replace('VBF_','')],"jj_l1_mergedHTruth==1")
@@ -317,7 +317,7 @@ if options.run.find("all")!=-1 or options.run.find("qcd")!=-1:
     if runParallel and submitToBatch:
         if options.run.find("all")!=-1 or options.run.find("templates")!=-1:
             wait = False
-            print "ctx.cuts['nonres'] = ",ctx.cuts['nonres']  
+            print "ctx.cuts['nonres'] = ",ctx.cuts['nonres']
             f.makeBackgroundShapesMVVKernel("nonRes","JJ_"+filePeriod,nonResTemplate,ctx.cuts['nonres'],"1D",wait)
             f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+filePeriod,nonResTemplate,'l1',ctx.cuts['nonres'],"2Dl1",wait)
             f.makeBackgroundShapesMVVConditional("nonRes","JJ_"+filePeriod,nonResTemplate,'l2',ctx.cuts['nonres'],"2Dl2",wait)
@@ -337,7 +337,7 @@ if options.run.find("all")!=-1 or options.run.find("qcd")!=-1:
     if options.run.find("all")!=-1 or options.run.find("norm")!=-1:
         f.makeNormalizations("nonRes","JJ_"+filePeriod,nonResTemplate,0,ctx.cuts['nonres'],"nRes",options.single,"",options.sendjobs,options.tau)
 
-  
+
 
 if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
     print "for V+jets"
@@ -345,7 +345,7 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
         print "first we fit"
         f.fitVJets("JJ_"+filePeriod+"_WJets",resTemplate,1.,1.)
     wait=False
-    if options.batch == True : wait=True 
+    if options.batch == True : wait=True
     if options.run.find("all")!=-1 or options.run.find("kernel")!=-1 or options.run.find("All")!=-1:
         if options.fitsmjj == True:
             print "and then we fit mvv"
@@ -358,8 +358,8 @@ if options.run.find("all")!=-1 or options.run.find("vjets")!=-1:
             print "then kernel Z"
             f.makeBackgroundShapesMVVKernel("ZJets","JJ_"+filePeriod,ZresTemplate,ctx.cuts['nonres'],"1DZ",wait,1.,1.,options.sendjobs,options.fittempl,options.tau,options.kfactors)
     if options.run.find("all")!=-1 or options.run.find("SF")!=-1 or options.run.find("All")!=-1:
-        print "then SF W"
-        f.makeSF(WresTemplate,False,options.vv,options.four,options.tau)
+        #print "then SF W"
+        #f.makeSF(WresTemplate,False,options.vv,options.four,options.tau)
         print "then SF Z"
         f.makeSF(ZresTemplate,False,options.vv,options.four,options.tau)
     if options.run.find("all")!=-1 or options.run.find("MU")!=-1 or options.run.find("All")!=-1:
