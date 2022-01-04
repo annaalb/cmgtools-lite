@@ -8,8 +8,8 @@ from CMGTools.VVResonances.plotting.tdrstyle import *
 setTDRStyle()
 from CMGTools.VVResonances.plotting.TreePlotter import TreePlotter
 from CMGTools.VVResonances.plotting.MergedPlotter import MergedPlotter
-sys.path.insert(0, "../interactive/") 
-import cuts 
+sys.path.insert(0, "../interactive/")
+import cuts
 ROOT.gROOT.SetBatch(True)
 
 
@@ -36,19 +36,19 @@ binsz_x=[]
 binsz_y=[]
 for b in range(0,51): binsz_x.append(0.7+0.7*b/50.0)
 for b in range(0,51): binsz_y.append(0.6+0.6*b/50.0)
-    
+
 scalexHisto=ROOT.TH1F("scalexHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 resxHisto=ROOT.TH1F("resxHisto","resHisto",len(binsx)-1,array('d',binsx))
 
 scaleyHisto=ROOT.TH1F("scaleyHisto","scaleHisto",len(binsx)-1,array('d',binsx))
 resyHisto=ROOT.TH1F("resyHisto","resHisto",len(binsx)-1,array('d',binsx))
- 
+
 variables=options.vars.split(',')
 genVariables=options.genVars.split(',')
 
 doBothLegs = False
 leg="l1"
-if len(variables)==3 and len(genVariables)==5: 
+if len(variables)==3 and len(genVariables)==5:
     doBothLegs = True
     leg="l1l2"
 
@@ -60,7 +60,7 @@ superHX_l2= None
 superHY= None
 superHY_l2= None
 
-print 
+print
 sampleTypes=options.samples.split(',')
 dataPlotters=[]
 folders=[]
@@ -69,7 +69,8 @@ print "folders ",folders
 for folder in folders:
     print "folder ",folder
     print "split ",folder.split("/")
-    year=folder.split("/")[1]
+    year=folder.split("/")[-2]
+    #year=folder.split("/")[0]
     print "year ",year
     print "now working with cuts "
     ctx = cuts.cuts("init_VV_VH.json",year,"dijetbins_random")
@@ -101,22 +102,22 @@ for folder in folders:
 
     data=MergedPlotter(dataPlotters)
     if superHX==None:
-        print "create superHX"    
+        print "create superHX"
         superHX=data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[2],options.cut,"1.",binsx,binsz_x) #mvv
         print "created superHX ",superHX
-    else: 
+    else:
         print "Add to superHX"
-        superHX.Add(data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[2],options.cut,"1.",binsx,binsz_x)) 
-    if superHY == None:  
+        superHX.Add(data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[2],options.cut,"1.",binsx,binsz_x))
+    if superHY == None:
         superHY=data.drawTH2Binned(variables[1]+'/'+genVariables[1]+':'+genVariables[2],options.cut,"1.",binsx,binsz_y) #mjet
     else:
-        superHY.Add(data.drawTH2Binned(variables[1]+'/'+genVariables[1]+':'+genVariables[2],options.cut,"1.",binsx,binsz_y))    
+        superHY.Add(data.drawTH2Binned(variables[1]+'/'+genVariables[1]+':'+genVariables[2],options.cut,"1.",binsx,binsz_y))
     if doBothLegs == True:
         if superHX_l2 == None:
             superHX_l2=data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[4],options.cut,"1.",binsx,binsz_x) #mvv
         else:
             superHX_l2.Add(data.drawTH2Binned(variables[0]+'/'+genVariables[0]+':'+genVariables[4],options.cut,"1.",binsx,binsz_x))
-        if superHY_l2 == None: 
+        if superHY_l2 == None:
             superHY_l2=data.drawTH2Binned(variables[2]+'/'+genVariables[3]+':'+genVariables[4],options.cut,"1.",binsx,binsz_y) #mjet
         else:  superHY_l2.Add(data.drawTH2Binned(variables[2]+'/'+genVariables[3]+':'+genVariables[4],options.cut,"1.",binsx,binsz_y))
     print " done with folder ",folder
@@ -133,17 +134,17 @@ label=options.output.split("_")[1]
 print "label ",label
 f=ROOT.TFile(options.output,"RECREATE")
 f.cd()
-   
+
 
 print "########## mvv ###############"
 for bin in range(1,superHX.GetNbinsX()+1):
    tmp=superHX.ProjectionY("q",bin,bin)
-   if bin==1: 
+   if bin==1:
 	    scalexHisto.SetBinContent(bin,tmp.GetMean())
 	    scalexHisto.SetBinError(bin,tmp.GetMeanError())
 	    resxHisto.SetBinContent(bin,tmp.GetRMS())
 	    resxHisto.SetBinError(bin,tmp.GetRMSError())
-	    continue	    
+	    continue
    startbin   = 0.
    maxcontent = 0.
    maxbin=0
@@ -175,14 +176,14 @@ for bin in range(1,superHX.GetNbinsX()+1):
    resxHisto.SetBinError    (bin,tmpwidthErr)
 
 print "########## mjet ###############"
-for bin in range(1,superHY.GetNbinsX()+1): 
+for bin in range(1,superHY.GetNbinsX()+1):
    tmp=superHY.ProjectionY("q",bin,bin)
    if bin==1:
 	    scaleyHisto.SetBinContent(bin,tmp.GetMean())
 	    scaleyHisto.SetBinError(bin,tmp.GetMeanError())
 	    resyHisto.SetBinContent(bin,tmp.GetRMS())
-	    resyHisto.SetBinError(bin,tmp.GetRMSError())       
-	    continue	   
+	    resyHisto.SetBinError(bin,tmp.GetRMSError())
+	    continue
    startbin   = 0.
    maxcontent = 0.
    for b in range(tmp.GetXaxis().GetNbins()):
@@ -212,11 +213,11 @@ for bin in range(1,superHY.GetNbinsX()+1):
    resyHisto.SetBinContent  (bin,tmpwidth)
    resyHisto.SetBinError    (bin,tmpwidthErr)
 
-         
+
 scalexHisto.Write()
 scaleyHisto.Write()
 resxHisto.Write()
 resyHisto.Write()
 superHX.Write("dataX")
 superHY.Write("dataY")
-f.Close()    
+f.Close()
