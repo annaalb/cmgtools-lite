@@ -16,3 +16,9 @@ PostFit*
 #*.json
 *.txt
 tmp*
+*.root
+results_2018
+.__afs*
+2016
+2017
+2018
