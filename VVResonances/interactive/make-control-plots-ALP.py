@@ -730,9 +730,9 @@ if __name__ == "__main__":
     os.mkdir(jobdir)
     os.chdir(jobdir)
 
-    cmssw_cmd = 'python {outdir}/make-control-plots-submit.py -y {year} -v "{var}" -l {label}'.format(outdir=outdir,year=year,var=k,label=options.label)
-    if doVBF: cmssw_cmd = 'python {outdir}/make-control-plots-submit.py -y {year} -v "{var}" --vbf -l "{label}"'.format(outdir=outdir,year=year,var=k,label=options.label)
-    if doInclusive: cmssw_cmd = 'python {outdir}/make-control-plots-submit.py -y {year} -v "{var}" --incl -l "{label}"'.format(outdir=outdir,year=year,var=k,label=options.label)
+    cmssw_cmd = 'python {outdir}/make-control-plots-ALP.py -y {year} -v "{var}" -l {label}'.format(outdir=outdir,year=year,var=k,label=options.label)
+    if doVBF: cmssw_cmd = 'python {outdir}/make-control-plots-ALP.py -y {year} -v "{var}" --vbf -l "{label}"'.format(outdir=outdir,year=year,var=k,label=options.label)
+    if doInclusive: cmssw_cmd = 'python {outdir}/make-control-plots-ALP.py -y {year} -v "{var}" --incl -l "{label}"'.format(outdir=outdir,year=year,var=k,label=options.label)
     print(cmssw_cmd)
 
     with open('job.sh', 'w') as fout:
