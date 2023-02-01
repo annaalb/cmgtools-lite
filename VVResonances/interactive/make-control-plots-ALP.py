@@ -20,8 +20,10 @@ def makeSubmitFileCondor(exe,jobname,jobflavour,localinput=False,cmst3=False):
     if localinput:
       submitfile.write("arguments             = $(ClusterID) $(ProcId)\n")
     else:
-     submitfile.write("Proxy_filename = x509up_%s\n"%os.getenv("USER"))
-     submitfile.write("Proxy_path = %s/$(Proxy_filename)\n"%os.getenv("HOME"))
+     #submitfile.write("Proxy_filename = x509up_%s\n"%os.getenv("USER"))
+     #submitfile.write("Proxy_path = %s/$(Proxy_filename)\n"%os.getenv("HOME"))
+     submitfile.write("Proxy_filename = myproxy\n")
+     submitfile.write("Proxy_path = %s/private/proxy/$(Proxy_filename)\n"%os.getenv("HOME"))
      submitfile.write("transfer_input_files = $(Proxy_path)\n")
      submitfile.write("arguments             = $(Proxy_path) $(ClusterID) $(ProcId)\n")
 
